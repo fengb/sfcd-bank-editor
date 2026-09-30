@@ -1,43 +1,75 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
+import { useVirtualList } from '@vueuse/core'
 
-import { BYTES_PER_ROW, buildHexRows, formatHex } from './hex'
+import {
+  BYTES_PER_ROW,
+  OFFSET_DIGITS,
+  formatAsciiCell,
+  formatHexCell,
+  formatOffset,
+  parseHexOffset,
+} from './hex'
 
-/** 4 KiB per page: 256 rows, small enough to render without lag. */
-const PAGE_BYTES = 4096
+/**
+ * Fixed row height in px, bound to `--row-height` and consumed as `.row`'s
+ * `line-height`. useVirtualList places every row at `index * itemHeight`, so
+ * the number the scroll maths uses and the number the browser renders have to
+ * be the same value — pinned in px rather than rem for exactly that reason, or
+ * a user changing their root font-size would silently desync them and rows
+ * would overlap or gap while scrolling.
+ */
+const ROW_HEIGHT = 20
 
-/** Byte offsets are always shown as 6 hex digits, e.g. `000000`. */
-const OFFSET_DIGITS = 6
+/** Rows kept mounted either side of the viewport so scrolling doesn't flash. */
+const OVERSCAN = 8
 
 const props = defineProps<{ data: Uint8Array }>()
 
-const page = ref(0)
-const pageCount = computed(() => Math.max(1, Math.ceil(props.data.length / PAGE_BYTES)))
-const start = computed(() => page.value * PAGE_BYTES)
-const rows = computed(() => buildHexRows(props.data, start.value, PAGE_BYTES, BYTES_PER_ROW))
+const rowOffsets = computed(() =>
+  Array.from({ length: Math.ceil(props.data.length / BYTES_PER_ROW) }, (_, i) => i * BYTES_PER_ROW),
+)
 
-const rangeLabel = computed(() => {
-  const end = Math.min(props.data.length, start.value + PAGE_BYTES)
-  if (end <= start.value) return 'empty'
-  return `0x${formatHex(start.value, 6)} – 0x${formatHex(end - 1, 6)}`
+// Only rows near the viewport are ever mounted. ByteRow slices its own bytes,
+// so a row costs nothing until it has been scrolled into view.
+const { list, scrollTo, containerProps, wrapperProps } = useVirtualList(rowOffsets, {
+  itemHeight: ROW_HEIGHT,
+  overscan: OVERSCAN,
 })
 
-function go(next: number): void {
-  page.value = Math.min(Math.max(0, next), pageCount.value - 1)
+function goTo(event: SubmitEvent): void {
+  if (props.data.length === 0) return
+
+  const form = event.currentTarget
+  if (!(form instanceof HTMLFormElement)) return
+
+  // The input's value is read straight off the form that was submitted, so
+  // there is no v-model mirroring state that only exists between keypresses.
+  const value = new FormData(form).get('offset')
+  if (typeof value !== 'string') return
+
+  const offset = parseHexOffset(value, props.data.length - 1)
+  // Unparseable input is left alone rather than silently jumping somewhere else.
+  if (offset === null) return
+
+  scrollTo(Math.floor(offset / BYTES_PER_ROW))
 }
 
-// Column widths in `ch` units. The row font is monospace, so one `ch` is
-// exactly one character and every column can be sized to its own content —
+// Every dimension the stylesheet needs, as CSS custom properties. `ch` units
+// are used for the columns because the row font is monospace, so one `ch` is
+// exactly one character and each column can be sized to its own content —
 // which is what keeps the gaps between them uniform. Derived from the same
-// constants the template renders with, so the grid cannot drift out of sync.
+// constants ByteRow renders with, so the grid cannot drift out of sync.
+const rowHeight = computed(() => `${ROW_HEIGHT}px`)
 const offsetColumnWidth = computed(() => `${OFFSET_DIGITS}ch`)
 const hexColumnWidth = computed(() => `${BYTES_PER_ROW * 3 - 1}ch`)
 
-// A newly loaded file starts at the top again.
+// A newly loaded file starts at the top again. The component is not remounted
+// between files, so the scroll position would otherwise carry over.
 watch(
   () => props.data,
   () => {
-    page.value = 0
+    scrollTo(0)
   },
 )
 </script>
@@ -46,35 +78,35 @@ watch(
   <section class="viewer">
     <header class="viewer__bar">
       <h2 class="viewer__title">Contents</h2>
-      <div class="viewer__pager">
-        <span class="viewer__range">{{ rangeLabel }}</span>
-        <button type="button" class="btn" :disabled="page === 0" @click="go(0)">&laquo;</button>
-        <button type="button" class="btn" :disabled="page === 0" @click="go(page - 1)">
-          &lsaquo;
-        </button>
-        <span class="viewer__page">{{ page + 1 }} / {{ pageCount }}</span>
-        <button type="button" class="btn" :disabled="page + 1 >= pageCount" @click="go(page + 1)">
-          &rsaquo;
-        </button>
-        <button
-          type="button"
-          class="btn"
-          :disabled="page + 1 >= pageCount"
-          @click="go(pageCount - 1)"
-        >
-          &raquo;
-        </button>
-      </div>
+      <form class="viewer__goto" @submit.prevent="goTo">
+        <label class="viewer__goto-label" for="bytes-goto">Go to</label>
+        <input
+          id="bytes-goto"
+          name="offset"
+          class="viewer__goto-input"
+          type="text"
+          placeholder="000000"
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </form>
     </header>
 
-    <div
-      class="viewer__scroll"
-      :style="{ '--offset-col': offsetColumnWidth, '--hex-col': hexColumnWidth }"
-    >
-      <div v-for="row in rows" :key="row.offset" class="row">
-        <span class="row__offset">{{ formatHex(row.offset, OFFSET_DIGITS) }}</span>
-        <span class="row__hex">{{ row.hex }}</span>
-        <span class="row__ascii">{{ row.ascii }}</span>
+    <div class="viewer__scroll" v-bind="containerProps">
+      <div
+        class="viewer__rows"
+        v-bind="wrapperProps"
+        :style="{
+          '--row-height': rowHeight,
+          '--offset-col': offsetColumnWidth,
+          '--hex-col': hexColumnWidth,
+        }"
+      >
+        <div v-for="item in list" :key="item.data" class="row">
+          <span class="row__offset">{{ formatOffset(item.data) }}</span>
+          <span class="row__hex">{{ formatHexCell(data, item.data) }}</span>
+          <span class="row__ascii">{{ formatAsciiCell(data, item.data) }}</span>
+        </div>
       </div>
     </div>
   </section>
@@ -104,40 +136,54 @@ watch(
   font-weight: 600;
 }
 
-.viewer__pager {
+/* A real <form> so Enter submits natively, rather than a keyup handler. */
+.viewer__goto {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.45rem;
   align-items: center;
 }
 
-.viewer__range,
-.viewer__page {
+.viewer__goto-label {
   color: var(--muted);
   font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
 }
 
-.viewer__page {
-  min-width: 4.5rem;
-  text-align: center;
+.viewer__goto-input {
+  width: 10ch;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
 }
 
+.viewer__goto-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* The height bound is what gives the virtual list a viewport to measure
+   against; overflow comes from containerProps. Deliberately no padding here:
+   the list places row 0 at offset 0, so a padding-top would shift every row by
+   that much and the scroll maths would no longer line up with what is drawn. */
 .viewer__scroll {
   max-height: 60vh;
-  padding: 0.5rem 0;
-  overflow: auto;
 }
 
 /* offset | hex | ascii — every column is sized to its content in `ch`, so the
-   single `column-gap` below is the only gap in the row. */
+   single `column-gap` below is the only gap in the row. The column widths and
+   `--row-height` are set on `.viewer__rows` and inherited from there. */
 .row {
   display: grid;
   grid-template-columns: var(--offset-col, 6ch) var(--hex-col, 47ch) minmax(16ch, 1fr);
   column-gap: 8ch;
   padding: 0 0.9rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.78rem;
-  line-height: 1.55;
+  font-size: 12.5px;
+  line-height: var(--row-height, 20px);
 }
 
 .row:hover {
