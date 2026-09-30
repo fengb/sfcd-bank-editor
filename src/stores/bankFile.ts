@@ -1,12 +1,12 @@
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+import { useLocalStorage } from '@vueuse/core'
 
 /** Everything we can pull a file out of: a drop handler's result, an `<input>`, or a single file. */
 export type FileSource = File | File[] | FileList | null | undefined
 
 export interface LoadedFile {
   name: string
-  size: number
   type: string
   lastModified: number
   /** The entire file, held in memory. */
@@ -25,10 +25,62 @@ function describe(error: unknown): string {
   return String(error)
 }
 
+/** localStorage holds strings, so the bytes go out base64-encoded. */
+function encode(data: Uint8Array): string {
+  const CHUNK = 0x8000
+  let binary = ''
+  for (let i = 0; i < data.length; i += CHUNK) {
+    binary += String.fromCharCode(...data.subarray(i, i + CHUNK))
+  }
+  return btoa(binary)
+}
+
+function decode(text: string): Uint8Array {
+  const binary = atob(text)
+  const data = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) data[i] = binary.charCodeAt(i)
+  return data
+}
+
+const STORAGE_KEY = 'sfcd-bank-editor:file'
+
+/** `''` stands in for "nothing saved", so a corrupt value just reads as empty. */
+const SERIALIZER = {
+  read: (raw: string): LoadedFile | null => {
+    if (raw === '') return null
+    const stored = JSON.parse(raw) as {
+      name: string
+      type: string
+      lastModified: number
+      data: string
+    }
+    return {
+      name: stored.name,
+      type: stored.type,
+      lastModified: stored.lastModified,
+      data: decode(stored.data),
+    }
+  },
+  write: (value: LoadedFile | null): string => {
+    if (value === null) return ''
+    return JSON.stringify({
+      name: value.name,
+      type: value.type,
+      lastModified: value.lastModified,
+      data: encode(value.data),
+    })
+  },
+}
+
 export const useBankFileStore = defineStore('bankFile', () => {
-  // `shallowRef`, not `ref`: a deep reactive proxy would wrap every one of the
-  // millions of bytes in a `Uint8Array` and make reads painfully slow.
-  const file = shallowRef<LoadedFile | null>(null)
+  const file = useLocalStorage<LoadedFile | null>(STORAGE_KEY, null, {
+    shallow: true,
+    deep: false,
+    writeDefaults: false,
+    listenToStorageChanges: false,
+    serializer: SERIALIZER,
+  })
+
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -57,7 +109,6 @@ export const useBankFileStore = defineStore('bankFile', () => {
       const buffer = await picked.arrayBuffer()
       file.value = {
         name: picked.name,
-        size: picked.size,
         type: picked.type,
         lastModified: picked.lastModified,
         data: new Uint8Array(buffer),

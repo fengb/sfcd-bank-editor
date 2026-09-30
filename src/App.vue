@@ -29,8 +29,8 @@ const stats = computed(() => {
   if (loaded === null) return []
   return [
     { label: 'Name', value: loaded.name },
-    { label: 'Size', value: `${loaded.size.toLocaleString()} bytes (${formatBytes(loaded.size)})` },
-    { label: 'Size (hex)', value: `0x${formatHexAddress(loaded.size)}` },
+    { label: 'Size', value: `${loaded.data.length.toLocaleString()} bytes (${formatBytes(loaded.data.length)})` },
+    { label: 'Size (hex)', value: `0x${formatHexAddress(loaded.data.length)}` },
     { label: 'MIME type', value: loaded.type === '' ? 'unknown' : loaded.type },
     { label: 'Modified', value: new Date(loaded.lastModified).toLocaleString() },
     { label: 'In memory as', value: `Uint8Array(${loaded.data.length})` },

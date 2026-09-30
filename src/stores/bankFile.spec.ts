@@ -31,7 +31,7 @@ describe('bankFile store', () => {
     await store.load(makeFile('BANK0A.BIN', [1, 2, 3]))
 
     expect(store.file?.name).toBe('BANK0A.BIN')
-    expect(store.file?.size).toBe(3)
+    expect(store.file?.data.length).toBe(3)
     expect(store.file?.type).toBe('application/octet-stream')
     expect(store.file?.lastModified).toBe(1_700_000_000_000)
   })
