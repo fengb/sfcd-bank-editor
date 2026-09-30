@@ -7,6 +7,7 @@ import AppOverlay from '@/components/AppOverlay.vue'
 import { useBankFileStore } from '@/stores/bankFile'
 import { formatBytes, formatHexAddress } from '@/utils/format'
 import BytesViewer from '@/panes/BytesViewer'
+import HeaderViewer from '@/panes/HeaderViewer'
 
 const store = useBankFileStore()
 const { file, data, isLoaded, isLoading, error } = storeToRefs(store)
@@ -73,6 +74,7 @@ function onPick(event: Event): void {
       </dl>
     </section>
 
+    <HeaderViewer v-if="data" :data="data" />
     <BytesViewer v-if="data" :data="data" />
 
     <section v-else-if="!isLoading" class="empty">
