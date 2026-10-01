@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
-import { useVirtualList } from '@vueuse/core'
+import { computed, ref, watch } from 'vue'
+import InputText from 'primevue/inputtext'
+import Panel from 'primevue/panel'
+import VirtualScroller from 'primevue/virtualscroller'
 
-import {
-  BYTES_PER_ROW,
-  OFFSET_DIGITS,
-  formatAsciiCell,
-  formatHexCell,
-  formatOffset,
-  parseHexOffset,
-} from './hex'
+import { BYTES_PER_ROW, formatAsciiCell, formatHexCell, formatOffset, parseHexOffset } from './hex'
 
 /**
  * Fixed row height in px, bound to `--row-height` and consumed as `.row`'s
- * `line-height`. useVirtualList places every row at `index * itemHeight`, so
+ * `line-height`. VirtualScroller places every item at `index * itemSize`, so
  * the number the scroll maths uses and the number the browser renders have to
  * be the same value — pinned in px rather than rem for exactly that reason, or
  * a user changing their root font-size would silently desync them and rows
@@ -30,13 +25,11 @@ const rowOffsets = computed(() =>
   Array.from({ length: Math.ceil(props.data.length / BYTES_PER_ROW) }, (_, i) => i * BYTES_PER_ROW),
 )
 
-// Only rows near the viewport are ever mounted. ByteRow slices its own bytes,
-// so a row costs nothing until it has been scrolled into view.
-const { list, scrollTo, containerProps, wrapperProps } = useVirtualList(rowOffsets, {
-  itemHeight: ROW_HEIGHT,
-  overscan: OVERSCAN,
-})
+const scroller = ref<InstanceType<typeof VirtualScroller> | null>(null)
 
+// Only rows near the viewport are ever mounted. Each item is a plain offset,
+// so the hex and ASCII cells are formatted in the template below and a row
+// costs nothing until it has been scrolled into view.
 function goTo(event: SubmitEvent): void {
   if (props.data.length === 0) return
 
@@ -52,157 +45,85 @@ function goTo(event: SubmitEvent): void {
   // Unparseable input is left alone rather than silently jumping somewhere else.
   if (offset === null) return
 
-  scrollTo(Math.floor(offset / BYTES_PER_ROW))
+  scroller.value?.scrollToIndex(Math.floor(offset / BYTES_PER_ROW))
 }
 
 // Every dimension the stylesheet needs, as CSS custom properties. `ch` units
 // are used for the columns because the row font is monospace, so one `ch` is
 // exactly one character and each column can be sized to its own content —
 // which is what keeps the gaps between them uniform. Derived from the same
-// constants ByteRow renders with, so the grid cannot drift out of sync.
-const rowHeight = computed(() => `${ROW_HEIGHT}px`)
-const offsetColumnWidth = computed(() => `${OFFSET_DIGITS}ch`)
-const hexColumnWidth = computed(() => `${BYTES_PER_ROW * 3 - 1}ch`)
+// constants the row template renders with, so the grid cannot drift out of sync.
+const rowStyle = computed(() => ({
+  '--row-height': `${ROW_HEIGHT}px`,
+}))
 
 // A newly loaded file starts at the top again. The component is not remounted
 // between files, so the scroll position would otherwise carry over.
 watch(
   () => props.data,
   () => {
-    scrollTo(0)
+    scroller.value?.scrollToIndex(0)
   },
 )
 </script>
 
 <template>
-  <section class="viewer">
-    <header class="viewer__bar">
-      <h2 class="viewer__title">Contents</h2>
+  <Panel header="Contents">
+    <template #icons>
       <form class="viewer__goto" @submit.prevent="goTo">
         <label class="viewer__goto-label" for="bytes-goto">Go to</label>
-        <input
+        <InputText
           id="bytes-goto"
           name="offset"
           class="viewer__goto-input"
-          type="text"
           placeholder="000000"
           autocomplete="off"
           spellcheck="false"
         />
       </form>
-    </header>
+    </template>
 
-    <div class="viewer__scroll" v-bind="containerProps">
-      <div
-        class="viewer__rows"
-        v-bind="wrapperProps"
-        :style="{
-          '--row-height': rowHeight,
-          '--offset-col': offsetColumnWidth,
-          '--hex-col': hexColumnWidth,
-        }"
-      >
-        <div v-for="item in list" :key="item.data" class="row">
-          <span class="row__offset">{{ formatOffset(item.data) }}</span>
-          <span class="row__hex">{{ formatHexCell(data, item.data) }}</span>
-          <span class="row__ascii">{{ formatAsciiCell(data, item.data) }}</span>
+    <VirtualScroller
+      ref="scroller"
+      :style="rowStyle"
+      :items="rowOffsets"
+      :itemSize="ROW_HEIGHT"
+      :numToleratedItems="OVERSCAN"
+      scrollHeight="60vh"
+    >
+      <template #item="{ item }">
+        <div class="row">
+          <span>{{ formatOffset(item) }}</span>
+          <span>{{ formatHexCell(data, item) }}</span>
+          <span>{{ formatAsciiCell(data, item) }}</span>
         </div>
-      </div>
-    </div>
-  </section>
+      </template>
+    </VirtualScroller>
+  </Panel>
 </template>
 
 <style scoped>
-.viewer {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--panel);
-  overflow: hidden;
-}
-
-.viewer__bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 0.9rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.viewer__title {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-/* A real <form> so Enter submits natively, rather than a keyup handler. */
 .viewer__goto {
   display: flex;
   gap: 0.45rem;
   align-items: center;
 }
 
-.viewer__goto-label {
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
 .viewer__goto-input {
   width: 10ch;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--bg);
-  color: var(--text);
-  font: inherit;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--app-font-mono);
   font-size: 0.8rem;
 }
 
-.viewer__goto-input:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-
-/* The height bound is what gives the virtual list a viewport to measure
-   against; overflow comes from containerProps. Deliberately no padding here:
-   the list places row 0 at offset 0, so a padding-top would shift every row by
-   that much and the scroll maths would no longer line up with what is drawn. */
-.viewer__scroll {
-  max-height: 60vh;
-}
-
-/* offset | hex | ascii — every column is sized to its content in `ch`, so the
-   single `column-gap` below is the only gap in the row. The column widths and
-   `--row-height` are set on `.viewer__rows` and inherited from there. */
 .row {
-  display: grid;
-  grid-template-columns: var(--offset-col, 6ch) var(--hex-col, 47ch) minmax(16ch, 1fr);
-  column-gap: 8ch;
-  padding: 0 0.9rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  display: flex;
+  gap: 8ch;
+  font-family: var(--app-font-mono);
   font-size: 12.5px;
   line-height: var(--row-height, 20px);
 }
 
 .row:hover {
-  background: var(--row-hover);
-}
-
-.row__offset {
-  color: var(--muted);
-}
-
-.row__hex {
-  color: var(--hex);
-  white-space: pre;
-  overflow: hidden;
-}
-
-.row__ascii {
-  color: var(--ascii);
-  white-space: pre;
-  overflow: hidden;
+  background: var(--p-content-hover-background);
 }
 </style>

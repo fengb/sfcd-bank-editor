@@ -1,85 +1,16 @@
 :root {
-  --bg: #0f1115;
-  --panel: #171a21;
-  --border: #2a303c;
-  --text: #e6e8ee;
-  --muted: #8b93a7;
-  --accent: #6aa9ff;
-  --hex: #a8d0ff;
-  --ascii: #7fd6a2;
-  --row-hover: #1d2129;
-  --danger: #ff8f8f;
-  --danger-border: #5a2b2b;
-  --danger-bg: #2a1a1c;
-
-  color-scheme: dark;
-}
-
-* {
-  box-sizing: border-box;
+  /* Shared by the byte and header panes, which both render in monospace. */
+  --app-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
   font-family:
     system-ui,
     -apple-system,
     'Segoe UI',
     Roboto,
     sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
-}
-
-code {
-  padding: 0.05em 0.35em;
-  border-radius: 4px;
-  background: #232833;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.85em;
-}
-
-.btn {
-  padding: 0.45rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--panel);
-  color: var(--text);
-  font: inherit;
-  font-size: 0.875rem;
-  cursor: pointer;
-}
-
-.btn:hover:not(:disabled) {
-  border-color: var(--accent);
-}
-
-.btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.btn--primary {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: #0d1117;
-  font-weight: 600;
-}
-
-.btn--primary:hover {
-  filter: brightness(1.1);
-}
-
-/* Keeps the file input keyboard reachable while hiding it. */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }

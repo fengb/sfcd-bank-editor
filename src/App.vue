@@ -2,6 +2,11 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useDropZone } from '@vueuse/core'
+import Button from 'primevue/button'
+import Card from 'primevue/card'
+import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
+import Message from 'primevue/message'
+import Toolbar from 'primevue/toolbar'
 
 import AppOverlay from '@/components/AppOverlay.vue'
 import { useBankFileStore } from '@/stores/bankFile'
@@ -28,7 +33,10 @@ const stats = computed(() => {
   if (loaded === null) return []
   return [
     { label: 'Name', value: loaded.name },
-    { label: 'Size', value: `${loaded.data.length.toLocaleString()} bytes (${formatBytes(loaded.data.length)})` },
+    {
+      label: 'Size',
+      value: `${loaded.data.length.toLocaleString()} bytes (${formatBytes(loaded.data.length)})`,
+    },
     { label: 'Size (hex)', value: `0x${formatHexAddress(loaded.data.length)}` },
     { label: 'MIME type', value: loaded.type === '' ? 'unknown' : loaded.type },
     { label: 'Modified', value: new Date(loaded.lastModified).toLocaleString() },
@@ -36,11 +44,11 @@ const stats = computed(() => {
   ]
 })
 
-function onPick(event: Event): void {
-  const input = event.currentTarget as HTMLInputElement
-  void store.load(input.files?.[0])
-  // Clear it so picking the same file again still fires a change event.
-  input.value = ''
+function onSelect(event: FileUploadSelectEvent): void {
+  // `customUpload` keeps FileUpload from ever reaching for a URL; it just hands
+  // the picked files over. It also resets its own file input afterwards, so
+  // picking the same file again still fires.
+  void store.load(event.files?.[0])
 }
 </script>
 
@@ -54,34 +62,47 @@ function onPick(event: Event): void {
       </p>
     </header>
 
-    <div class="toolbar">
-      <label class="btn btn--primary">
-        Open file…
-        <input type="file" class="visually-hidden" @change="onPick" />
-      </label>
-      <button v-if="data" type="button" class="btn" @click="store.clear()">Close</button>
-    </div>
+    <Toolbar class="app__toolbar">
+      <template #start>
+        <FileUpload
+          mode="basic"
+          chooseLabel="Open file…"
+          :customUpload="true"
+          :multiple="false"
+          :select="onSelect"
+        />
+        <Button v-if="data" label="Close" severity="secondary" text @click="store.clear()" />
+      </template>
+    </Toolbar>
 
-    <p v-if="error" class="notice notice--error">{{ error }}</p>
+    <Message v-if="error" severity="error" :closable="false" class="app__notice">
+      {{ error }}
+    </Message>
 
-    <section v-if="data" class="panel">
-      <dl class="stats">
-        <div v-for="stat in stats" :key="stat.label" class="stats__item">
-          <dt class="stats__label">{{ stat.label }}</dt>
-          <dd class="stats__value">{{ stat.value }}</dd>
-        </div>
-      </dl>
-    </section>
+    <Message v-if="isLoading" severity="info" :closable="false" class="app__notice">
+      Reading file…
+    </Message>
+
+    <Card v-if="data" class="app__panel">
+      <template #content>
+        <dl class="stats">
+          <div v-for="stat in stats" :key="stat.label" class="stats__item">
+            <dt class="stats__label">{{ stat.label }}</dt>
+            <dd class="stats__value">{{ stat.value }}</dd>
+          </div>
+        </dl>
+      </template>
+    </Card>
 
     <HeaderViewer v-if="data" :data="data" />
     <BytesViewer v-if="data" :data="data" />
 
-    <section v-else-if="!isLoading" class="empty">
-      <p class="empty__title">No file loaded</p>
-      <p class="empty__hint">Drop a file on the window, or use <em>Open file…</em> above.</p>
-    </section>
-
-    <p v-else class="notice">Reading file…</p>
+    <Card v-else-if="!isLoading" class="app__empty">
+      <template #content>
+        <p class="empty__title">No file loaded</p>
+        <p class="empty__hint">Drop a file on the window, or use <em>Open file…</em> above.</p>
+      </template>
+    </Card>
 
     <AppOverlay :visible="isOverDropZone">
       <p class="drop__title">{{ isLoading ? 'Reading…' : 'Drop it anywhere' }}</p>
@@ -111,21 +132,20 @@ function onPick(event: Event): void {
 
 .app__subtitle {
   margin: 0;
-  color: var(--muted);
+  color: var(--p-text-muted-color);
 }
 
-.toolbar {
-  display: flex;
-  gap: 0.5rem;
+.app__toolbar {
   margin-bottom: 1rem;
 }
 
-.panel {
+.app__notice {
+  display: block;
   margin-bottom: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--panel);
+}
+
+.app__panel {
+  margin-bottom: 1rem;
 }
 
 .stats {
@@ -140,7 +160,7 @@ function onPick(event: Event): void {
 }
 
 .stats__label {
-  color: var(--muted);
+  color: var(--p-text-muted-color);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -148,29 +168,12 @@ function onPick(event: Event): void {
 
 .stats__value {
   margin: 0.15rem 0 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--app-font-mono);
   font-size: 0.85rem;
   overflow-wrap: anywhere;
 }
 
-.notice {
-  margin: 0 0 1rem;
-  padding: 0.6rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--muted);
-}
-
-.notice--error {
-  border-color: var(--danger-border);
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
-.empty {
-  padding: 3rem 1rem;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
+.app__empty {
   text-align: center;
 }
 
@@ -181,18 +184,18 @@ function onPick(event: Event): void {
 
 .empty__hint {
   margin: 0;
-  color: var(--muted);
+  color: var(--p-text-muted-color);
 }
 
 .drop__title {
   margin: 0 0 0.5rem;
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--p-primary-color);
 }
 
 .drop__hint {
   margin: 0;
-  color: var(--muted);
+  color: var(--p-text-muted-color);
 }
 </style>
