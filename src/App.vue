@@ -10,9 +10,8 @@ import BytesViewer from '@/panes/BytesViewer'
 import HeaderViewer from '@/panes/HeaderViewer'
 
 const store = useBankFileStore()
-const { file, data, isLoaded, isLoading, error } = storeToRefs(store)
+const { file, data, isLoading, error } = storeToRefs(store)
 
-// `document` rather than `window`: useDropZone targets elements or a document.
 const { isOverDropZone } = useDropZone(document, {
   // Filter on `kind`, not `type` — a binary file's MIME type is often the empty
   // string, so `dataTypes: ['Files']` would reject exactly the files we want.
@@ -20,7 +19,7 @@ const { isOverDropZone } = useDropZone(document, {
   checkValidity: (items) => Array.from(items).some((item) => item.kind === 'file'),
   multiple: false,
   onDrop: (files) => {
-    void store.load(files)
+    store.load(files?.[0])
   },
 })
 
@@ -39,7 +38,7 @@ const stats = computed(() => {
 
 function onPick(event: Event): void {
   const input = event.currentTarget as HTMLInputElement
-  void store.load(input.files)
+  void store.load(input.files?.[0])
   // Clear it so picking the same file again still fires a change event.
   input.value = ''
 }
@@ -60,7 +59,7 @@ function onPick(event: Event): void {
         Open file…
         <input type="file" class="visually-hidden" @change="onPick" />
       </label>
-      <button v-if="isLoaded" type="button" class="btn" @click="store.clear()">Close</button>
+      <button v-if="data" type="button" class="btn" @click="store.clear()">Close</button>
     </div>
 
     <p v-if="error" class="notice notice--error">{{ error }}</p>
