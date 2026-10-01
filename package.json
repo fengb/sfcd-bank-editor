@@ -5,15 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "run-s check:type build-only",
     "preview": "vite preview",
-    "test:unit": "vitest",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build",
-    "lint": "run-s \"lint:*\"",
-    "lint:oxlint": "oxlint . --fix",
-    "lint:eslint": "eslint . --fix --cache",
-    "format": "oxfmt src/"
+    "format": "oxfmt src/",
+    "check": "run-s 'check:*'",
+    "check:format": "oxfmt --check src/",
+    "check:lint": "run-s 'check:lint:*'",
+    "check:lint:oxlint": "oxlint . --deny-warnings",
+    "check:lint:eslint": "eslint . --max-warnings 0",
+    "check:test": "vitest run",
+    "check:type": "vue-tsc --build --force",
+    "test": "run-s check:test",
+    "watch:test": "vitest"
   },
   "dependencies": {
     "@primeuix/themes": "^1.2.5",
