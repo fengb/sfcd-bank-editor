@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import Column from 'primevue/column'
-import DataTable from 'primevue/datatable'
-import Message from 'primevue/message'
+import { QBanner, QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
 import { LABELS, isDummyBank, readU32be } from './util'
-import { Panel } from 'primevue'
 
 interface HeaderEntry {
   offset: number
@@ -30,28 +27,44 @@ const entries = computed<HeaderEntry[]>(() =>
     }
   }),
 )
+
+const columns: QTableProps['columns'] = [
+  { name: 'offset', label: 'Offset', field: 'offset', format: (v) => formatHex(v) },
+  { name: 'name', label: 'Name', field: 'name', align: 'left' },
+  {
+    name: 'address',
+    label: 'Raw address',
+    field: 'address',
+    format: (v) => formatHex(v, 6),
+  },
+  {
+    name: 'extent',
+    label: 'Extent',
+    field: 'extent',
+    format: (v) => formatHex(v, 6),
+  },
+]
 </script>
 
 <template>
-  <Panel header="Header">
-    <Message v-if="isDummy" severity="warn" :closable="false">
-      This file is a 5-byte <code>DUMMY</code> placeholder. The bank number is not in use, so there
-      is no block directory to read.
-    </Message>
+  <QTable
+    :rows="entries"
+    :columns="columns"
+    :rows-per-page-options="[0]"
+    row-key="offset"
+    dense
+    hide-bottom
+    style="height: 600px"
+  >
+    <template #top>
+      <h3>Header</h3>
 
-    <DataTable v-else :value="entries" size="small" :rowHover="true" scrollable scrollHeight="40vh">
-      <Column field="offset" header="Offset">
-        <template #body="{ data }">{{ formatHex(data.offset) }}</template>
-      </Column>
-      <Column field="name" header="Name" />
-      <Column field="address" header="Raw address">
-        <template #body="{ data }">{{ formatHex(data.address, 6) }}</template>
-      </Column>
-      <Column field="extent" header="Extent">
-        <template #body="{ data }">{{ formatHex(data.extent, 6) }}</template>
-      </Column>
-    </DataTable>
-  </Panel>
+      <QBanner v-if="isDummy" dense>
+        This file is a 5-byte <code>DUMMY</code> placeholder. The bank number is not in use, so
+        there is no block directory to read.
+      </QBanner>
+    </template>
+  </QTable>
 </template>
 
 <style scoped></style>

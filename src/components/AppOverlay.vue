@@ -21,16 +21,16 @@ defineProps<{ visible: boolean }>()
   display: grid;
   place-items: center;
   padding: 2rem;
-  background: color-mix(in srgb, var(--p-surface-950) 82%, transparent);
+  background: color-mix(in srgb, var(--app-surface-deep) 82%, transparent);
   backdrop-filter: blur(2px);
   pointer-events: none;
 }
 
 .overlay__card {
   padding: 2rem 2.5rem;
-  border: 2px dashed var(--p-primary-color);
-  border-radius: var(--p-content-border-radius);
-  background: var(--p-surface-900);
+  border: 2px dashed var(--q-primary);
+  border-radius: var(--app-border-radius);
+  background: var(--app-surface-raised);
   text-align: center;
 }
 

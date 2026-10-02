@@ -1,15 +1,16 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import PrimeVue from 'primevue/config'
+import { Quasar } from 'quasar'
 
 import App from './App.vue'
-import { primevueConfig } from './primevue'
 
+// Resolved to Quasar's prebuilt stylesheet by the Vite plugin.
+import 'quasar/src/css/index.sass'
 import './assets/main.css'
 
 const app = createApp(App)
 
 app.use(createPinia())
-app.use(PrimeVue, primevueConfig)
+app.use(Quasar, { config: { dark: true } })
 
 app.mount('#app')
