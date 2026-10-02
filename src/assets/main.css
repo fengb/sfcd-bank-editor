@@ -1,14 +1,8 @@
-:root {
-  /* Shared by the byte and header panes, which both render in monospace. */
-  --app-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-
-  /* Quasar only publishes custom properties for its palette
-     (`--q-primary`, `--q-dark-page`, …) — it has none for muted text, hover
-     surfaces or its radius scale — so the handful the app needs are named
-     here, on top of that palette. */
-  --app-text-muted: #9e9e9e; /* Quasar's $grey-6 */
-  --app-surface-deep: #0a0a0a;
-  --app-surface-raised: #1e1e1e;
-  --app-border-radius: 4px; /* Quasar's $generic-border-radius */
-  --app-hover: rgba(255, 255, 255, 0.04);
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 1rem 0;
 }

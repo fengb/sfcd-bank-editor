@@ -103,7 +103,6 @@ function close(): void {
 }
 
 .stats__label {
-  color: var(--app-text-muted);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -111,7 +110,6 @@ function close(): void {
 
 .stats__value {
   margin: 0.15rem 0 0;
-  font-family: var(--app-font-mono);
   font-size: 0.85rem;
   overflow-wrap: anywhere;
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useDropZone } from '@vueuse/core'
+import { QBanner } from 'quasar'
 import { provide, ref, readonly } from 'vue'
 
 export type DropHandler = (file: File) => Promise<boolean>
@@ -38,17 +39,12 @@ const { isOverDropZone } = useDropZone(document, {
 
 <template>
   <Teleport to="body">
-    <Transition name="overlay-fade">
-      <div v-if="isOverDropZone" class="overlay">
-        <div class="overlay__card">
-          <p class="drop__title">{{ isLoading ? 'Reading…' : 'Drop it anywhere' }}</p>
-          <p class="drop__hint">
-            The file is read straight into a <code>Uint8Array</code> in this tab. Nothing is
-            uploaded.
-          </p>
-        </div>
-      </div>
-    </Transition>
+    <div v-if="isOverDropZone" class="overlay">
+      <QBanner rounded class="bg-primary">
+        <h4>Drop it anywhere</h4>
+        <p>The file is read straight into a <code>Uint8Array</code> in this tab.</p>
+      </QBanner>
+    </div>
   </Teleport>
 </template>
 
@@ -59,39 +55,8 @@ const { isOverDropZone } = useDropZone(document, {
   z-index: 20;
   display: grid;
   place-items: center;
-  padding: 2rem;
-  background: color-mix(in srgb, var(--app-surface-deep) 82%, transparent);
+  background: rgba(0, 0, 0, 80%);
   backdrop-filter: blur(2px);
   pointer-events: none;
-}
-
-.overlay__card {
-  padding: 2rem 2.5rem;
-  border: 2px dashed var(--q-primary);
-  border-radius: var(--app-border-radius);
-  background: var(--app-surface-raised);
-  text-align: center;
-}
-
-.overlay-fade-enter-active,
-.overlay-fade-leave-active {
-  transition: opacity 120ms ease;
-}
-
-.overlay-fade-enter-from,
-.overlay-fade-leave-to {
-  opacity: 0;
-}
-
-.drop__title {
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--q-primary);
-}
-
-.drop__hint {
-  margin: 0;
-  color: var(--app-text-muted);
 }
 </style>
