@@ -1,7 +1,7 @@
 {
   "name": "sfcd-bank-editor",
   "version": "0.0.0",
-  "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
