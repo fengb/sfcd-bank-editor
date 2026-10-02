@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useDropZone } from '@vueuse/core'
 import { QBanner, QBtn, QCard, QCardSection, QFile } from 'quasar'
 
-import AppOverlay from '@/components/AppOverlay.vue'
+import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
 import { useBankFileStore } from '@/stores/bankFile'
 import { formatBytes, formatHexAddress } from '@/utils/format'
 import BytesViewer from '@/panes/BytesViewer'
@@ -15,17 +14,10 @@ const { file, data, isLoading, error } = storeToRefs(store)
 
 const picked = ref<File | undefined>()
 
-const { isOverDropZone } = useDropZone(document, {
-  // Filter on `kind`, not `type` — a binary file's MIME type is often the empty
-  // string, so `dataTypes: ['Files']` would reject exactly the files we want.
-  // This also stops text drags from lightening up the overlay.
-  checkValidity: (items) => Array.from(items).some((item) => item.kind === 'file'),
-  multiple: false,
-  onDrop: (files) => {
-    picked.value = files?.[0]
-    void store.load(picked.value)
-  },
-})
+const dropHandler: DropHandler = async (file: File) => {
+  await store.load(file)
+  return true
+}
 
 const stats = computed(() => {
   const loaded = file.value
@@ -59,13 +51,10 @@ function close(): void {
 </script>
 
 <template>
+  <GlobalFileDrop :drop-handler="dropHandler" />
   <main class="app">
     <header>
       <h1>SFCD Bank Editor</h1>
-      <p>
-        Drop a file anywhere on this window, or pick one. It is read into a
-        <code>Uint8Array</code> and kept in memory.
-      </p>
     </header>
 
     <div class="row">
@@ -92,13 +81,6 @@ function close(): void {
 
     <HeaderViewer v-if="data" :data="data" />
     <BytesViewer v-if="data" :data="data" />
-
-    <AppOverlay :visible="isOverDropZone">
-      <p class="drop__title">{{ isLoading ? 'Reading…' : 'Drop it anywhere' }}</p>
-      <p class="drop__hint">
-        The file is read straight into a <code>Uint8Array</code> in this tab. Nothing is uploaded.
-      </p>
-    </AppOverlay>
   </main>
 </template>
 
@@ -132,17 +114,5 @@ function close(): void {
   font-family: var(--app-font-mono);
   font-size: 0.85rem;
   overflow-wrap: anywhere;
-}
-
-.drop__title {
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--q-primary);
-}
-
-.drop__hint {
-  margin: 0;
-  color: var(--app-text-muted);
 }
 </style>

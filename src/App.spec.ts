@@ -16,6 +16,6 @@ describe('App', () => {
     })
 
     expect(wrapper.text()).toContain('SFCD Bank Editor')
-    expect(wrapper.text()).toContain('Drop a file anywhere')
+    expect(wrapper.text()).toContain('Open file')
   })
 })
