@@ -71,6 +71,11 @@ const columns: QTableProps['columns'] = [
 </script>
 
 <template>
+  <h3>Summary</h3>
+  <dl>
+    <dt>Book</dt><dd>{{props.bytes[0x124]}}</dd>
+    <dt>Chapter</dt><dd>{{props.bytes[0x125]}}</dd>
+  </dl>
   <QTable
     :rows="rows"
     :columns="columns"
@@ -81,8 +86,6 @@ const columns: QTableProps['columns'] = [
     style="height: 600px"
   >
     <template #top>
-      <h3>Header</h3>
-
       <QBanner v-if="isDummy" dense>
         This file is a 5-byte <code>DUMMY</code> placeholder. The bank number is not in use, so
         there is no block directory to read.
