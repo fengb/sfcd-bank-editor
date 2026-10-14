@@ -79,8 +79,8 @@ function close(): void {
       </QCardSection>
     </QCard>
 
-    <HeaderViewer v-if="data" :data="data" />
-    <BytesViewer v-if="data" :data="data" />
+    <HeaderViewer v-if="data" :bytes="data" />
+    <BytesViewer v-if="data" :bytes="data" />
   </main>
 </template>
 

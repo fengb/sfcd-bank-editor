@@ -12,9 +12,9 @@ interface HeaderRow {
   extent: number
 }
 
-const props = defineProps<{ data: Uint8Array }>()
+const props = defineProps<{ bytes: Uint8Array }>()
 
-const isDummy = computed(() => isDummyBank(props.data))
+const isDummy = computed(() => isDummyBank(props.bytes))
 
 const rows = computed<HeaderRow[]>(() =>
   Array.from({ length: 0x100 / 8 }, (_, i) => i * 8).map((_, i) => {
@@ -22,8 +22,8 @@ const rows = computed<HeaderRow[]>(() =>
     return {
       offset,
       name: LABELS[offset],
-      address: readU32be(props.data, offset) ?? 0,
-      extent: readU32be(props.data, offset + 4) ?? 0,
+      address: readU32be(props.bytes, offset) ?? 0,
+      extent: readU32be(props.bytes, offset + 4) ?? 0,
     }
   }),
 )
@@ -53,7 +53,7 @@ const columns: QTableProps['columns'] = [
       }
 
       // Distance between first entry and first entry's target
-      const target = readU32be(props.data, row.address - 0x10000) ?? 0
+      const target = readU32be(props.bytes, row.address - 0x10000) ?? 0
       const slotSize = target - row.address
 
       if (slotSize < 0) {

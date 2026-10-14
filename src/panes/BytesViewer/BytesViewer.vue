@@ -4,12 +4,12 @@ import { QInput, QTable, type QTableProps } from 'quasar'
 
 import { BYTES_PER_ROW, formatHex, parseHexOffset, toPrintable } from './hex'
 
-const props = defineProps<{ data: Uint8Array }>()
+const props = defineProps<{ bytes: Uint8Array }>()
 
 const rows = computed(() =>
-  Array.from({ length: Math.ceil(props.data.length / BYTES_PER_ROW) }, (_, i) => {
+  Array.from({ length: Math.ceil(props.bytes.length / BYTES_PER_ROW) }, (_, i) => {
     const offset = i * BYTES_PER_ROW
-    return { offset, bytes: props.data.subarray(offset, offset + BYTES_PER_ROW) }
+    return { offset, bytes: props.bytes.subarray(offset, offset + BYTES_PER_ROW) }
   }),
 )
 
@@ -20,9 +20,9 @@ const offsetInput = ref('')
 // so the hex and ASCII cells are formatted in the template below and a row
 // costs nothing until it has been scrolled into view.
 function goTo(): void {
-  if (props.data.length === 0) return
+  if (props.bytes.length === 0) return
 
-  const offset = parseHexOffset(offsetInput.value, props.data.length - 1)
+  const offset = parseHexOffset(offsetInput.value, props.bytes.length - 1)
   // Unparseable input is left alone rather than silently jumping somewhere else.
   if (offset === null) return
 
@@ -32,7 +32,7 @@ function goTo(): void {
 // A newly loaded file starts at the top again. The component is not remounted
 // between files, so the scroll position would otherwise carry over.
 watch(
-  () => props.data,
+  () => props.bytes,
   () => {
     table.value?.scrollTo(0)
   },
