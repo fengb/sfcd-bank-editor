@@ -6,11 +6,9 @@ import { formatHex } from '../BytesViewer/hex'
 import { LABELS } from './util'
 import { Bank, type BankHeader } from '@/domain/bank'
 
-const props = defineProps<{ bytes: Uint8Array }>()
+const props = defineProps<{ bank: Bank }>()
 
-const bank = computed(() => new Bank(props.bytes))
-
-const rows = computed(() => Object.values(bank.value.headers))
+const rows = computed(() => Object.values(props.bank.headers))
 
 const columns: QTableProps['columns'] = [
   { name: 'offset', label: 'Offset', field: 'offset', format: (v) => formatHex(v) },
@@ -35,7 +33,7 @@ const columns: QTableProps['columns'] = [
   {
     name: 'slot-size',
     label: 'Slot Size',
-    field: (row: BankHeader) => bank.value.slotSize(row),
+    field: (row: BankHeader) => props.bank.slotSize(row),
   },
 ]
 </script>
@@ -44,9 +42,9 @@ const columns: QTableProps['columns'] = [
   <h3>Summary</h3>
   <dl>
     <dt>Book</dt>
-    <dd>{{ props.bytes[0x124] }}</dd>
+    <dd>{{ props.bank.bytes[0x124] }}</dd>
     <dt>Chapter</dt>
-    <dd>{{ props.bytes[0x125] }}</dd>
+    <dd>{{ props.bank.bytes[0x125] }}</dd>
   </dl>
   <QTable
     :rows="rows"
@@ -58,7 +56,7 @@ const columns: QTableProps['columns'] = [
     style="height: 600px"
   >
     <template #top>
-      <QBanner v-if="bank.isDummy" dense>
+      <QBanner v-if="props.bank.isDummy" dense>
         This file is a 5-byte <code>DUMMY</code> placeholder. The bank number is not in use, so
         there is no block directory to read.
       </QBanner>

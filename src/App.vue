@@ -4,13 +4,13 @@ import { storeToRefs } from 'pinia'
 import { QBanner, QBtn, QCard, QCardSection, QFile } from 'quasar'
 
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
-import { useBankFileStore } from '@/stores/bankFile'
-import { formatBytes, formatHexAddress } from '@/utils/format'
+import { useBankFileStore } from '@/stores/bank'
+import { formatHexAddress } from '@/utils/format'
 import BytesViewer from '@/panes/BytesViewer'
 import HeaderViewer from '@/panes/HeaderViewer'
 
 const store = useBankFileStore()
-const { file, data, isLoading, error } = storeToRefs(store)
+const { file, bank, isLoading, error } = storeToRefs(store)
 
 const picked = ref<File | undefined>()
 
@@ -24,14 +24,7 @@ const stats = computed(() => {
   if (loaded === null) return []
   return [
     { label: 'Name', value: loaded.name },
-    {
-      label: 'Size',
-      value: `${loaded.data.length.toLocaleString()} bytes (${formatBytes(loaded.data.length)})`,
-    },
-    { label: 'Size (hex)', value: `0x${formatHexAddress(loaded.data.length)}` },
-    { label: 'MIME type', value: loaded.type === '' ? 'unknown' : loaded.type },
-    { label: 'Modified', value: new Date(loaded.lastModified).toLocaleString() },
-    { label: 'In memory as', value: `Uint8Array(${loaded.data.length})` },
+    { label: 'Size (hex)', value: `0x${formatHexAddress(loaded.bytes.length)}` },
   ]
 })
 
@@ -59,7 +52,7 @@ function close(): void {
 
     <div class="row">
       <QFile v-model="picked" label="Open file…" outlined @update:model-value="onSelect" />
-      <QBtn v-if="data" label="Close" flat no-caps @click="close" />
+      <QBtn v-if="bank" label="Close" flat no-caps @click="close" />
     </div>
 
     <QBanner v-if="error" dense>
@@ -68,19 +61,21 @@ function close(): void {
 
     <QBanner v-if="isLoading" dense> Reading file… </QBanner>
 
-    <QCard v-if="data" flat bordered>
-      <QCardSection>
-        <dl class="stats">
-          <div v-for="stat in stats" :key="stat.label" class="stats__item">
-            <dt class="stats__label">{{ stat.label }}</dt>
-            <dd class="stats__value">{{ stat.value }}</dd>
-          </div>
-        </dl>
-      </QCardSection>
-    </QCard>
+    <div v-if="bank">
+      <QCard flat bordered>
+        <QCardSection>
+          <dl class="stats">
+            <div v-for="stat in stats" :key="stat.label" class="stats__item">
+              <dt class="stats__label">{{ stat.label }}</dt>
+              <dd class="stats__value">{{ stat.value }}</dd>
+            </div>
+          </dl>
+        </QCardSection>
+      </QCard>
 
-    <HeaderViewer v-if="data" :bytes="data" />
-    <BytesViewer v-if="data" :bytes="data" />
+      <HeaderViewer :bank="bank" />
+      <BytesViewer :bytes="bank.bytes" />
+    </div>
   </main>
 </template>
 

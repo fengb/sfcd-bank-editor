@@ -2,11 +2,11 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
 
+import { Bank } from '@/domain/bank'
+
 export interface BankFile {
   name: string
-  type: string
-  lastModified: number
-  data: Uint8Array
+  bytes: Uint8Array
 }
 
 function describe(error: unknown): string {
@@ -22,24 +22,18 @@ const SERIALIZER = {
     if (raw === '') return null
     const stored = JSON.parse(raw) as {
       name: string
-      type: string
-      lastModified: number
-      data: string
+      bytes: string
     }
     return {
       name: stored.name,
-      type: stored.type,
-      lastModified: stored.lastModified,
-      data: Uint8Array.fromBase64(stored.data),
+      bytes: Uint8Array.fromBase64(stored.bytes),
     }
   },
   write: (value: BankFile | null): string => {
     if (value === null) return ''
     return JSON.stringify({
       name: value.name,
-      type: value.type,
-      lastModified: value.lastModified,
-      data: value.data.toBase64(),
+      bytes: value.bytes.toBase64(),
     })
   },
 }
@@ -56,7 +50,9 @@ export const useBankFileStore = defineStore('bankFile', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  const data = computed<Uint8Array | null>(() => file.value?.data ?? null)
+  const bytes = computed<Uint8Array | null>(() => file.value?.bytes ?? null)
+
+  const bank = computed<Bank | null>(() => (file.value ? new Bank(file.value.bytes) : null))
 
   /** Read the first file in `source` fully into memory. */
   async function load(source: File | undefined): Promise<void> {
@@ -72,9 +68,7 @@ export const useBankFileStore = defineStore('bankFile', () => {
       const buffer = await source.arrayBuffer()
       file.value = {
         name: source.name,
-        type: source.type,
-        lastModified: source.lastModified,
-        data: new Uint8Array(buffer),
+        bytes: new Uint8Array(buffer),
       }
     } catch (cause) {
       file.value = null
@@ -90,5 +84,5 @@ export const useBankFileStore = defineStore('bankFile', () => {
     isLoading.value = false
   }
 
-  return { file, data, isLoading, error, load, clear }
+  return { file, bytes, bank, isLoading, error, load, clear }
 })
