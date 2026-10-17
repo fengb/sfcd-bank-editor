@@ -3,34 +3,23 @@ import { computed } from 'vue'
 import { QBanner, QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
-import { LABELS, isDummyBank, readU32be } from './util'
-
-interface HeaderRow {
-  offset: number
-  name: string | undefined
-  address: number
-  extent: number
-}
+import { LABELS } from './util'
+import { Bank, type BankHeader } from '@/domain/bank'
 
 const props = defineProps<{ bytes: Uint8Array }>()
 
-const isDummy = computed(() => isDummyBank(props.bytes))
+const bank = computed(() => new Bank(props.bytes))
 
-const rows = computed<HeaderRow[]>(() =>
-  Array.from({ length: 0x100 / 8 }, (_, i) => i * 8).map((_, i) => {
-    const offset = i * 8
-    return {
-      offset,
-      name: LABELS[offset],
-      address: readU32be(props.bytes, offset) ?? 0,
-      extent: readU32be(props.bytes, offset + 4) ?? 0,
-    }
-  }),
-)
+const rows = computed(() => Object.values(bank.value.headers))
 
 const columns: QTableProps['columns'] = [
   { name: 'offset', label: 'Offset', field: 'offset', format: (v) => formatHex(v) },
-  { name: 'name', label: 'Name', field: 'name', align: 'left' },
+  {
+    name: 'name',
+    label: 'Name',
+    align: 'left',
+    field: (row: BankHeader) => LABELS[row.offset] ?? '',
+  },
   {
     name: 'address',
     label: 'Raw address',
@@ -46,26 +35,7 @@ const columns: QTableProps['columns'] = [
   {
     name: 'slot-size',
     label: 'Slot Size',
-    field: (row: HeaderRow) => {
-      // Extent is canonical. Don't derive anything if this exists.
-      if (row.extent) {
-        return null
-      }
-
-      // Distance between first entry and first entry's target
-      const target = readU32be(props.bytes, row.address - 0x10000) ?? 0
-      const slotSize = target - row.address
-
-      if (slotSize < 0) {
-        // Data is thoroughly messed up -- target is before the metadata
-        return 'error'
-      } else if (slotSize > 0x1000) {
-        // Slot stride is massive -- (probably) not a slot
-        return '--'
-      }
-
-      return slotSize
-    },
+    field: (row: BankHeader) => bank.value.slotSize(row),
   },
 ]
 </script>
@@ -73,8 +43,10 @@ const columns: QTableProps['columns'] = [
 <template>
   <h3>Summary</h3>
   <dl>
-    <dt>Book</dt><dd>{{props.bytes[0x124]}}</dd>
-    <dt>Chapter</dt><dd>{{props.bytes[0x125]}}</dd>
+    <dt>Book</dt>
+    <dd>{{ props.bytes[0x124] }}</dd>
+    <dt>Chapter</dt>
+    <dd>{{ props.bytes[0x125] }}</dd>
   </dl>
   <QTable
     :rows="rows"
@@ -86,7 +58,7 @@ const columns: QTableProps['columns'] = [
     style="height: 600px"
   >
     <template #top>
-      <QBanner v-if="isDummy" dense>
+      <QBanner v-if="bank.isDummy" dense>
         This file is a 5-byte <code>DUMMY</code> placeholder. The bank number is not in use, so
         there is no block directory to read.
       </QBanner>

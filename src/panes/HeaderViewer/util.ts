@@ -1,5 +1,3 @@
-export const DUMMY_SENTINEL = 'DUMMY'
-
 export const LABELS: Record<number, string | undefined> = {
   0x00: 'Map sprite pointer table',
   0x08: 'Map tileset pointer table',
@@ -23,25 +21,4 @@ export const LABELS: Record<number, string | undefined> = {
   0x98: 'Pointer table into 0xA0',
   0xa0: undefined,
   0xa8: 'Chapter screen graphics',
-}
-
-/**
- * Read a big-endian u32 at `offset`, or null when the read would run past the
- * end of the buffer. The `>>> 0` is required: `<<`/`|` yield int32, so any
- * value with bit 31 set (>= 0x80000000) would come back negative.
- */
-export function readU32be(data: Uint8Array, offset: number): number | null {
-  if (offset < 0 || offset + 4 > data.length) return null
-  return (
-    ((data[offset + 0]! << 24) |
-      (data[offset + 1]! << 16) |
-      (data[offset + 2]! << 8) |
-      (data[offset + 3]! << 0)) >>>
-    0
-  )
-}
-
-/** Unused banks are 5-byte stubs reading "DUMMY"; they carry no directory. */
-export function isDummyBank(data: Uint8Array): boolean {
-  return String.fromCharCode(...data.subarray(0, DUMMY_SENTINEL.length)) === DUMMY_SENTINEL
 }
