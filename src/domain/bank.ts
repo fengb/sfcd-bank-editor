@@ -40,7 +40,7 @@ export class Bank {
       unknown1: this.parseHeader(0x50),
       unknown2: this.parseHeader(0x58),
 
-      unknown3: this.parseHeader(0x60),
+      characterData: this.parseHeader(0x60),
       texts: this.parseHeader(0x68),
 
       icons: this.parseHeader(0x70),
@@ -73,10 +73,13 @@ export class Bank {
   }
 
   parseHeader(offset: number) {
+    const address = readU32be(this.bytes, offset) ?? 0
+    const extent = readU32be(this.bytes, offset + 4) ?? 0
     return {
       offset,
-      address: readU32be(this.bytes, offset) ?? 0,
-      extent: readU32be(this.bytes, offset + 4) ?? 0,
+      address,
+      extent,
+      bytes: this.bytes.slice(address - 0x10000, address - 0x10000 + extent),
     }
   }
 

@@ -8,6 +8,7 @@ import { useBankFileStore } from '@/stores/bank'
 import { formatHexAddress } from '@/utils/format'
 import BytesViewer from '@/panes/BytesViewer'
 import HeaderViewer from '@/panes/HeaderViewer'
+import CharacterViewer from './panes/CharacterViewer'
 
 const store = useBankFileStore()
 const { file, bank, isLoading, error } = storeToRefs(store)
@@ -74,6 +75,7 @@ function close(): void {
       </QCard>
 
       <HeaderViewer :bank="bank" />
+      <CharacterViewer :bytes="bank.headers.characterData.bytes" />
       <BytesViewer :bytes="bank.bytes" />
     </div>
   </main>
