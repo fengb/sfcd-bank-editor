@@ -13,18 +13,11 @@ const STAT_KEYS = ['hp', 'mp', 'att', 'def', 'agi'] as const
 
 const recordColumns: QTableProps['columns'] = [
   { name: 'class', label: 'Class', align: 'left', field: (row) => formatHex(row.classId) },
-  ...STAT_KEYS.flatMap((key) => [
-    {
-      name: key,
-      label: key.toUpperCase(),
-      field: (row: CharacterRecord) => row.stats[key].value,
-    },
-    {
-      name: `${key}-growth`,
-      label: `${key.toUpperCase()} growth`,
-      field: (row: CharacterRecord) => formatHex(row.stats[key].growth),
-    },
-  ]),
+  ...STAT_KEYS.map((key) => ({
+    name: key,
+    label: `${key.toUpperCase()} / growth`,
+    field: (row: CharacterRecord) => `${row.stats[key].value} / ${row.stats[key].growth}`,
+  })),
   {
     name: 'spells',
     label: 'Spells',

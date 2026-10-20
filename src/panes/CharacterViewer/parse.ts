@@ -1,18 +1,11 @@
+import { chunk, chunkBy } from 'es-toolkit'
+
 const POINTER_SIZE = 4
-/**
- * Aux pointer indices in the leading block. [A]/[B] point at the character
- * pointer sub-array that immediately follows them, [C] at the starting-level
- * table, [D] at the class data table.
- */
 const AUX = {
-  /** Points at the character pointer sub-array; pins the ROM base. */
-  CHAR_PTRS: 0,
-  /** Documented duplicate of [A]; not consulted. */
-  DUPLICATE: 1,
-  /** Starting-level table. */
-  SECONDARY: 2,
-  /** Class data table. */
-  CLASSES: 3,
+  CHAR_PTRS: 0x00,
+  DUPLICATE: 0x04, // dupe
+  SECONDARY: 0x08,
+  CLASSES: 0x0c,
 } as const
 const AUX_POINTER_COUNT = 4
 /** The sub-array of character pointers follows the aux entries: 4 × 4 = 0x10. */
@@ -65,95 +58,72 @@ function readU32be(data: Uint8Array, offset: number): number | null {
   )
 }
 
-function statPair(data: Uint8Array, at: number): StatPair {
+function statPair(data: number[], at: number): StatPair {
   return { growth: data[at]!, value: data[at + 1]! }
 }
 
+function iterPair<T>(array: T[]): [T, T][] {
+  return chunk(array, 2) as [T, T][]
+}
+
 function parseRecords(bytes: Uint8Array): CharacterRecord[] {
-  const records: CharacterRecord[] = []
-  let offset = 0
-
-  while (offset + RECORD_PAYLOAD <= bytes.length) {
-    const classId = bytes[offset]!
-    // The table ends in an FF FF marker; no record starts with FF or FE.
-    if (classId === 0xff || classId === 0xfe) break
-
-    // Magic users carry a [level, spell] tail between the stat pairs and the terminator.
-    const spells: SpellLearn[] = []
-    let i = offset + RECORD_PAYLOAD
-    while (i + 1 < bytes.length && bytes[i] !== 0xff && bytes[i] !== 0xfe) {
-      spells.push({ level: bytes[i]!, spell: bytes[i + 1]! })
-      i += 2
-    }
-
-    records.push({
-      classId,
+  const grouped = chunkBy([...bytes], (byte) => byte === 0xff || byte === 0xfe)
+  return iterPair(grouped).map(([entry, separators]) => {
+    return {
+      classId: entry[0]!,
       stats: {
-        hp: statPair(bytes, offset + 1),
-        mp: statPair(bytes, offset + 3),
-        att: statPair(bytes, offset + 5),
-        def: statPair(bytes, offset + 7),
-        agi: statPair(bytes, offset + 9),
+        hp: statPair(entry, 1),
+        mp: statPair(entry, 3),
+        att: statPair(entry, 5),
+        def: statPair(entry, 7),
+        agi: statPair(entry, 9),
       },
-      spells,
-      terminator: bytes[i] ?? 0xff,
-    })
-    offset = i + 1
-  }
-
-  return records
+      spells: iterPair(entry.slice(RECORD_PAYLOAD)).map(([level, spell]) => ({
+        level: level,
+        spell: spell,
+      })),
+      terminator: separators![0]!,
+    }
+  })
 }
 
 function parseSecondary(bytes: Uint8Array): SecondaryEntry[] {
-  const count = Math.floor(bytes.length / SECONDARY_ENTRY_SIZE)
-  const entries: SecondaryEntry[] = []
-  for (let index = 0; index < count; index++) {
-    const offset = index * SECONDARY_ENTRY_SIZE
-    entries.push({
-      classId: bytes[offset]!,
-      level: bytes[offset + 1]!,
-      unknown: [bytes[offset + 2]!, bytes[offset + 3]!, bytes[offset + 4]!, bytes[offset + 5]!],
-    })
-  }
-  return entries
+  return chunk([...bytes], SECONDARY_ENTRY_SIZE)
+    .filter((entry) => entry.length === SECONDARY_ENTRY_SIZE)
+    .map((entry) => ({
+      classId: entry[0]!,
+      level: entry[1]!,
+      unknown: [entry[2]!, entry[3]!, entry[4]!, entry[5]!],
+    }))
 }
 
 function parseClasses(bytes: Uint8Array): ClassEntry[] {
-  const entries: ClassEntry[] = []
-  for (let classId = 0; (classId + 1) * CLASS_ENTRY_SIZE <= bytes.length; classId++) {
-    const offset = classId * CLASS_ENTRY_SIZE
-    entries.push({
-      classId,
-      mov: bytes[offset]!,
-      unknown: [bytes[offset + 1]!, bytes[offset + 2]!, bytes[offset + 3]!, bytes[offset + 4]!],
-    })
-  }
-  return entries
+  return chunk([...bytes], CLASS_ENTRY_SIZE).map((entry, classId) => ({
+    classId,
+    mov: entry[0]!,
+    unknown: [entry[1]!, entry[2]!, entry[3]!, entry[4]!],
+  }))
 }
 
 export function parseCharacterData(bytes: Uint8Array): CharacterTables {
   const empty = { records: [], secondary: [], classes: [] }
 
-  // [A] (file offset 0x00) points at the character pointer sub-array, so its
-  // target pins both the sub-array start and the ROM base for everything else.
-  const headerA = readU32be(bytes, 0x00)
+  const headerA = readU32be(bytes, AUX.CHAR_PTRS)
   if (headerA === null) return empty
-  const base = headerA - CHAR_PTR_START
-  const fileOffsetOf = (pointer: number): number => pointer - base
+  // ROM encodes actual pointer so adjust for relative addressing here
+  const baseOffset = headerA - CHAR_PTR_START
 
   // The first character pointer targets the first record, packed right after
   // the sub-array; its distance from the sub-array start is the array itself.
-  const recordsStart = fileOffsetOf(readU32be(bytes, CHAR_PTR_START) ?? 0)
+  const recordsStart = (readU32be(bytes, CHAR_PTR_START) ?? 0) - baseOffset
   if (recordsStart <= CHAR_PTR_START || recordsStart > bytes.length) return empty
 
-  const secondaryStart = fileOffsetOf(readU32be(bytes, 0x08) ?? 0)
-  const classStart = fileOffsetOf(readU32be(bytes, 0x0c) ?? 0)
+  const secondaryStart = (readU32be(bytes, AUX.SECONDARY) ?? 0) - baseOffset
+  const classStart = (readU32be(bytes, AUX.CLASSES) ?? 0) - baseOffset
   const secondaryInRange = secondaryStart >= recordsStart && secondaryStart < bytes.length
   const classInRange = classStart >= recordsStart && classStart < bytes.length
 
   return {
-    // Records end at the FF FF marker before the secondary table; bound the
-    // walk so a malformed pointer cannot spill into the tables beyond.
     records: parseRecords(bytes.slice(recordsStart, secondaryStart)),
     secondary: secondaryInRange ? parseSecondary(bytes.slice(secondaryStart, classStart)) : [],
     classes: classInRange ? parseClasses(bytes.slice(classStart)) : [],
