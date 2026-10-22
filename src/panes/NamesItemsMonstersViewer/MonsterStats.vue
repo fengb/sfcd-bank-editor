@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
+import { decodeSpell } from '@/domain/bank'
 
 const props = defineProps<{ bytes: Uint8Array; offset: number }>()
 
@@ -18,19 +19,6 @@ function decodeInventory(value: number): string {
   const equipped = (value & 0x80) !== 0
   const idx = value & 0x7f
   return `${formatHex(idx, 2)}${equipped ? '+' : ' '}`
-}
-
-function decodeSpell(value: number): string {
-  if (value === 0x3f) return ' --'
-  const idx = value & 0x3f
-  const flags = value & 0xc0
-  const flagsDisplay: Record<any, string> = {
-    [0x00]: '¹',
-    [0x40]: '²',
-    [0x80]: '³',
-    [0xc0]: '⁴',
-  }
-  return `${formatHex(idx, 2)}${flagsDisplay[flags]}`
 }
 
 const rows = computed(() => {

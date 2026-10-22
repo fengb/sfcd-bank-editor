@@ -4,6 +4,7 @@ import { QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
 import { parseCharacterData, type CharacterRecord } from './parse'
+import { decodeSpell } from '@/domain/bank';
 
 const props = defineProps<{ bytes: Uint8Array }>()
 
@@ -23,7 +24,7 @@ const recordColumns: QTableProps['columns'] = [
     label: 'Spells',
     align: 'left',
     field: (row: CharacterRecord) =>
-      row.spells.map((s) => `L${s.level}:${formatHex(s.spell)}`).join(' '),
+      row.spells.map((s) => `L${s.level}:${decodeSpell(s.spell)}`).join(' '),
   },
   { name: 'term', label: 'Term', field: (row) => formatHex(row.terminator) },
 ]
