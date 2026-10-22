@@ -14,17 +14,23 @@ function readU16be(data: Uint8Array, off: number): number {
 }
 
 function decodeInventory(value: number): string {
-  if (value === 0x007f) return 'empty'
+  if (value === 0x007f) return ' --'
   const equipped = (value & 0x80) !== 0
   const idx = value & 0x7f
-  return `idx ${idx}${equipped ? ' (equipped)' : ''}`
+  return `${formatHex(idx, 2)}${equipped ? '+' : ' '}`
 }
 
 function decodeSpell(value: number): string {
-  if (value === 0x3f) return 'empty'
+  if (value === 0x3f) return ' --'
   const idx = value & 0x3f
   const flags = value & 0xc0
-  return flags ? `idx ${idx} (flags 0x${formatHex(flags)})` : `idx ${idx}`
+  const flagsDisplay: Record<any, string> = {
+    [0x00]: '¹',
+    [0x40]: '²',
+    [0x80]: '³',
+    [0xc0]: '⁴',
+  }
+  return `${formatHex(idx, 2)}${flagsDisplay[flags]}`
 }
 
 const rows = computed(() => {
@@ -38,24 +44,17 @@ const rows = computed(() => {
     rec.hp = readU16be(props.bytes, base + 0x0c)
     rec.field0e = readU16be(props.bytes, base + 0x0e)
     rec.mp = props.bytes[base + 0x10]!
-    rec.atkBase = props.bytes[base + 0x12]!
+    rec.atk = props.bytes[base + 0x12]!
     rec.def = props.bytes[base + 0x14]!
     rec.agi = props.bytes[base + 0x16]!
     rec.mov = props.bytes[base + 0x18]!
     rec.field1a = formatHex(readU16be(props.bytes, base + 0x1a), 4)
     rec.field1e = formatHex(readU16be(props.bytes, base + 0x1e), 4)
 
-    const inv: string[] = []
-    for (let s = 0; s < 4; s++) {
-      inv.push(decodeInventory(readU16be(props.bytes, base + 0x20 + s * 2)))
-    }
-    rec.inventory = inv.join(', ')
-
-    const spells: string[] = []
-    for (let s = 0; s < 4; s++) {
-      spells.push(decodeSpell(props.bytes[base + 0x28 + s]!))
-    }
-    rec.spells = spells.join(', ')
+    rec.inventory = Array.from({ length: 4 }).map((_, s) =>
+      readU16be(props.bytes, base + 0x20 + s * 2),
+    )
+    rec.spells = Array.from({ length: 4 }).map((_, s) => props.bytes[base + 0x28 + s]!)
 
     rec.field2c = formatHex(readU16be(props.bytes, base + 0x2c), 4)
     rec.field2e = formatHex(readU16be(props.bytes, base + 0x2e), 4)
@@ -68,24 +67,34 @@ const rows = computed(() => {
 })
 
 const columns: QTableProps['columns'] = [
-  { name: 'num', label: '#', field: '#', align: 'center', style: 'width: 30px' },
-  { name: 'index', label: 'Idx', field: 'index', align: 'center', style: 'width: 40px' },
-  { name: 'level', label: 'Lvl', field: 'level', align: 'center', style: 'width: 40px' },
-  { name: 'hp', label: 'HP', field: 'hp', align: 'center', style: 'width: 40px' },
-  { name: 'mp', label: 'MP', field: 'mp', align: 'center', style: 'width: 40px' },
-  { name: 'atkBase', label: 'ATK(base)', field: 'atkBase', align: 'center', style: 'width: 50px' },
-  { name: 'def', label: 'DEF', field: 'def', align: 'center', style: 'width: 40px' },
-  { name: 'agi', label: 'AGI', field: 'agi', align: 'center', style: 'width: 40px' },
-  { name: 'mov', label: 'MOV', field: 'mov', align: 'center', style: 'width: 40px' },
-  { name: 'aiClass', label: 'AI class', field: 'aiClass', align: 'center', style: 'width: 50px' },
-  { name: 'inventory', label: 'Inventory', field: 'inventory' },
-  { name: 'spells', label: 'Spells', field: 'spells' },
-  { name: 'field1a', label: '+0x1A', field: 'field1a', align: 'center' },
-  { name: 'field1e', label: '+0x1E', field: 'field1e', align: 'center' },
-  { name: 'field0e', label: '+0x0E', field: 'field0e', align: 'center', style: 'width: 50px' },
-  { name: 'field2c', label: '+0x2C', field: 'field2c', align: 'center', style: 'width: 50px' },
-  { name: 'field2e', label: '+0x2E', field: 'field2e', align: 'center', style: 'width: 50px' },
-  { name: 'field34', label: '+0x34', field: 'field34', align: 'center', style: 'width: 50px' },
+  { name: 'num', label: '#', field: '#' },
+  { name: 'index', label: 'Idx', field: 'index' },
+  { name: 'level', label: 'Lvl', field: 'level' },
+  { name: 'hp', label: 'HP', field: 'hp' },
+  { name: 'mp', label: 'MP', field: 'mp' },
+  { name: 'atk', label: 'ATK', field: 'atk' },
+  { name: 'def', label: 'DEF', field: 'def' },
+  { name: 'agi', label: 'AGI', field: 'agi' },
+  { name: 'mov', label: 'MOV', field: 'mov' },
+  {
+    name: 'inventory',
+    label: 'Inventory',
+    field: 'inventory',
+    format: (inv) => inv.map(decodeInventory).join(''),
+  },
+  {
+    name: 'spells',
+    label: 'Spells',
+    field: 'spells',
+    format: (spells) => spells.map(decodeSpell).join(''),
+  },
+  { name: 'field1a', label: '+0x1A', field: 'field1a' },
+  { name: 'field1e', label: '+0x1E', field: 'field1e' },
+  { name: 'field0e', label: '+0x0E', field: 'field0e' },
+  { name: 'field2c', label: '+0x2C', field: 'field2c' },
+  { name: 'field2e', label: '+0x2E', field: 'field2e' },
+  { name: 'aiClass', label: 'AI class', field: 'aiClass' },
+  { name: 'field34', label: '+0x34', field: 'field34' },
 ]
 </script>
 
@@ -103,7 +112,6 @@ const columns: QTableProps['columns'] = [
       row-key="num"
       dense
       hide-bottom
-      virtual-scroll
       style="height: 400px"
     />
   </div>
