@@ -10,7 +10,7 @@ export const LABELS: Record<number, string | undefined> = {
   0x40: 'Spell graphics pointer table',
   0x48: undefined,
   0x50: undefined,
-  0x58: undefined,
+  0x58: 'Monster/item/string data',
   0x60: 'Character data',
   0x68: 'Textbank block',
   0x70: 'Icon graphics',

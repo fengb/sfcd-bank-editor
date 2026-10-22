@@ -1,4 +1,4 @@
-function readU32be(data: Uint8Array, offset: number): number | null {
+export function readU32be(data: Uint8Array, offset: number): number | null {
   if (offset < 0 || offset + 4 > data.length) return null
   return (
     ((data[offset + 0]! << 24) |
@@ -38,7 +38,7 @@ export class Bank {
       unknown0: this.parseHeader(0x48),
 
       unknown1: this.parseHeader(0x50),
-      unknown2: this.parseHeader(0x58),
+      namesItemsMonsters: this.parseHeader(0x58),
 
       characterData: this.parseHeader(0x60),
       texts: this.parseHeader(0x68),

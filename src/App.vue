@@ -9,6 +9,7 @@ import { formatHexAddress } from '@/utils/format'
 import BytesViewer from '@/panes/BytesViewer'
 import HeaderViewer from '@/panes/HeaderViewer'
 import CharacterViewer from './panes/CharacterViewer'
+import NamesItemsMonstersViewer from '@/panes/NamesItemsMonstersViewer'
 
 const store = useBankFileStore()
 const { file, bank, isLoading, error } = storeToRefs(store)
@@ -77,6 +78,7 @@ function close(): void {
       <HeaderViewer :bank="bank" />
       <CharacterViewer :bytes="bank.headers.characterData.bytes" />
       <BytesViewer :bytes="bank.bytes" />
+      <NamesItemsMonstersViewer :bytes="bank.headers.namesItemsMonsters.bytes" />
     </div>
   </main>
 </template>
