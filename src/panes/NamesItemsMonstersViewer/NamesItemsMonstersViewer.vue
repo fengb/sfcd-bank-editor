@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { mapValues } from 'es-toolkit'
 
+import BytesViewer from '@/components/BytesViewer'
 import type { BankRegion } from '@/domain/bank'
-import { readU32be } from '@/domain/bank.ts'
+import { readU32be } from '@/domain/bank'
 
 import ItemTable from './ItemTable.vue'
 import MonsterStats from './MonsterStats.vue'
 import NamesTable from './NamesTable.vue'
-import SpellData from './SpellData.vue'
 
 /** RAM base used by the pointer header; subtracting it yields file offsets. */
 const RAM_BASE = 0x233200
@@ -38,7 +38,7 @@ const stats = {
   <h2>Monster/Item/String</h2>
   <MonsterStats :region="region" :offset="stats.monsters.offset" />
   <ItemTable :region="region" :offset="stats.items.offset" />
-  <SpellData :bytes="region" :offset="stats.spells.offset" />
+  <BytesViewer :bytes="region.subarray(stats.spells.offset, stats.spells.offset + 576)" />
   <NamesTable :region="region" :offsets="mapValues(names, (h) => h.offset)" />
 </template>
 

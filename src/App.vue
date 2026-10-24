@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia'
 import { QBanner, QBtn, QCard, QCardSection, QFile } from 'quasar'
 import { computed, ref } from 'vue'
 
+import BytesViewer from '@/components/BytesViewer'
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
-import BytesViewer from '@/panes/BytesViewer'
 import NamesItemsMonstersViewer from '@/panes/NamesItemsMonstersViewer'
 import TextsViewer from '@/panes/TextsViewer'
 import TocViewer from '@/panes/TocViewer'
@@ -79,7 +79,7 @@ function close(): void {
 
       <TocViewer :bank="bank" />
       <CharacterViewer :region="bank.toc.characterData.region()" />
-      <BytesViewer :bytes="bank.bytes" />
+      <BytesViewer title="Contents" :bytes="bank.bytes" />
       <NamesItemsMonstersViewer :region="bank.toc.namesItemsMonsters.region()" />
       <TextsViewer :region="bank.toc.texts.region()" />
     </div>

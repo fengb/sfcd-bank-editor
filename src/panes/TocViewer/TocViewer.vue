@@ -2,9 +2,9 @@
 import { QBanner, QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 
+import { formatHex } from '@/components/BytesViewer/hex'
 import { Bank, type BankToc } from '@/domain/bank'
 
-import { formatHex } from '../BytesViewer/hex'
 import { LABELS } from './util'
 
 const props = defineProps<{ bank: Bank }>()

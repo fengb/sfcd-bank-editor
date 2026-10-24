@@ -2,10 +2,10 @@
 import { QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 
+import { formatHex } from '@/components/BytesViewer/hex'
 import { decodeSpell } from '@/domain/bank'
 import type { BankRegion } from '@/domain/bank'
 
-import { formatHex } from '../BytesViewer/hex'
 import { parseCharacterData, type CharacterRecord } from './parse'
 
 const props = defineProps<{ region: BankRegion }>()

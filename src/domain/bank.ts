@@ -1,4 +1,4 @@
-import { formatHex } from '@/panes/BytesViewer/hex'
+import { formatHex } from '@/components/BytesViewer/hex'
 
 export function readU32be(data: Uint8Array, offset: number): number | null {
   if (offset < 0 || offset + 4 > data.length) return null

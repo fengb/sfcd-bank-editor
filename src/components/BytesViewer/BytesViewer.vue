@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue'
 
 import { BYTES_PER_ROW, formatHex, parseHexOffset, toPrintable } from './hex'
 
-const props = defineProps<{ bytes: Uint8Array }>()
+const props = defineProps<{ title?: string; bytes: Uint8Array }>()
 
 const rows = computed(() =>
   Array.from({ length: Math.ceil(props.bytes.length / BYTES_PER_ROW) }, (_, i) => {
@@ -72,12 +72,12 @@ const columns: QTableProps['columns'] = [
     row-key="offset"
     dense
     hide-bottom
-    virtual-scroll
+    :virtual-scroll="rows.length > 100"
     style="height: 600px"
   >
     <template #top>
-      <div class="row full-width justify-between items-center">
-        <h3>Contents</h3>
+      <div v-if="props.title" class="row full-width justify-between items-center">
+        <h3>{{ title }}</h3>
 
         <form class="viewer__goto" @submit.prevent="goTo">
           <QInput
