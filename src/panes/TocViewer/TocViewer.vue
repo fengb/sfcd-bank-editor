@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { QBanner, QTable, type QTableProps } from 'quasar'
+import { computed } from 'vue'
+
+import { Bank, type BankToc } from '@/domain/bank'
 
 import { formatHex } from '../BytesViewer/hex'
 import { LABELS } from './util'
-import { Bank, type BankToc } from '@/domain/bank'
 
 const props = defineProps<{ bank: Bank }>()
 

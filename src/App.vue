@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { QBanner, QBtn, QCard, QCardSection, QFile } from 'quasar'
+import { computed, ref } from 'vue'
 
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
-import { useBankFileStore } from '@/stores/bank'
-import { formatHexAddress } from '@/utils/format'
 import BytesViewer from '@/panes/BytesViewer'
-import TocViewer from '@/panes/TocViewer'
-import CharacterViewer from './panes/CharacterViewer'
 import NamesItemsMonstersViewer from '@/panes/NamesItemsMonstersViewer'
 import TextsViewer from '@/panes/TextsViewer'
+import TocViewer from '@/panes/TocViewer'
+import { useBankFileStore } from '@/stores/bank'
+import { formatHexAddress } from '@/utils/format'
+
+import CharacterViewer from './panes/CharacterViewer'
 
 const store = useBankFileStore()
 const { file, bank, isLoading, error } = storeToRefs(store)
 
-const picked = ref<File | undefined>()
+const picked = ref<File>()
 
 const dropHandler: DropHandler = async (file: File) => {
   await store.load(file)

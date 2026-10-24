@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
 import { QInput, QTable, type QTableProps } from 'quasar'
+import { computed, ref, watch } from 'vue'
 
 import { BYTES_PER_ROW, formatHex, parseHexOffset, toPrintable } from './hex'
 
@@ -16,7 +16,7 @@ const rows = computed(() =>
   }),
 )
 
-const table = ref<QTable | null>(null)
+const table = ref<QTable>()
 const offsetInput = ref('')
 
 // Only rows near the viewport are ever mounted. Each item is a plain offset,

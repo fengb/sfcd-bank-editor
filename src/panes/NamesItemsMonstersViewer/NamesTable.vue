@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { BankRegion } from '@/domain/bank'
-import { capitalize, computed } from 'vue'
-import { QTable, type QTableProps } from 'quasar'
 import { mapValues, zip } from 'es-toolkit'
+import { QTable, type QTableProps } from 'quasar'
+import { capitalize, computed } from 'vue'
+
+import type { BankRegion } from '@/domain/bank'
 
 const props = defineProps<{
   region: BankRegion

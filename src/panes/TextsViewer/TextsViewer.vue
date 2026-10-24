@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { BankRegion } from '@/domain/bank'
-import { computed } from 'vue'
 import { QTable, type QTableProps } from 'quasar'
+import { computed } from 'vue'
+
+import type { BankRegion } from '@/domain/bank'
 
 import { parseTextBlock } from './parse'
 

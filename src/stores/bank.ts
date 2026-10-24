@@ -1,6 +1,6 @@
-import { computed, ref } from 'vue'
-import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 
 import { Bank } from '@/domain/bank'
 

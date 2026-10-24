@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { QTable, type QTableProps } from 'quasar'
+import { computed } from 'vue'
+
+import { decodeSpell } from '@/domain/bank'
+import type { BankRegion } from '@/domain/bank'
 
 import { formatHex } from '../BytesViewer/hex'
 import { parseCharacterData, type CharacterRecord } from './parse'
-import { decodeSpell } from '@/domain/bank'
-import type { BankRegion } from '@/domain/bank'
 
 const props = defineProps<{ region: BankRegion }>()
 

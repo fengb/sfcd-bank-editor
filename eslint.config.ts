@@ -1,8 +1,8 @@
-import { globalIgnores } from 'eslint/config'
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import pluginVue from 'eslint-plugin-vue'
 import pluginVitest from '@vitest/eslint-plugin'
+import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import skipFormatting from 'eslint-config-prettier/flat'
+import pluginVue from 'eslint-plugin-vue'
+import { globalIgnores } from 'eslint/config'
 
 // To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
 // import { configureVueProject } from '@vue/eslint-config-typescript'

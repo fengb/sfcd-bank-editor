@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { readU32be } from '@/domain/bank.ts'
-import type { BankRegion } from '@/domain/bank'
-import MonsterStats from './MonsterStats.vue'
-import ItemTable from './ItemTable.vue'
-import SpellData from './SpellData.vue'
-import NamesTable from './NamesTable.vue'
 import { mapValues } from 'es-toolkit'
+
+import type { BankRegion } from '@/domain/bank'
+import { readU32be } from '@/domain/bank.ts'
+
+import ItemTable from './ItemTable.vue'
+import MonsterStats from './MonsterStats.vue'
+import NamesTable from './NamesTable.vue'
+import SpellData from './SpellData.vue'
 
 /** RAM base used by the pointer header; subtracting it yields file offsets. */
 const RAM_BASE = 0x233200

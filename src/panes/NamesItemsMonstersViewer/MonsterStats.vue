@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { QTable, type QTableProps } from 'quasar'
+import { computed } from 'vue'
 
-import { formatHex } from '../BytesViewer/hex'
 import { decodeSpell } from '@/domain/bank'
 import type { BankRegion } from '@/domain/bank'
+
+import { formatHex } from '../BytesViewer/hex'
 
 const props = defineProps<{ region: BankRegion; offset?: number }>()
 
