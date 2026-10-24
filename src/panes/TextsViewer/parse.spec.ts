@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { resolve } from 'node:path'
 
 import {
   bitsOf,
@@ -16,7 +16,7 @@ import {
   OFFSET,
 } from './parse'
 
-const path = join(import.meta.dirname, 'parse.test.bin')
+const path = resolve(import.meta.dirname, 'parse.test.bin')
 
 describe('parseTextBlock', () => {
   it('returns an empty list for empty input', () => {
