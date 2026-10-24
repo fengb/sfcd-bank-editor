@@ -4,11 +4,13 @@ import { QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
 import { decodeSpell } from '@/domain/bank'
+import type { BankRegion } from '@/domain/bank'
 
-const props = defineProps<{ bytes: Uint8Array; offset: number }>()
+const props = defineProps<{ region: BankRegion; offset?: number }>()
 
 const RECORD_SIZE = 0x38 // 56 bytes
 const RECORD_COUNT = 71
+const baseOffset = computed(() => props.offset ?? props.region.offset)
 
 function readU16be(data: Uint8Array, off: number): number {
   return ((data[off]! << 8) | data[off + 1]!) >>> 0
@@ -22,32 +24,32 @@ function decodeInventory(value: number): string {
 }
 
 const rows = computed(() => {
-  const result: Record<string, any>[] = []
+  const result: Record<string, unknown>[] = []
   for (let i = 0; i < RECORD_COUNT; i++) {
-    const base = props.offset + i * RECORD_SIZE
-    if (base + RECORD_SIZE > props.bytes.length) break
-    const rec: Record<string, any> = { '#': i }
-    rec.index = readU16be(props.bytes, base + 0x00)
-    rec.level = readU16be(props.bytes, base + 0x0a)
-    rec.hp = readU16be(props.bytes, base + 0x0c)
-    rec.field0e = readU16be(props.bytes, base + 0x0e)
-    rec.mp = props.bytes[base + 0x10]!
-    rec.atk = props.bytes[base + 0x12]!
-    rec.def = props.bytes[base + 0x14]!
-    rec.agi = props.bytes[base + 0x16]!
-    rec.mov = props.bytes[base + 0x18]!
-    rec.field1a = formatHex(readU16be(props.bytes, base + 0x1a), 4)
-    rec.field1e = formatHex(readU16be(props.bytes, base + 0x1e), 4)
+    const base = baseOffset.value + i * RECORD_SIZE
+    if (base + RECORD_SIZE > props.region.length) break
+    const rec: Record<string, unknown> = { '#': i }
+    rec.index = readU16be(props.region, base + 0x00)
+    rec.level = readU16be(props.region, base + 0x0a)
+    rec.hp = readU16be(props.region, base + 0x0c)
+    rec.field0e = readU16be(props.region, base + 0x0e)
+    rec.mp = props.region[base + 0x10]!
+    rec.atk = props.region[base + 0x12]!
+    rec.def = props.region[base + 0x14]!
+    rec.agi = props.region[base + 0x16]!
+    rec.mov = props.region[base + 0x18]!
+    rec.field1a = formatHex(readU16be(props.region, base + 0x1a), 4)
+    rec.field1e = formatHex(readU16be(props.region, base + 0x1e), 4)
 
     rec.inventory = Array.from({ length: 4 }).map((_, s) =>
-      readU16be(props.bytes, base + 0x20 + s * 2),
+      readU16be(props.region, base + 0x20 + s * 2),
     )
-    rec.spells = Array.from({ length: 4 }).map((_, s) => props.bytes[base + 0x28 + s]!)
+    rec.spells = Array.from({ length: 4 }).map((_, s) => props.region[base + 0x28 + s]!)
 
-    rec.field2c = formatHex(readU16be(props.bytes, base + 0x2c), 4)
-    rec.field2e = formatHex(readU16be(props.bytes, base + 0x2e), 4)
-    rec.aiClass = formatHex(readU16be(props.bytes, base + 0x30), 4)
-    rec.field34 = formatHex(readU16be(props.bytes, base + 0x34), 4)
+    rec.field2c = formatHex(readU16be(props.region, base + 0x2c), 4)
+    rec.field2e = formatHex(readU16be(props.region, base + 0x2e), 4)
+    rec.aiClass = formatHex(readU16be(props.region, base + 0x30), 4)
+    rec.field34 = formatHex(readU16be(props.region, base + 0x34), 4)
 
     result.push(rec)
   }
@@ -90,7 +92,7 @@ const columns: QTableProps['columns'] = [
   <div>
     <p>
       71 monster records × 56 bytes. File offset: 0x{{
-        offset.toString(16).toUpperCase().padStart(4, '0')
+        baseOffset.toString(16).toUpperCase().padStart(4, '0')
       }}
     </p>
     <QTable

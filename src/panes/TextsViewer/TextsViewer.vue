@@ -1,12 +1,13 @@
 <script setup lang="ts">
+import type { BankRegion } from '@/domain/bank'
 import { computed } from 'vue'
 import { QTable, type QTableProps } from 'quasar'
 
 import { parseTextBlock } from './parse'
 
-const props = defineProps<{ bytes: Uint8Array }>()
+const props = defineProps<{ region: BankRegion }>()
 
-const strings = computed(() => parseTextBlock(props.bytes))
+const strings = computed(() => parseTextBlock(props.region))
 const rows = computed(() => strings.value.map((text, index) => ({ index, text })))
 
 const columns: QTableProps['columns'] = [

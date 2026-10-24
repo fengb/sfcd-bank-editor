@@ -4,11 +4,11 @@ import { QBanner, QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
 import { LABELS } from './util'
-import { Bank, type BankHeader } from '@/domain/bank'
+import { Bank, type BankToc } from '@/domain/bank'
 
 const props = defineProps<{ bank: Bank }>()
 
-const rows = computed(() => Object.values(props.bank.headers))
+const rows = computed(() => Object.values(props.bank.toc))
 
 const columns: QTableProps['columns'] = [
   { name: 'offset', label: 'Offset', field: 'offset', format: (v) => formatHex(v) },
@@ -16,7 +16,7 @@ const columns: QTableProps['columns'] = [
     name: 'name',
     label: 'Name',
     align: 'left',
-    field: (row: BankHeader) => LABELS[row.offset] ?? '',
+    field: (row: BankToc) => LABELS[row.offset] ?? '',
   },
   {
     name: 'address',
@@ -33,7 +33,7 @@ const columns: QTableProps['columns'] = [
   {
     name: 'slot-size',
     label: 'Slot Size',
-    field: (row: BankHeader) => props.bank.slotSize(row),
+    field: (row: BankToc) => row.slotSize(),
   },
 ]
 </script>

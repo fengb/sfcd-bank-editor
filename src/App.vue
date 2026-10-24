@@ -7,7 +7,7 @@ import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vu
 import { useBankFileStore } from '@/stores/bank'
 import { formatHexAddress } from '@/utils/format'
 import BytesViewer from '@/panes/BytesViewer'
-import HeaderViewer from '@/panes/HeaderViewer'
+import TocViewer from '@/panes/TocViewer'
 import CharacterViewer from './panes/CharacterViewer'
 import NamesItemsMonstersViewer from '@/panes/NamesItemsMonstersViewer'
 import TextsViewer from '@/panes/TextsViewer'
@@ -76,11 +76,11 @@ function close(): void {
         </QCardSection>
       </QCard>
 
-      <HeaderViewer :bank="bank" />
-      <CharacterViewer :bytes="bank.headers.characterData.bytes" />
+      <TocViewer :bank="bank" />
+      <CharacterViewer :region="bank.toc.characterData.region()" />
       <BytesViewer :bytes="bank.bytes" />
-      <NamesItemsMonstersViewer :bytes="bank.headers.namesItemsMonsters.bytes" />
-      <TextsViewer :bytes="bank.headers.texts.bytes" />
+      <NamesItemsMonstersViewer :region="bank.toc.namesItemsMonsters.region()" />
+      <TextsViewer :region="bank.toc.texts.region()" />
     </div>
   </main>
 </template>

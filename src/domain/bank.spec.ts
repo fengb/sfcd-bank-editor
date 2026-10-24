@@ -15,7 +15,7 @@ describe('Bank', () => {
       const data = new Uint8Array(0x11000)
       data[0x2c] = 0x01 // non-zero extent
       const bank = new Bank(data)
-      expect(bank.slotSize(bank.headers.enemyBattleSprites)).toBeNull()
+      expect(bank.toc.enemyBattleSprites.slotSize()).toBeNull()
     })
 
     it('derives slot size from target distance', () => {
@@ -23,14 +23,14 @@ describe('Bank', () => {
       setU32be(data, 0x28, 0x10020) // address
       setU32be(data, 0x20, 0x10060) // target read at address - 0x10000
       const bank = new Bank(data)
-      expect(bank.slotSize(bank.headers.enemyBattleSprites)).toBe(0x40)
+      expect(bank.toc.enemyBattleSprites.slotSize()).toBe(0x40)
     })
 
     it('returns error when the target precedes the metadata', () => {
       const data = new Uint8Array(0x11000)
       setU32be(data, 0x8, 0x10000) // header 0x08 address; target read at 0x0000 is 0
       const bank = new Bank(data)
-      expect(bank.slotSize(bank.headers.mapTiles)).toBe('error')
+      expect(bank.toc.mapTiles.slotSize()).toBe('error')
     })
 
     it('returns -- when the slot stride is implausibly large', () => {
@@ -38,7 +38,7 @@ describe('Bank', () => {
       setU32be(data, 0x8, 0x10000) // header 0x08 address
       setU32be(data, 0x0, 0x20000) // target read at 0x0000
       const bank = new Bank(data)
-      expect(bank.slotSize(bank.headers.mapTiles)).toBe('--')
+      expect(bank.toc.mapTiles.slotSize()).toBe('--')
     })
   })
 

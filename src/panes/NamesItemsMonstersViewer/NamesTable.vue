@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import type { BankRegion } from '@/domain/bank'
 import { capitalize, computed } from 'vue'
 import { QTable, type QTableProps } from 'quasar'
 import { mapValues, zip } from 'es-toolkit'
 
-const props = defineProps<{ bytes: Uint8Array; offsets: Record<string, number> }>()
+const props = defineProps<{
+  region: BankRegion
+  offsets: Record<string, number>
+}>()
 
 const columns = computed<QTableProps['columns']>(() =>
   Object.keys(props.offsets).map((name, i) => ({
@@ -34,7 +38,7 @@ const rows = computed(() => {
 
   let current = sortedOffsets.shift()!
   const startingOffset = current.offset
-  for (const [name, offset] of readString(props.bytes, startingOffset)) {
+  for (const [name, offset] of readString(props.region, startingOffset)) {
     const next = sortedOffsets[0]
     if (next && next.offset <= offset) {
       current = sortedOffsets.shift()!

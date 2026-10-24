@@ -1,20 +1,23 @@
 <script setup lang="ts">
+import type { BankRegion } from '@/domain/bank'
 import { computed } from 'vue'
 import { QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
 
-const props = defineProps<{ bytes: Uint8Array; offset: number }>()
+const props = defineProps<{ bytes?: BankRegion; region?: BankRegion; offset?: number }>()
+const source = computed(() => props.region ?? props.bytes!)
 
 const TABLE_SIZE = 576
+const baseOffset = computed(() => props.offset ?? source.value.offset)
 
 const rows = computed(() => {
-  const result: Record<string, any>[] = []
-  const end = Math.min(props.offset + TABLE_SIZE, props.bytes.length)
-  for (let off = props.offset; off < end; off += 16) {
-    const chunk = props.bytes.subarray(off, Math.min(off + 16, end))
+  const result: Record<string, unknown>[] = []
+  const end = Math.min(baseOffset.value + TABLE_SIZE, source.value.length)
+  for (let off = baseOffset.value; off < end; off += 16) {
+    const chunk = source.value.subarray(off, Math.min(off + 16, end))
     result.push({
-      relOffset: formatHex(off - props.offset, 4),
+      relOffset: formatHex(off - baseOffset.value, 4),
       hexes: [...chunk].map((b) => formatHex(b, 2)).join(' '),
       ascii: [...chunk]
         .map((b) => (b >= 0x20 && b <= 0x7e ? String.fromCharCode(b) : '.'))
@@ -35,7 +38,7 @@ const columns: QTableProps['columns'] = [
   <div>
     <p>
       Spell data table (576 bytes; internal structure undocumented). File offset: 0x{{
-        offset.toString(16).toUpperCase().padStart(4, '0')
+        baseOffset.toString(16).toUpperCase().padStart(4, '0')
       }}
     </p>
     <QTable

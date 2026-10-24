@@ -1,4 +1,4 @@
-import { formatHex } from "@/panes/BytesViewer/hex"
+import { formatHex } from '@/panes/BytesViewer/hex'
 
 export function readU32be(data: Uint8Array, offset: number): number | null {
   if (offset < 0 || offset + 4 > data.length) return null
@@ -13,92 +13,39 @@ export function readU32be(data: Uint8Array, offset: number): number | null {
 
 export type SlotSize = number | null | 'error' | '--'
 
-export type BankHeader = {
-  offset: number
+export type BankRegion = Uint8Array & { offset: number }
+
+export class BankToc {
   address: number
   extent: number
-}
 
-export class Bank {
-  constructor(readonly bytes: Uint8Array) {}
-
-  get headers() {
-    return {
-      mapSprites: this.parseHeader(0x00),
-      mapTiles: this.parseHeader(0x08),
-
-      portraits: this.parseHeader(0x10),
-      allyBattleSprites: this.parseHeader(0x18),
-
-      weaponSprites: this.parseHeader(0x20),
-      enemyBattleSprites: this.parseHeader(0x28),
-
-      backgrounds: this.parseHeader(0x30),
-      grounds: this.parseHeader(0x38), // ???
-
-      spellGraphics: this.parseHeader(0x40),
-      unknown0: this.parseHeader(0x48),
-
-      unknown1: this.parseHeader(0x50),
-      namesItemsMonsters: this.parseHeader(0x58),
-
-      characterData: this.parseHeader(0x60),
-      texts: this.parseHeader(0x68),
-
-      icons: this.parseHeader(0x70),
-      churchShopGraphics: this.parseHeader(0x78),
-
-      mapData: this.parseHeader(0x80), // clarify name
-      battleData: this.parseHeader(0x88), // clarify name
-
-      unknownA: this.parseHeader(0x90), // "Shared WRAM pointer table"
-      unknownB: this.parseHeader(0x98), // "Pointer table into 0xA0"
-
-      unknownC: this.parseHeader(0xa0),
-      chapterGraphics: this.parseHeader(0xa8),
-
-      pad0: this.parseHeader(0xb0),
-      pad1: this.parseHeader(0xb8),
-
-      pad2: this.parseHeader(0xc0),
-      pad3: this.parseHeader(0xc8),
-
-      pad4: this.parseHeader(0xd0),
-      pad5: this.parseHeader(0xd8),
-
-      pad6: this.parseHeader(0xe0),
-      pad7: this.parseHeader(0xe8),
-
-      pad8: this.parseHeader(0xf0),
-      pad9: this.parseHeader(0xf8),
-    }
+  constructor(
+    readonly bytes: Uint8Array,
+    readonly entryOffset: number,
+  ) {
+    this.address = readU32be(this.bytes, entryOffset) ?? 0
+    this.extent = readU32be(this.bytes, entryOffset + 4) ?? 0
   }
 
-  parseHeader(offset: number) {
-    const address = readU32be(this.bytes, offset) ?? 0
-    const extent = readU32be(this.bytes, offset + 4) ?? 0
-    return {
-      offset,
-      address,
-      extent,
-      bytes: this.bytes.slice(address - 0x10000, address - 0x10000 + extent),
-    }
+  /** Alias for `entryOffset`, matching the legacy TOC object's `offset` field. */
+  get offset(): number {
+    return this.entryOffset
   }
 
-  /** Unused banks are 5-byte stubs reading "DUMMY" */
-  get isDummy(): boolean {
-    return this.bytes.length === 5 && String.fromCharCode(...this.bytes) === 'DUMMY'
+  region(): BankRegion {
+    const offset = this.address - 0x10000
+    return Object.assign(this.bytes.subarray(offset, offset + this.extent), { offset })
   }
 
-  slotSize(header: BankHeader): SlotSize {
+  slotSize(): SlotSize {
     // Extent is canonical. Don't derive anything if this exists.
-    if (header.extent) {
+    if (this.extent) {
       return null
     }
 
     // Distance between first entry and first entry's target.
-    const target = readU32be(this.bytes, header.address - 0x10000) ?? 0
-    const slotSize = target - header.address
+    const target = readU32be(this.bytes, this.address - 0x10000) ?? 0
+    const slotSize = target - this.address
 
     if (slotSize < 0) {
       // Data is thoroughly messed up -- target is before the metadata
@@ -112,11 +59,72 @@ export class Bank {
   }
 }
 
+export class Bank {
+  constructor(readonly bytes: Uint8Array) {}
+
+  get toc() {
+    return {
+      mapSprites: new BankToc(this.bytes, 0x00),
+      mapTiles: new BankToc(this.bytes, 0x08),
+
+      portraits: new BankToc(this.bytes, 0x10),
+      allyBattleSprites: new BankToc(this.bytes, 0x18),
+
+      weaponSprites: new BankToc(this.bytes, 0x20),
+      enemyBattleSprites: new BankToc(this.bytes, 0x28),
+
+      backgrounds: new BankToc(this.bytes, 0x30),
+      grounds: new BankToc(this.bytes, 0x38), // ???
+
+      spellGraphics: new BankToc(this.bytes, 0x40),
+      unknown0: new BankToc(this.bytes, 0x48),
+
+      unknown1: new BankToc(this.bytes, 0x50),
+      namesItemsMonsters: new BankToc(this.bytes, 0x58),
+
+      characterData: new BankToc(this.bytes, 0x60),
+      texts: new BankToc(this.bytes, 0x68),
+
+      icons: new BankToc(this.bytes, 0x70),
+      churchShopGraphics: new BankToc(this.bytes, 0x78),
+
+      mapData: new BankToc(this.bytes, 0x80), // clarify name
+      battleData: new BankToc(this.bytes, 0x88), // clarify name
+
+      unknownA: new BankToc(this.bytes, 0x90), // "Shared WRAM pointer table"
+      unknownB: new BankToc(this.bytes, 0x98), // "Pointer table into 0xA0"
+
+      unknownC: new BankToc(this.bytes, 0xa0),
+      chapterGraphics: new BankToc(this.bytes, 0xa8),
+
+      pad0: new BankToc(this.bytes, 0xb0),
+      pad1: new BankToc(this.bytes, 0xb8),
+
+      pad2: new BankToc(this.bytes, 0xc0),
+      pad3: new BankToc(this.bytes, 0xc8),
+
+      pad4: new BankToc(this.bytes, 0xd0),
+      pad5: new BankToc(this.bytes, 0xd8),
+
+      pad6: new BankToc(this.bytes, 0xe0),
+      pad7: new BankToc(this.bytes, 0xe8),
+
+      pad8: new BankToc(this.bytes, 0xf0),
+      pad9: new BankToc(this.bytes, 0xf8),
+    }
+  }
+
+  /** Unused banks are 5-byte stubs reading "DUMMY" */
+  get isDummy(): boolean {
+    return this.bytes.length === 5 && String.fromCharCode(...this.bytes) === 'DUMMY'
+  }
+}
+
 export function decodeSpell(value: number): string {
   if (value === 0x3f) return ' --'
   const idx = value & 0x3f
   const flags = value & 0xc0
-  const flagsDisplay: Record<any, string> = {
+  const flagsDisplay: Record<number, string> = {
     [0x00]: '¹',
     [0x40]: '²',
     [0x80]: '³',

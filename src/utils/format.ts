@@ -10,7 +10,7 @@ export function formatHexAddress(value: number, width = 4): string {
   return value.toString(16).toUpperCase().padStart(width, '0')
 }
 
-/** Big-endian `$$$$` sub-CPU address used by the bank headers. */
+/** Big-endian `$$$$` sub-CPU address used by the bank toc. */
 export function formatSubCpuAddress(address: number): string {
   return `$${formatHexAddress(address)}`
 }

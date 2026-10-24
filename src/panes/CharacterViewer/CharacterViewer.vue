@@ -4,11 +4,12 @@ import { QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '../BytesViewer/hex'
 import { parseCharacterData, type CharacterRecord } from './parse'
-import { decodeSpell } from '@/domain/bank';
+import { decodeSpell } from '@/domain/bank'
+import type { BankRegion } from '@/domain/bank'
 
-const props = defineProps<{ bytes: Uint8Array }>()
+const props = defineProps<{ region: BankRegion }>()
 
-const tables = computed(() => parseCharacterData(props.bytes))
+const tables = computed(() => parseCharacterData(props.region))
 
 const STAT_KEYS = ['hp', 'mp', 'att', 'def', 'agi'] as const
 
