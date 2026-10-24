@@ -12,7 +12,7 @@ export const LABELS: Record<number, string | undefined> = {
   0x50: undefined,
   0x58: 'Monster/item/string data',
   0x60: 'Character data',
-  0x68: 'Textbank block',
+  0x68: 'Text block',
   0x70: 'Icon graphics',
   0x78: 'Church / shop HQ graphics',
   0x80: 'Per-map data',
