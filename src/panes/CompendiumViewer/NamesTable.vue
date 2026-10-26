@@ -3,10 +3,8 @@ import { mapValues, zip } from 'es-toolkit'
 import { QTable, type QTableProps } from 'quasar'
 import { capitalize, computed } from 'vue'
 
-import type { BankRegion } from '@/domain/bank'
-
 const props = defineProps<{
-  region: BankRegion
+  region: Uint8Array
   offsets: Record<string, number>
 }>()
 

@@ -2,14 +2,11 @@
 import { QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 
-import type { BankRegion } from '@/domain/bank'
+import type Dialog from '@/domain/Bank/Dialog'
 
-import { parseDialog } from './parse'
+const props = defineProps<{ dialog: Dialog }>()
 
-const props = defineProps<{ region: BankRegion }>()
-
-const strings = computed(() => parseDialog(props.region))
-const rows = computed(() => strings.value.map((dialog, index) => ({ index, dialog })))
+const rows = computed(() => props.dialog.strings.map((dialog, index) => ({ index, dialog })))
 
 const columns: QTableProps['columns'] = [
   {

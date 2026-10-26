@@ -3,7 +3,7 @@ import { QBanner, QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
-import { Bank, type BankToc } from '@/domain/bank'
+import { Bank, type BankToc } from '@/domain/Bank'
 
 import { LABELS } from './util'
 
@@ -12,12 +12,12 @@ const props = defineProps<{ bank: Bank }>()
 const rows = computed(() => Object.values(props.bank.toc))
 
 const columns: QTableProps['columns'] = [
-  { name: 'offset', label: 'Offset', field: 'offset', format: (v) => formatHex(v) },
+  { name: 'entryOffset', label: 'Offset', field: 'entryOffset', format: (v) => formatHex(v) },
   {
     name: 'name',
     label: 'Name',
     align: 'left',
-    field: (row: BankToc) => LABELS[row.offset] ?? '',
+    field: (row: BankToc) => LABELS[row.entryOffset] ?? '',
   },
   {
     name: 'address',

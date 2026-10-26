@@ -2,7 +2,7 @@ import { useLocalStorage } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { Bank } from '@/domain/bank'
+import { Bank } from '@/domain/Bank'
 
 export interface BankFile {
   name: string

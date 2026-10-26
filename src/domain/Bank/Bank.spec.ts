@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { Bank } from './bank'
+import { Bank } from './Bank'
 
 function setU32be(data: Uint8Array, offset: number, value: number): void {
   data[offset] = (value >>> 24) & 0xff

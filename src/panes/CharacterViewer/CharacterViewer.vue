@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { QTable, type QTableProps } from 'quasar'
-import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
-import { decodeSpell } from '@/domain/bank'
-import type { BankRegion } from '@/domain/bank'
+import { decodeSpell } from '@/domain/Bank'
+import { type default as Character, type CharacterRecord } from '@/domain/Bank/Character'
 
-import { parseCharacterData, type CharacterRecord } from './parse'
-
-const props = defineProps<{ region: BankRegion }>()
-
-const tables = computed(() => parseCharacterData(props.region))
+const props = defineProps<{ character: Character }>()
 
 const STAT_KEYS = ['hp', 'mp', 'att', 'def', 'agi'] as const
 
@@ -55,7 +50,7 @@ const classColumns: QTableProps['columns'] = [
 <template>
   <h3>Character records</h3>
   <QTable
-    :rows="tables.records"
+    :rows="props.character.records"
     :columns="recordColumns"
     :rows-per-page-options="[0]"
     row-key="offset"
@@ -66,7 +61,7 @@ const classColumns: QTableProps['columns'] = [
 
   <h3>Secondary</h3>
   <QTable
-    :rows="tables.secondary"
+    :rows="props.character.secondary"
     :columns="secondaryColumns"
     :rows-per-page-options="[0]"
     row-key="index"
@@ -76,7 +71,7 @@ const classColumns: QTableProps['columns'] = [
 
   <h3>Classes</h3>
   <QTable
-    :rows="tables.classes"
+    :rows="props.character.classes"
     :columns="classColumns"
     :rows-per-page-options="[0]"
     row-key="classId"

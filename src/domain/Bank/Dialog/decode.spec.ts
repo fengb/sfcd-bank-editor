@@ -6,26 +6,26 @@ import { resolve } from 'node:path'
 import {
   bitsOf,
   splitTree,
-  parseTokens,
-  parseString,
-  parseDialogPage,
-  parseDialogPages,
-  parseDialog,
+  decodeTokens,
+  decodeString,
+  decodeDialogPage,
+  decodeDialogPages,
+  decodeDialog,
   CHAR_TO_TOKEN,
   TOKEN_TO_CHAR,
   OFFSET,
-} from './parse'
+} from './decode'
 
-const path = resolve(import.meta.dirname, 'parse.test.bin')
+const path = resolve(import.meta.dirname, 'decode.test.bin')
 
-describe('parseDialog', () => {
+describe('decodeDialog', () => {
   it('returns an empty list for empty input', () => {
-    expect(parseDialog(new Uint8Array())).toEqual([])
+    expect(decodeDialog(new Uint8Array())).toEqual([])
   })
 
   it('decodes the BANKD0E dialog into 528 strings', async () => {
     const bytes = new Uint8Array(await readFile(path))
-    const strings = parseDialog(bytes)
+    const strings = decodeDialog(bytes)
 
     expect(strings).toHaveLength(528)
     expect(strings[0]).toBe('The game will be suspended.↵OK?')
@@ -78,30 +78,31 @@ describe('splitTree', () => {
   })
 })
 
-describe('parseTokens', () => {
+describe('decodeTokens', () => {
   it('decodes a token using the skip path', () => {
     const trees = {
       0xfe: { tokens: [12, 0xfe], tree: [0b01100000] },
     }
-    const tokens = parseTokens(trees, new Uint8Array([0x80]), 0)
+    const tokens = decodeTokens(trees, new Uint8Array([0x80]), 0)
     expect(tokens).toEqual([12])
   })
 })
 
-describe('parseString', () => {
+describe('decodeString', () => {
   it('maps a decoded symbol through TOKEN_TO_CHAR', () => {
     const trees = {
       0xfe: { tokens: [12, 0xfe], tree: [0b01100000] },
     }
-    expect(parseString(trees, new Uint8Array([0x80]), 0)).toBe('A')
+    expect(decodeString(trees, new Uint8Array([0x80]), 0)).toBe('A')
   })
 })
-describe('parseString intermediate specials', () => {
+
+describe('decodeString intermediate specials', () => {
   it('maps a special symbol to its intermediate glyph', () => {
     const trees = {
       0xfe: { tokens: [0xef, 0xfe], tree: [0b01100000] },
     }
-    expect(parseString(trees, new Uint8Array([0x80]), 0)).toBe('↵')
+    expect(decodeString(trees, new Uint8Array([0x80]), 0)).toBe('↵')
   })
 })
 
@@ -115,25 +116,25 @@ describe('CHAR_TO_TOKEN', () => {
   })
 })
 
-describe('parseDialogPage', () => {
+describe('decodeDialogPage', () => {
   it('decodes a single line', () => {
     const trees = {
       0xfe: { tokens: [12, 0xfe], tree: [0b01100000] },
     }
     const data = new Uint8Array([1, 0x80])
-    expect(parseDialogPage(trees, data)).toEqual(['A'])
+    expect(decodeDialogPage(trees, data)).toEqual(['A'])
   })
 
   it('returns [] for empty input', () => {
     const trees = { 0xfe: { tokens: [0xfe], tree: [0x80] } }
-    expect(parseDialogPage(trees, new Uint8Array())).toEqual([])
+    expect(decodeDialogPage(trees, new Uint8Array())).toEqual([])
   })
 })
 
-describe('parseDialogPages', () => {
+describe('decodeDialogPages', () => {
   it('returns [] for empty input', () => {
     const trees = { 0xfe: { tokens: [0xfe], tree: [0x80] } }
-    expect(parseDialogPages(trees, new Uint8Array(), 0)).toEqual([])
+    expect(decodeDialogPages(trees, new Uint8Array(), 0)).toEqual([])
   })
 
   it('decodes a bank reached through an offset table', () => {
@@ -144,6 +145,6 @@ describe('parseDialogPages', () => {
     new DataView(bytes.buffer).setUint32(0, OFFSET + 10, false)
     bytes[10] = 1
     bytes[11] = 0x80
-    expect(parseDialogPages(trees, bytes, 0)).toEqual(['A'])
+    expect(decodeDialogPages(trees, bytes, 0)).toEqual(['A'])
   })
 })

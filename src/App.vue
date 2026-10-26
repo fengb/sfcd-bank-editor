@@ -78,10 +78,10 @@ function close(): void {
       </QCard>
 
       <TocViewer :bank="bank" />
-      <CharacterViewer :region="bank.toc.characterData.region()" />
+      <CharacterViewer :character="bank.toc.characterData.region()" />
       <BytesViewer title="Contents" :bytes="bank.bytes" />
       <CompendiumViewer :region="bank.toc.compendium.region()" />
-      <DialogViewer :region="bank.toc.dialog.region()" />
+      <DialogViewer :dialog="bank.toc.dialog.region()" />
     </div>
   </main>
 </template>

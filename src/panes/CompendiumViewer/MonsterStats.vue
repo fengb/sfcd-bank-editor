@@ -3,18 +3,12 @@ import { QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
-import { decodeSpell } from '@/domain/bank'
-import type { BankRegion } from '@/domain/bank'
-
-const props = defineProps<{ region: BankRegion; offset?: number }>()
+import { decodeSpell } from '@/domain/Bank'
+import { readU16be } from '@/domain/Bank/util'
+const props = defineProps<{ region: Uint8Array; offset: number }>()
 
 const RECORD_SIZE = 0x38 // 56 bytes
 const RECORD_COUNT = 71
-const baseOffset = computed(() => props.offset ?? props.region.offset)
-
-function readU16be(data: Uint8Array, off: number): number {
-  return ((data[off]! << 8) | data[off + 1]!) >>> 0
-}
 
 function decodeInventory(value: number): string {
   if (value === 0x007f) return ' --'
@@ -26,7 +20,7 @@ function decodeInventory(value: number): string {
 const rows = computed(() => {
   const result: Record<string, unknown>[] = []
   for (let i = 0; i < RECORD_COUNT; i++) {
-    const base = baseOffset.value + i * RECORD_SIZE
+    const base = props.offset + i * RECORD_SIZE
     if (base + RECORD_SIZE > props.region.length) break
     const rec: Record<string, unknown> = { '#': i }
     rec.index = readU16be(props.region, base + 0x00)
@@ -92,7 +86,7 @@ const columns: QTableProps['columns'] = [
   <div>
     <p>
       71 monster records × 56 bytes. File offset: 0x{{
-        baseOffset.toString(16).toUpperCase().padStart(4, '0')
+        props.offset.toString(16).toUpperCase().padStart(4, '0')
       }}
     </p>
     <QTable

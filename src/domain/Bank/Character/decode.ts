@@ -1,5 +1,7 @@
 import { chunk, chunkBy } from 'es-toolkit'
 
+import { readU32be } from '../util'
+
 const POINTER_SIZE = 4
 const AUX = {
   CHAR_PTRS: 0x00,
@@ -47,17 +49,6 @@ export type CharacterTables = {
   classes: ClassEntry[]
 }
 
-function readU32be(data: Uint8Array, offset: number): number | null {
-  if (offset < 0 || offset + 4 > data.length) return null
-  return (
-    ((data[offset]! << 24) |
-      (data[offset + 1]! << 16) |
-      (data[offset + 2]! << 8) |
-      data[offset + 3]!) >>>
-    0
-  )
-}
-
 function statPair(data: number[], at: number): StatPair {
   return { growth: data[at]!, value: data[at + 1]! }
 }
@@ -66,7 +57,7 @@ function iterPair<T>(array: T[]): [T, T][] {
   return chunk(array, 2) as [T, T][]
 }
 
-function parseRecords(bytes: Uint8Array): CharacterRecord[] {
+function decodeRecords(bytes: Uint8Array): CharacterRecord[] {
   const grouped = chunkBy([...bytes], (byte) => byte === 0xff || byte === 0xfe)
   return iterPair(grouped).map(([entry, separators]) => {
     return {
@@ -87,7 +78,7 @@ function parseRecords(bytes: Uint8Array): CharacterRecord[] {
   })
 }
 
-function parseSecondary(bytes: Uint8Array): SecondaryEntry[] {
+function decodeSecondary(bytes: Uint8Array): SecondaryEntry[] {
   return chunk([...bytes], SECONDARY_ENTRY_SIZE)
     .filter((entry) => entry.length === SECONDARY_ENTRY_SIZE)
     .map((entry) => ({
@@ -97,7 +88,7 @@ function parseSecondary(bytes: Uint8Array): SecondaryEntry[] {
     }))
 }
 
-function parseClasses(bytes: Uint8Array): ClassEntry[] {
+function decodeClasses(bytes: Uint8Array): ClassEntry[] {
   return chunk([...bytes], CLASS_ENTRY_SIZE).map((entry, classId) => ({
     classId,
     mov: entry[0]!,
@@ -105,7 +96,7 @@ function parseClasses(bytes: Uint8Array): ClassEntry[] {
   }))
 }
 
-export function parseCharacterData(bytes: Uint8Array): CharacterTables {
+export function decodeCharacterData(bytes: Uint8Array): CharacterTables {
   const empty = { records: [], secondary: [], classes: [] }
 
   const headerA = readU32be(bytes, AUX.CHAR_PTRS)
@@ -124,8 +115,8 @@ export function parseCharacterData(bytes: Uint8Array): CharacterTables {
   const classInRange = classStart >= recordsStart && classStart < bytes.length
 
   return {
-    records: parseRecords(bytes.slice(recordsStart, secondaryStart)),
-    secondary: secondaryInRange ? parseSecondary(bytes.slice(secondaryStart, classStart)) : [],
-    classes: classInRange ? parseClasses(bytes.slice(classStart)) : [],
+    records: decodeRecords(bytes.slice(recordsStart, secondaryStart)),
+    secondary: secondaryInRange ? decodeSecondary(bytes.slice(secondaryStart, classStart)) : [],
+    classes: classInRange ? decodeClasses(bytes.slice(classStart)) : [],
   }
 }
