@@ -4,12 +4,12 @@ import { computed } from 'vue'
 
 import type { BankRegion } from '@/domain/bank'
 
-import { parseTextBlock } from './parse'
+import { parseDialog } from './parse'
 
 const props = defineProps<{ region: BankRegion }>()
 
-const strings = computed(() => parseTextBlock(props.region))
-const rows = computed(() => strings.value.map((text, index) => ({ index, text })))
+const strings = computed(() => parseDialog(props.region))
+const rows = computed(() => strings.value.map((dialog, index) => ({ index, dialog })))
 
 const columns: QTableProps['columns'] = [
   {
@@ -19,9 +19,9 @@ const columns: QTableProps['columns'] = [
     sortable: true,
   },
   {
-    name: 'text',
-    label: 'Text',
-    field: 'text',
+    name: 'dialog',
+    label: 'Dialog',
+    field: 'dialog',
     align: 'left',
   },
 ]
@@ -39,7 +39,7 @@ const columns: QTableProps['columns'] = [
   >
     <template #top>
       <div class="row full-width justify-between items-center">
-        <h3>Text block strings</h3>
+        <h3>Dialog strings</h3>
       </div>
     </template>
   </QTable>

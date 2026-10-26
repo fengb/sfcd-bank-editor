@@ -83,7 +83,7 @@ export class Bank {
       compendium: new BankToc(this.bytes, 0x58),
 
       characterData: new BankToc(this.bytes, 0x60),
-      texts: new BankToc(this.bytes, 0x68),
+      dialog: new BankToc(this.bytes, 0x68),
 
       icons: new BankToc(this.bytes, 0x70),
       churchShopGraphics: new BankToc(this.bytes, 0x78),

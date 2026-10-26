@@ -6,7 +6,7 @@ import { computed, ref } from 'vue'
 import BytesViewer from '@/components/BytesViewer'
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
 import CompendiumViewer from '@/panes/CompendiumViewer'
-import TextsViewer from '@/panes/TextsViewer'
+import DialogViewer from '@/panes/DialogViewer'
 import TocViewer from '@/panes/TocViewer'
 import { useBankFileStore } from '@/stores/bank'
 import { formatHexAddress } from '@/utils/format'
@@ -81,7 +81,7 @@ function close(): void {
       <CharacterViewer :region="bank.toc.characterData.region()" />
       <BytesViewer title="Contents" :bytes="bank.bytes" />
       <CompendiumViewer :region="bank.toc.compendium.region()" />
-      <TextsViewer :region="bank.toc.texts.region()" />
+      <DialogViewer :region="bank.toc.dialog.region()" />
     </div>
   </main>
 </template>

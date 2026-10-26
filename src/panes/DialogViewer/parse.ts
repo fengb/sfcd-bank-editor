@@ -136,7 +136,7 @@ export function parseString(
     .join('')
 }
 
-export function parseTextBlockPage(
+export function parseDialogPage(
   trees: Record<number, HuffmanTree | null>,
   data: Uint8Array,
 ): string[] {
@@ -144,7 +144,7 @@ export function parseTextBlockPage(
   let pagePointer = 0
   for (let i = 0; i < STRINGS_PER_PAGE && pagePointer < data.length; i++) {
     const lineLength = data[pagePointer] ?? 0
-    if (lineLength === 0) break
+    if (lineLength === 0 || lineLength === 0xff) break
     if (pagePointer + 1 + lineLength > data.length) break
     result.push(parseString(trees, data, pagePointer + 1))
     pagePointer += lineLength + 1
@@ -152,27 +152,28 @@ export function parseTextBlockPage(
   return result
 }
 
-export function parseTextBlockPages(
+export function parseDialogPages(
   trees: Record<number, HuffmanTree | null>,
   bytes: Uint8Array,
-  textBlockOffsetsPointer: number,
+  dialogOffsetsPointer: number,
 ): string[] {
   const result: string[] = []
-  for (let off = textBlockOffsetsPointer; off + 4 <= bytes.length; off += 4) {
+  for (let off = dialogOffsetsPointer; off + 4 <= bytes.length; off += 4) {
     const begin = (readU32be(bytes, off) ?? 0) - OFFSET
     if (begin < 0 || begin + 1 > bytes.length) break
-    result.push(...parseTextBlockPage(trees, bytes.subarray(begin)))
+    const pageBytes = bytes.subarray(begin)
+    result.push(...parseDialogPage(trees, pageBytes))
   }
   return result
 }
 
-export function parseTextBlock(data: Uint8Array): string[] {
-  const textBlockPointer = (readU32be(data, 0) ?? 0) - OFFSET
+export function parseDialog(data: Uint8Array): string[] {
+  const dialogPointer = (readU32be(data, 0) ?? 0) - OFFSET
   const treeOffsetsPointer = (readU32be(data, 0x40) ?? 0) - OFFSET
   const treeDataPointer = (readU32be(data, 0x4a) ?? 0) - OFFSET
 
   const offsetsRegion = data.subarray(treeOffsetsPointer, treeDataPointer)
-  const treeData = data.subarray(treeDataPointer, textBlockPointer)
+  const treeData = data.subarray(treeDataPointer, dialogPointer)
 
   const count = offsetsRegion.length >> 1
   const huffmanTreeOffsets = Array.from<number>({ length: count }).map(
@@ -183,5 +184,5 @@ export function parseTextBlock(data: Uint8Array): string[] {
     offset === 0xffff ? null : splitTree(treeData, offset),
   )
 
-  return parseTextBlockPages(trees, data, textBlockPointer)
+  return parseDialogPages(trees, data, dialogPointer)
 }

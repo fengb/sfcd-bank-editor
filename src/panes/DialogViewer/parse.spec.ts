@@ -8,9 +8,9 @@ import {
   splitTree,
   parseTokens,
   parseString,
-  parseTextBlockPage,
-  parseTextBlockPages,
-  parseTextBlock,
+  parseDialogPage,
+  parseDialogPages,
+  parseDialog,
   CHAR_TO_TOKEN,
   TOKEN_TO_CHAR,
   OFFSET,
@@ -18,14 +18,14 @@ import {
 
 const path = resolve(import.meta.dirname, 'parse.test.bin')
 
-describe('parseTextBlock', () => {
+describe('parseDialog', () => {
   it('returns an empty list for empty input', () => {
-    expect(parseTextBlock(new Uint8Array())).toEqual([])
+    expect(parseDialog(new Uint8Array())).toEqual([])
   })
 
-  it('decodes the BANKD0E text block into 528 strings', async () => {
+  it('decodes the BANKD0E dialog into 528 strings', async () => {
     const bytes = new Uint8Array(await readFile(path))
-    const strings = parseTextBlock(bytes)
+    const strings = parseDialog(bytes)
 
     expect(strings).toHaveLength(528)
     expect(strings[0]).toBe('The game will be suspended.↵OK?')
@@ -115,25 +115,25 @@ describe('CHAR_TO_TOKEN', () => {
   })
 })
 
-describe('parseTextBlockPage', () => {
+describe('parseDialogPage', () => {
   it('decodes a single line', () => {
     const trees = {
       0xfe: { tokens: [12, 0xfe], tree: [0b01100000] },
     }
     const data = new Uint8Array([1, 0x80])
-    expect(parseTextBlockPage(trees, data)).toEqual(['A'])
+    expect(parseDialogPage(trees, data)).toEqual(['A'])
   })
 
   it('returns [] for empty input', () => {
     const trees = { 0xfe: { tokens: [0xfe], tree: [0x80] } }
-    expect(parseTextBlockPage(trees, new Uint8Array())).toEqual([])
+    expect(parseDialogPage(trees, new Uint8Array())).toEqual([])
   })
 })
 
-describe('parseTextBlockPages', () => {
+describe('parseDialogPages', () => {
   it('returns [] for empty input', () => {
     const trees = { 0xfe: { tokens: [0xfe], tree: [0x80] } }
-    expect(parseTextBlockPages(trees, new Uint8Array(), 0)).toEqual([])
+    expect(parseDialogPages(trees, new Uint8Array(), 0)).toEqual([])
   })
 
   it('decodes a bank reached through an offset table', () => {
@@ -144,6 +144,6 @@ describe('parseTextBlockPages', () => {
     new DataView(bytes.buffer).setUint32(0, OFFSET + 10, false)
     bytes[10] = 1
     bytes[11] = 0x80
-    expect(parseTextBlockPages(trees, bytes, 0)).toEqual(['A'])
+    expect(parseDialogPages(trees, bytes, 0)).toEqual(['A'])
   })
 })
