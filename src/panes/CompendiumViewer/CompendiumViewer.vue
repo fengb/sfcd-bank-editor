@@ -35,7 +35,7 @@ const stats = {
 </script>
 
 <template>
-  <h2>Monster/Item/String</h2>
+  <h2>Compendium</h2>
   <MonsterStats :region="region" :offset="stats.monsters.offset" />
   <ItemTable :region="region" :offset="stats.items.offset" />
   <BytesViewer :bytes="region.subarray(stats.spells.offset, stats.spells.offset + 576)" />

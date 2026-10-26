@@ -80,7 +80,7 @@ export class Bank {
       unknown0: new BankToc(this.bytes, 0x48),
 
       unknown1: new BankToc(this.bytes, 0x50),
-      namesItemsMonsters: new BankToc(this.bytes, 0x58),
+      compendium: new BankToc(this.bytes, 0x58),
 
       characterData: new BankToc(this.bytes, 0x60),
       texts: new BankToc(this.bytes, 0x68),
