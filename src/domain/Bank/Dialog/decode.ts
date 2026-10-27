@@ -1,3 +1,5 @@
+import { invert, mapValues } from 'es-toolkit'
+
 import { readU16be, readU32be } from '../util'
 
 export const OFFSET = 0x22e000
@@ -46,12 +48,9 @@ export const TOKEN_TO_CHAR: Record<number, string> = {
   0xfb: '⌫', // CLEAR
   0xfc: 'Ⓝ', // NAME prefix
   0xfd: 'ⓒ', // COLOR prefix
-  0xfe: '¶', // EOL
 }
 
-export const CHAR_TO_TOKEN: Map<string, number> = new Map(
-  Object.entries(TOKEN_TO_CHAR).map(([key, value]) => [value, Number(key)] as [string, number]),
-)
+export const CHAR_TO_TOKEN: Record<string, number> = mapValues(invert(TOKEN_TO_CHAR), Number)
 
 export interface HuffmanTree {
   tokens: number[]

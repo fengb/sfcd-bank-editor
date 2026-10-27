@@ -111,7 +111,7 @@ describe('CHAR_TO_TOKEN', () => {
     for (const [symbol, char] of Object.entries(TOKEN_TO_CHAR)) {
       expect([...char]).toHaveLength(1)
       expect(char.charCodeAt(0)).toBeLessThanOrEqual(0xffff)
-      expect(CHAR_TO_TOKEN.get(char)).toBe(Number(symbol))
+      expect(CHAR_TO_TOKEN[char]).toBe(Number(symbol))
     }
   })
 })
