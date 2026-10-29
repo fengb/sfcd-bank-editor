@@ -1,4 +1,5 @@
 import { formatHex } from '@/components/BytesViewer/hex'
+import BattleSprites from '@/domain/Bank/BattleSprites'
 import Character from '@/domain/Bank/Character'
 import Dialog from '@/domain/Bank/Dialog'
 
@@ -15,6 +16,17 @@ const tmpBytesFactory = {
   decode: (bytes: Uint8Array) => bytes,
 }
 
+const enemyBattleSpritesFactory = (bankBytes: Uint8Array): RegionFactory<BattleSprites> => ({
+  decode: (bytes: Uint8Array) => {
+    const ptOffset = readU32be(bankBytes, 0x28) ?? 0
+    const portraitPointer = readU32be(bankBytes, 0x10) ?? 0
+    if (ptOffset === portraitPointer) {
+      return new BattleSprites([], bytes)
+    }
+    return BattleSprites.decode(bytes)
+  },
+})
+
 export class BankToc<TRegion = unknown> {
   address: number
   extent: number
@@ -30,7 +42,8 @@ export class BankToc<TRegion = unknown> {
 
   region(): TRegion {
     const offset = this.address - 0x10000
-    return this.factory.decode(this.bytes.subarray(offset, offset + this.extent))
+    const size = this.extent > 0 ? this.extent : Math.max(0, this.bytes.length - offset)
+    return this.factory.decode(this.bytes.subarray(offset, offset + size))
   }
 
   slotSize(): SlotSize {
@@ -64,10 +77,10 @@ export class Bank {
       mapTiles: new BankToc(this.bytes, 0x08, tmpBytesFactory),
 
       portraits: new BankToc(this.bytes, 0x10, tmpBytesFactory),
-      allyBattleSprites: new BankToc(this.bytes, 0x18, tmpBytesFactory),
+      allyBattleSprites: new BankToc(this.bytes, 0x18, BattleSprites),
 
       weaponSprites: new BankToc(this.bytes, 0x20, tmpBytesFactory),
-      enemyBattleSprites: new BankToc(this.bytes, 0x28, tmpBytesFactory),
+      enemyBattleSprites: new BankToc(this.bytes, 0x28, enemyBattleSpritesFactory(this.bytes)),
 
       backgrounds: new BankToc(this.bytes, 0x30, tmpBytesFactory),
       grounds: new BankToc(this.bytes, 0x38, tmpBytesFactory), // ???
