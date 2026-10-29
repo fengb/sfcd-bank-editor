@@ -76,7 +76,7 @@ export function decodeBattleSpriteBlock(block: Uint8Array): DecodedBattleSprite 
   }
 
   const paletteCount = Math.floor((firstFrameOffset - palettesOffset) / PALETTE_SIZE)
-  if (paletteCount === 0) return null
+  if (paletteCount <= 0 || paletteCount >= 10) return null
   const palettes: Palette[] = Array.from({ length: paletteCount }, (_, i) =>
     parsePalette(
       block.subarray(palettesOffset + i * PALETTE_SIZE, palettesOffset + (i + 1) * PALETTE_SIZE),
@@ -103,6 +103,7 @@ export function decodeBattleSpriteBlock(block: Uint8Array): DecodedBattleSprite 
     } catch {
       return null
     }
+    if (frame.length == 0) return null
     frames.push(frame)
   }
 

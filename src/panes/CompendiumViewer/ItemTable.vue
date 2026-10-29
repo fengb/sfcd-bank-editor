@@ -58,7 +58,6 @@ const columns: QTableProps['columns'] = [
       row-key="num"
       dense
       hide-bottom
-      virtual-scroll
       style="height: 400px"
     />
   </div>

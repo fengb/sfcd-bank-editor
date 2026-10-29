@@ -56,7 +56,6 @@ const classColumns: QTableProps['columns'] = [
     row-key="offset"
     dense
     hide-bottom
-    virtual-scroll
   />
 
   <h3>Secondary</h3>

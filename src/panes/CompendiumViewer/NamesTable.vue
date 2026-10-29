@@ -20,7 +20,7 @@ const columns = computed<QTableProps['columns']>(() =>
 function* readString(data: Uint8Array, offset: number): Generator<[string, number]> {
   while (offset < data.length) {
     const len = data[offset++]!
-    if (offset + len > data.length) return null
+    if (len >= 0x80 || offset + len > data.length) return
     const name = [...data.subarray(offset, offset + len)]
       .map((c) => (c === 0x0d ? ' ' : String.fromCharCode(c)))
       .join('')
