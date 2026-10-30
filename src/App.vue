@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { QBanner, QBtn, QCard, QCardSection, QFile } from 'quasar'
+import { QBanner, QBtn, QBtnGroup, QCard, QCardSection, QFile } from 'quasar'
 import { computed, ref } from 'vue'
 
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
+import { LABELS, PAGES } from '@/pages/index/util'
 import { useBankFileStore } from '@/stores/bank'
 import { formatHexAddress } from '@/utils/format'
 
@@ -46,6 +47,16 @@ function close(): void {
   <main class="app">
     <header>
       <h1>SFCD Bank Editor</h1>
+      <QBtnGroup>
+        <QBtn color="primary" to="/" label="Home" />
+        <QBtn
+          v-for="[offset, to] in Object.entries(PAGES)"
+          color="primary"
+          :key="offset"
+          :to="to"
+          :label="LABELS[Number(offset)] ?? to"
+        />
+      </QBtnGroup>
     </header>
 
     <div class="row">

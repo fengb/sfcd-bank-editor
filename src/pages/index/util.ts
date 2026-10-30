@@ -22,3 +22,11 @@ export const LABELS: Record<number, string | undefined> = {
   0xa0: undefined,
   0xa8: 'Chapter screen graphics',
 }
+
+export const PAGES: Record<number, string> = {
+  0x18: '/ally-battle-sprites',
+  0x28: '/enemy-battle-sprites',
+  0x58: '/compendium',
+  0x60: '/character',
+  0x68: '/dialog',
+}
