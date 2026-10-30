@@ -2,9 +2,9 @@ export const LABELS: Record<number, string | undefined> = {
   0x00: 'Map sprite pointer table',
   0x08: 'Map tileset pointer table',
   0x10: 'Portrait pointer table',
-  0x18: 'Ally battle sprite table',
+  0x18: 'Ally battle sprites',
   0x20: 'Weapon sprite pointer table',
-  0x28: 'Enemy battle sprite table',
+  0x28: 'Enemy battle sprites',
   0x30: 'Background pointer table',
   0x38: 'Grounds graphics',
   0x40: 'Spell graphics pointer table',
@@ -29,4 +29,5 @@ export const PAGES: Record<number, string> = {
   0x58: '/compendium',
   0x60: '/character',
   0x68: '/dialog',
+  0x99: '/bytes',
 }

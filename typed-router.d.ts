@@ -45,6 +45,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/bytes/': RouteRecordInfo<
+      '/bytes/',
+      '/bytes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/character/': RouteRecordInfo<
       '/character/',
       '/character',
@@ -104,6 +111,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/ally-battle-sprites/index.vue': {
       routes:
         | '/ally-battle-sprites/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/bytes/index.vue': {
+      routes:
+        | '/bytes/'
       views:
         | never
       pathParamNames:

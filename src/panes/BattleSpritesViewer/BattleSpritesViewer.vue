@@ -62,39 +62,48 @@ watch(selected, () => {
 
 <template>
   <h2>Battle sprites</h2>
-  <QTable
-    :rows="props.battleSprites.sprites"
-    :columns="columns"
-    :rows-per-page-options="[0]"
-    row-key="index"
-    dense
-    hide-bottom
-    @row-click="(_, row) => (selected = row.index)"
-  />
-  <div class="row">
-    <div>
-      <div class="toggle-group">
-        <h4>Frame</h4>
-        <QBtnToggle v-model="selectedFrame" :options="frameOptions" dense toggle-color="primary" />
+  <div class="row q-gutter-md">
+    <QTable
+      :rows="props.battleSprites.sprites"
+      :columns="columns"
+      :rows-per-page-options="[0]"
+      class="col"
+      row-key="index"
+      dense
+      hide-bottom
+      @row-click="(_, row) => (selected = row.index)"
+    />
+    <div class="col-auto">
+      <div class="row justify-between">
+        <div>
+          <div>Frame</div>
+          <QBtnToggle
+            v-model="selectedFrame"
+            :options="frameOptions"
+            dense
+            toggle-color="primary"
+          />
+        </div>
+        <div>
+          <div>Palette</div>
+          <QBtnToggle
+            v-model="selectedPalette"
+            :options="paletteOptions"
+            dense
+            toggle-color="primary"
+          />
+        </div>
       </div>
-      <div class="toggle-group">
-        <h4>Palette</h4>
-        <QBtnToggle
-          v-model="selectedPalette"
-          :options="paletteOptions"
-          dense
-          toggle-color="primary"
-        />
-      </div>
-    </div>
-    <div class="grid grid-flow-col grid-rows-3">
-      <div v-for="(tiles, i) in tileGroups" :key="i" class="grid grid-flow-col grid-rows-4">
-        <Tile
-          v-for="(tile, j) in tiles"
-          :key="j"
-          :tile="tile"
-          :palette="activeSprite?.palettes?.[selectedPalette]!"
-        />
+      <div class="grid grid-flow-col grid-rows-3">
+        <div v-for="(tiles, i) in tileGroups" :key="i" class="grid grid-flow-col grid-rows-4">
+          <Tile
+            v-for="(tile, j) in tiles"
+            :key="j"
+            :tile="tile"
+            :palette="activeSprite?.palettes?.[selectedPalette]!"
+            :scale="3"
+          />
+        </div>
       </div>
     </div>
   </div>

@@ -27,7 +27,7 @@ const recordColumns: QTableProps['columns'] = [
   { name: 'class', label: 'Class', align: 'left', field: (row) => formatHex(row.classId) },
   ...STAT_KEYS.map((key) => ({
     name: key,
-    label: `${key.toUpperCase()} / growth`,
+    label: key.toUpperCase(),
     field: (row: CharacterRecord) =>
       row.stats[key].value || row.stats[key].growth
         ? `${row.stats[key].value}${GROWTH[row.stats[key].growth]}`

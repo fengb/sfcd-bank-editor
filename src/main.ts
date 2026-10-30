@@ -12,7 +12,7 @@ import 'quasar/src/css/index.sass'
 import './assets/main.css'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 })
 
