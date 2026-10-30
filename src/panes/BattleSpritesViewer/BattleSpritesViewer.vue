@@ -69,7 +69,6 @@ watch(selected, () => {
     row-key="index"
     dense
     hide-bottom
-    style="height: 400px"
     @row-click="(_, row) => (selected = row.index)"
   />
   <div class="row">

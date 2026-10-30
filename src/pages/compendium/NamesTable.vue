@@ -58,7 +58,6 @@ const rows = computed(() => {
       row-key="num"
       dense
       hide-bottom
-      style="height: 400px"
     />
   </div>
 </template>

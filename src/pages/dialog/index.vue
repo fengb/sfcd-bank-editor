@@ -2,11 +2,12 @@
 import { QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 
-import type Dialog from '@/domain/Bank/Dialog'
+import { useBankFileStore } from '@/stores/bank'
 
-const props = defineProps<{ dialog: Dialog }>()
+const store = useBankFileStore()
+const dialog = computed(() => store.bank!.toc.dialog.region())
 
-const rows = computed(() => props.dialog.strings.map((dialog, index) => ({ index, dialog })))
+const rows = computed(() => dialog.value.strings.map((d, index) => ({ index, dialog: d })))
 
 const columns: QTableProps['columns'] = [
   {
@@ -32,7 +33,6 @@ const columns: QTableProps['columns'] = [
     row-key="index"
     dense
     hide-bottom
-    style="height: 600px"
   >
     <template #top>
       <div class="row full-width justify-between items-center">

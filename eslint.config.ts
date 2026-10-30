@@ -25,5 +25,12 @@ export default defineConfigWithVueTs(
     files: ['src/**/*.spec.ts'],
   },
 
+  {
+    name: 'app/pages',
+    files: ['src/pages/**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
   skipFormatting,
 )

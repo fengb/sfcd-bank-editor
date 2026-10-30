@@ -3,16 +3,9 @@ import { storeToRefs } from 'pinia'
 import { QBanner, QBtn, QCard, QCardSection, QFile } from 'quasar'
 import { computed, ref } from 'vue'
 
-import BytesViewer from '@/components/BytesViewer'
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
-import BattleSpritesViewer from '@/panes/BattleSpritesViewer'
-import CompendiumViewer from '@/panes/CompendiumViewer'
-import DialogViewer from '@/panes/DialogViewer'
-import TocViewer from '@/panes/TocViewer'
 import { useBankFileStore } from '@/stores/bank'
 import { formatHexAddress } from '@/utils/format'
-
-import CharacterViewer from './panes/CharacterViewer'
 
 const store = useBankFileStore()
 const { file, bank, isLoading, error } = storeToRefs(store)
@@ -77,15 +70,10 @@ function close(): void {
           </dl>
         </QCardSection>
       </QCard>
-
-      <TocViewer :bank="bank" />
-      <CharacterViewer :character="bank.toc.characterData.region()" />
-      <BytesViewer title="Contents" :bytes="bank.bytes" />
-      <CompendiumViewer :region="bank.toc.compendium.region()" />
-      <BattleSpritesViewer :battleSprites="bank.toc.allyBattleSprites.region()" />
-      <BattleSpritesViewer :battleSprites="bank.toc.enemyBattleSprites.region()" />
-      <DialogViewer :dialog="bank.toc.dialog.region()" />
     </div>
+
+    <RouterView v-if="bank" />
+    <p v-else class="text-grey">Load a bank file to view this page.</p>
   </main>
 </template>
 

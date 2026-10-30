@@ -58,7 +58,6 @@ const columns: QTableProps['columns'] = [
       row-key="num"
       dense
       hide-bottom
-      style="height: 400px"
     />
   </div>
 </template>

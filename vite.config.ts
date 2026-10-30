@@ -3,11 +3,16 @@ import vue from '@vitejs/plugin-vue'
 import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import VueRouter from 'vue-router/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   plugins: [
+    // File-based routing must come before the Vue plugin.
+    VueRouter({
+      filePatterns: ['*/index'],
+    }),
     vue({ template: { transformAssetUrls } }),
     // Quasar transforms the Vue plugin's output, so it has to come after it —
     // it throws at resolve time otherwise.
