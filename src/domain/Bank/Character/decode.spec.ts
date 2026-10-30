@@ -71,6 +71,7 @@ describe('decodeCharacterData', () => {
 
     expect(records[0]).toEqual({
       classId: 0x00,
+      heroId: 0x00,
       stats: {
         hp: { growth: 0x07, value: 0x0c },
         mp: { growth: 0x01, value: 0x08 },
@@ -111,6 +112,7 @@ describe('decodeCharacterData', () => {
     expect(secondary).toHaveLength(20)
     expect(secondary[0]).toEqual({
       classId: 0x00,
+      heroId: 0x00,
       level: 1,
       unknown: [0xa0, 0x8b, 0x00, 0x00],
     })

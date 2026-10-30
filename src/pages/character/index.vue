@@ -12,12 +12,26 @@ const character = computed(() => store.bank!.toc.characterData.region())
 
 const STAT_KEYS = ['hp', 'mp', 'att', 'def', 'agi'] as const
 
+const GROWTH: Record<number, string> = {
+  1: '¹',
+  2: '²',
+  3: '³',
+  4: '⁴',
+  5: 'ₓ',
+  6: 'ₐ',
+  7: 'ₙ',
+}
+
 const recordColumns: QTableProps['columns'] = [
+  { name: 'hero', label: 'Hero', align: 'left', field: (row) => formatHex(row.heroId) },
   { name: 'class', label: 'Class', align: 'left', field: (row) => formatHex(row.classId) },
   ...STAT_KEYS.map((key) => ({
     name: key,
     label: `${key.toUpperCase()} / growth`,
-    field: (row: CharacterRecord) => `${row.stats[key].value} / ${row.stats[key].growth}`,
+    field: (row: CharacterRecord) =>
+      row.stats[key].value || row.stats[key].growth
+        ? `${row.stats[key].value}${GROWTH[row.stats[key].growth]}`
+        : '',
   })),
   {
     name: 'spells',

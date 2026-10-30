@@ -23,6 +23,7 @@ export type StatPair = { growth: number; value: number }
 export type SpellLearn = { level: number; spell: number }
 
 export type CharacterRecord = {
+  heroId: number
   classId: number
   stats: { hp: StatPair; mp: StatPair; att: StatPair; def: StatPair; agi: StatPair }
   /** Spell tail after the five stat pairs: [level, spell] until the terminator. */
@@ -32,6 +33,7 @@ export type CharacterRecord = {
 }
 
 export type SecondaryEntry = {
+  heroId: number
   classId: number
   level: number
   unknown: [number, number, number, number]
@@ -59,8 +61,9 @@ function iterPair<T>(array: T[]): [T, T][] {
 
 function decodeRecords(bytes: Uint8Array): CharacterRecord[] {
   const grouped = chunkBy([...bytes], (byte) => byte === 0xff || byte === 0xfe)
-  return iterPair(grouped).map(([entry, separators]) => {
+  return iterPair(grouped).map(([entry, separators], i) => {
     return {
+      heroId: Math.floor(i / 2),
       classId: entry[0]!,
       stats: {
         hp: statPair(entry, 1),
@@ -81,7 +84,8 @@ function decodeRecords(bytes: Uint8Array): CharacterRecord[] {
 function decodeSecondary(bytes: Uint8Array): SecondaryEntry[] {
   return chunk([...bytes], SECONDARY_ENTRY_SIZE)
     .filter((entry) => entry.length === SECONDARY_ENTRY_SIZE)
-    .map((entry) => ({
+    .map((entry, i) => ({
+      heroId: i,
       classId: entry[0]!,
       level: entry[1]!,
       unknown: [entry[2]!, entry[3]!, entry[4]!, entry[5]!],
