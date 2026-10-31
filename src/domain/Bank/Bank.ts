@@ -2,6 +2,7 @@ import { formatHex } from '@/components/BytesViewer/hex'
 import BattleSprites from '@/domain/Bank/BattleSprites'
 import Character from '@/domain/Bank/Character'
 import Dialog from '@/domain/Bank/Dialog'
+import Portraits from '@/domain/Bank/Portraits'
 
 import { readU32be } from './util'
 
@@ -76,7 +77,7 @@ export class Bank {
       mapSprites: new BankToc(this.bytes, 0x00, tmpBytesFactory),
       mapTiles: new BankToc(this.bytes, 0x08, tmpBytesFactory),
 
-      portraits: new BankToc(this.bytes, 0x10, tmpBytesFactory),
+      portraits: new BankToc(this.bytes, 0x10, Portraits),
       allyBattleSprites: new BankToc(this.bytes, 0x18, BattleSprites),
 
       weaponSprites: new BankToc(this.bytes, 0x20, tmpBytesFactory),

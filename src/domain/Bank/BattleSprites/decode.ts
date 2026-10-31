@@ -97,13 +97,9 @@ export function decodeBattleSpriteBlock(block: Uint8Array): DecodedBattleSprite 
     }
 
     const tileData = frameTable.subarray(relFrameOffset, relNextFrameOffset)
-    let frame: Tile[]
-    try {
-      frame = decodeStackGraphics(tileData)
-    } catch {
-      return null
-    }
-    if (frame.length == 0) return null
+    const frame = decodeStackGraphics(tileData)
+    if (!frame?.length) return null
+
     frames.push(frame)
   }
 

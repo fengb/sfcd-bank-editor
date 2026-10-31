@@ -24,6 +24,7 @@ export const LABELS: Record<number, string | undefined> = {
 }
 
 export const PAGES: Record<number, string> = {
+  0x10: '/portraits',
   0x18: '/ally-battle-sprites',
   0x28: '/enemy-battle-sprites',
   0x58: '/compendium',
@@ -33,6 +34,7 @@ export const PAGES: Record<number, string> = {
 
 export const ICONS: Record<string, string> = {
   '/': '🏠',
+  '/portraits': '🖼️',
   '/ally-battle-sprites': '🛡️',
   '/enemy-battle-sprites': '💀',
   '/compendium': '📖',

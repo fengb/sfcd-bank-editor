@@ -87,6 +87,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/portraits/': RouteRecordInfo<
+      '/portraits/',
+      '/portraits',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -159,6 +166,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/enemy-battle-sprites/index.vue': {
       routes:
         | '/enemy-battle-sprites/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/portraits/index.vue': {
+      routes:
+        | '/portraits/'
       views:
         | never
       pathParamNames:

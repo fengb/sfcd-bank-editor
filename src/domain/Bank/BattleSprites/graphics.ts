@@ -203,7 +203,11 @@ function decodeStackGraphicsLinear(input: Uint8Array): number[] {
   }
 }
 
-export function decodeStackGraphics(input: Uint8Array): Tile[] {
-  const linear = decodeStackGraphicsLinear(input)
-  return convertTiles(linear)
+export function decodeStackGraphics(input: Uint8Array): Tile[] | null {
+  try {
+    const linear = decodeStackGraphicsLinear(input)
+    return convertTiles(linear)
+  } catch {
+    return null
+  }
 }
