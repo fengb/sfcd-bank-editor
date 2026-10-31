@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { QBtn, QBtnGroup, QCard, QCardSection, QFile } from 'quasar'
+import { QBtn, QBtnGroup, QFile, QTooltip } from 'quasar'
 import { computed, ref } from 'vue'
 
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
-import { LABELS, PAGES } from '@/pages/index/util'
+import { ICONS, LABELS, PAGES } from '@/pages/index/util'
 import { useBankFileStore } from '@/stores/bank'
 import { formatHexAddress } from '@/utils/format'
 
@@ -27,6 +27,16 @@ const stats = computed(() => {
   ]
 })
 
+const nav = computed(() => [
+  { label: 'Home', to: '/', icon: ICONS['/'] },
+  ...Object.entries(PAGES).map(([offset, to]) => ({
+    to,
+    label: LABELS[Number(offset)],
+    icon: ICONS[to],
+  })),
+  { label: 'Bytes', to: '/bytes', icon: ICONS['/bytes'] },
+])
+
 /**
  * QFile is single-select unless `multiple` is set, so it hands over one File.
  * It empties its own <input> right after, so re-picking the same file still
@@ -42,24 +52,27 @@ function onSelect(selected: File | undefined): void {
   <main class="app">
     <header>
       <h1>SFCD Bank Editor</h1>
-      <QBtnGroup>
-        <QBtn color="primary" to="/" label="Home" />
+      <QBtnGroup tag="nav">
         <QBtn
-          v-for="[offset, to] in Object.entries(PAGES)"
-          color="primary"
-          :key="offset"
-          :to="to"
-          :label="LABELS[Number(offset)] ?? to.replace('/', '')"
-        />
+          v-for="item in nav"
+          :color="$route.path === item.to ? 'primary' : 'secondary'"
+          :key="item.to"
+          :to="item.to"
+          :aria-label="item.label"
+          padding="xs sm"
+        >
+          {{ item.icon }}
+          <QTooltip anchor="top middle" :offset="[27, 27]" transition-show="jump-up">
+            {{ item.label }}
+          </QTooltip>
+        </QBtn>
       </QBtnGroup>
-      <QCard flat bordered>
-        <QCardSection class="row q-gutter-md items-center">
-          <QFile v-model="picked" label="Open file…" outlined @update:model-value="onSelect" />
-          <div v-for="stat in stats" :key="stat.label">
-            <strong>{{ stat.label }}:</strong> {{ stat.value }}
-          </div>
-        </QCardSection>
-      </QCard>
+      <div class="row q-gutter-md items-center q-my-sm">
+        <QFile v-model="picked" label="Open file…" outlined @update:model-value="onSelect" />
+        <div v-for="stat in stats" :key="stat.label">
+          <strong>{{ stat.label }}:</strong> {{ stat.value }}
+        </div>
+      </div>
     </header>
 
     <RouterView v-if="bank" />

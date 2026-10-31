@@ -29,5 +29,14 @@ export const PAGES: Record<number, string> = {
   0x58: '/compendium',
   0x60: '/character',
   0x68: '/dialog',
-  0x99: '/bytes',
+}
+
+export const ICONS: Record<string, string> = {
+  '/': '🏠',
+  '/ally-battle-sprites': '🛡️',
+  '/enemy-battle-sprites': '💀',
+  '/compendium': '📖',
+  '/character': '👤',
+  '/dialog': '💬',
+  '/bytes': '🔢',
 }
