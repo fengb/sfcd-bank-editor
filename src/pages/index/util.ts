@@ -30,6 +30,7 @@ export const PAGES: Record<number, string> = {
   0x58: '/compendium',
   0x60: '/character',
   0x68: '/dialog',
+  0xa8: '/chapter-graphics',
 }
 
 export const ICONS: Record<string, string> = {
@@ -40,5 +41,6 @@ export const ICONS: Record<string, string> = {
   '/compendium': '📖',
   '/character': '👤',
   '/dialog': '💬',
+  '/chapter-graphics': '📜',
   '/bytes': '🔢',
 }

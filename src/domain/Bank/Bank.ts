@@ -1,5 +1,6 @@
 import { formatHex } from '@/components/BytesViewer/hex'
 import BattleSprites from '@/domain/Bank/BattleSprites'
+import ChapterGraphics from '@/domain/Bank/ChapterGraphics'
 import Character from '@/domain/Bank/Character'
 import Dialog from '@/domain/Bank/Dialog'
 import Portraits from '@/domain/Bank/Portraits'
@@ -105,7 +106,7 @@ export class Bank {
       unknownB: new BankToc(this.bytes, 0x98, tmpBytesFactory), // "Pointer table into 0xA0"
 
       unknownC: new BankToc(this.bytes, 0xa0, tmpBytesFactory),
-      chapterGraphics: new BankToc(this.bytes, 0xa8, tmpBytesFactory),
+      chapterGraphics: new BankToc(this.bytes, 0xa8, ChapterGraphics),
 
       pad0: new BankToc(this.bytes, 0xb0, tmpBytesFactory),
       pad1: new BankToc(this.bytes, 0xb8, tmpBytesFactory),

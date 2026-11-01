@@ -52,6 +52,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/chapter-graphics/': RouteRecordInfo<
+      '/chapter-graphics/',
+      '/chapter-graphics',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/character/': RouteRecordInfo<
       '/character/',
       '/character',
@@ -126,6 +133,14 @@ declare module 'vue-router/auto-routes' {
     'src/pages/bytes/index.vue': {
       routes:
         | '/bytes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/chapter-graphics/index.vue': {
+      routes:
+        | '/chapter-graphics/'
       views:
         | never
       pathParamNames:
