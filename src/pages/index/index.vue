@@ -7,7 +7,7 @@ import { formatHex } from '@/components/BytesViewer/hex'
 import { type BankToc } from '@/domain/Bank'
 import { useBankFileStore } from '@/stores/bank'
 
-import { LABELS, PAGES } from './util'
+import { PAGES } from './util'
 
 const store = useBankFileStore()
 const bank = computed(() => store.bank!)
@@ -17,8 +17,8 @@ const rows = computed(() => Object.values(bank.value.toc))
 const router = useRouter()
 
 function onRowClick(_evt: Event, row: BankToc): void {
-  const to = PAGES[row.entryOffset]
-  if (to) router.push(to)
+  const page = PAGES.find((p) => p.offset === row.entryOffset)
+  if (page) router.push(page.path)
 }
 
 const columns: QTableProps['columns'] = [
@@ -27,8 +27,8 @@ const columns: QTableProps['columns'] = [
     name: 'name',
     label: 'Name',
     align: 'left',
-    field: (row: BankToc) => LABELS[row.entryOffset] ?? '',
-    classes: (row: BankToc) => (PAGES[row.entryOffset] ? 'text-primary' : ''),
+    field: (row: BankToc) => PAGES.find((p) => p.offset === row.entryOffset)?.name ?? '',
+    classes: 'text-primary',
   },
   {
     name: 'address',

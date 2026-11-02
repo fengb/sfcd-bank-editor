@@ -45,9 +45,30 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/backgrounds/': RouteRecordInfo<
+      '/backgrounds/',
+      '/backgrounds',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/battle-data/': RouteRecordInfo<
+      '/battle-data/',
+      '/battle-data',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/bytes/': RouteRecordInfo<
       '/bytes/',
       '/bytes',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/camp-graphics/': RouteRecordInfo<
+      '/camp-graphics/',
+      '/camp-graphics',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -94,9 +115,93 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/grounds-graphics/': RouteRecordInfo<
+      '/grounds-graphics/',
+      '/grounds-graphics',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/icon-graphics/': RouteRecordInfo<
+      '/icon-graphics/',
+      '/icon-graphics',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/map-sprites/': RouteRecordInfo<
+      '/map-sprites/',
+      '/map-sprites',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/map-tilesets/': RouteRecordInfo<
+      '/map-tilesets/',
+      '/map-tilesets',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/per-map-data/': RouteRecordInfo<
+      '/per-map-data/',
+      '/per-map-data',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/portraits/': RouteRecordInfo<
       '/portraits/',
       '/portraits',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/spell-graphics/': RouteRecordInfo<
+      '/spell-graphics/',
+      '/spell-graphics',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/unknown-0x48/': RouteRecordInfo<
+      '/unknown-0x48/',
+      '/unknown-0x48',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/unknown-0x50/': RouteRecordInfo<
+      '/unknown-0x50/',
+      '/unknown-0x50',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/unknown-0x90/': RouteRecordInfo<
+      '/unknown-0x90/',
+      '/unknown-0x90',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/unknown-0x98/': RouteRecordInfo<
+      '/unknown-0x98/',
+      '/unknown-0x98',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/unknown-0xa0/': RouteRecordInfo<
+      '/unknown-0xa0/',
+      '/unknown-0xa0',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/weapon-sprites/': RouteRecordInfo<
+      '/weapon-sprites/',
+      '/weapon-sprites',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -130,9 +235,33 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/backgrounds/index.vue': {
+      routes:
+        | '/backgrounds/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/battle-data/index.vue': {
+      routes:
+        | '/battle-data/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/bytes/index.vue': {
       routes:
         | '/bytes/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/camp-graphics/index.vue': {
+      routes:
+        | '/camp-graphics/'
       views:
         | never
       pathParamNames:
@@ -186,9 +315,105 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/grounds-graphics/index.vue': {
+      routes:
+        | '/grounds-graphics/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/icon-graphics/index.vue': {
+      routes:
+        | '/icon-graphics/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/map-sprites/index.vue': {
+      routes:
+        | '/map-sprites/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/map-tilesets/index.vue': {
+      routes:
+        | '/map-tilesets/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/per-map-data/index.vue': {
+      routes:
+        | '/per-map-data/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/portraits/index.vue': {
       routes:
         | '/portraits/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/spell-graphics/index.vue': {
+      routes:
+        | '/spell-graphics/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/unknown-0x48/index.vue': {
+      routes:
+        | '/unknown-0x48/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/unknown-0x50/index.vue': {
+      routes:
+        | '/unknown-0x50/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/unknown-0x90/index.vue': {
+      routes:
+        | '/unknown-0x90/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/unknown-0x98/index.vue': {
+      routes:
+        | '/unknown-0x98/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/unknown-0xa0/index.vue': {
+      routes:
+        | '/unknown-0xa0/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/pages/weapon-sprites/index.vue': {
+      routes:
+        | '/weapon-sprites/'
       views:
         | never
       pathParamNames:

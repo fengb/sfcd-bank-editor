@@ -4,7 +4,7 @@ import { QBtn, QBtnGroup, QFile, QTooltip } from 'quasar'
 import { computed, ref } from 'vue'
 
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
-import { ICONS, LABELS, PAGES } from '@/pages/index/util'
+import { PAGES } from '@/pages/index/util'
 import { useBankFileStore } from '@/stores/bank'
 import { formatHexAddress } from '@/utils/format'
 
@@ -27,15 +27,13 @@ const stats = computed(() => {
   ]
 })
 
-const nav = computed(() => [
-  { label: 'Home', to: '/', icon: ICONS['/'] },
-  ...Object.entries(PAGES).map(([offset, to]) => ({
-    to,
-    label: LABELS[Number(offset)],
-    icon: ICONS[to],
+const nav = computed(() =>
+  PAGES.map((page) => ({
+    to: page.path,
+    label: page.name,
+    icon: page.icon,
   })),
-  { label: 'Bytes', to: '/bytes', icon: ICONS['/bytes'] },
-])
+)
 
 /**
  * QFile is single-select unless `multiple` is set, so it hands over one File.
