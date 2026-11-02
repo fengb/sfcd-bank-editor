@@ -4,6 +4,7 @@ import CampGraphics from '@/domain/Bank/CampGraphics'
 import ChapterGraphics from '@/domain/Bank/ChapterGraphics'
 import Character from '@/domain/Bank/Character'
 import Dialog from '@/domain/Bank/Dialog'
+import Icons from '@/domain/Bank/Icons'
 import Portraits from '@/domain/Bank/Portraits'
 import WeaponSprites from '@/domain/Bank/WeaponSprites'
 
@@ -87,7 +88,7 @@ export class Bank {
       characterData: new BankToc(this.bytes, 0x60, Character),
       dialog: new BankToc(this.bytes, 0x68, Dialog),
 
-      icons: new BankToc(this.bytes, 0x70, tmpBytesFactory),
+      icons: new BankToc(this.bytes, 0x70, Icons),
       campGraphics: new BankToc(this.bytes, 0x78, CampGraphics),
 
       mapData: new BankToc(this.bytes, 0x80, tmpBytesFactory), // clarify name

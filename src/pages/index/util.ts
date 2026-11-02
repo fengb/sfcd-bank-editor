@@ -21,7 +21,7 @@ export const PAGES: Page[] = [
   { offset: 0x58, icon: '📖', path: '/compendium', name: 'Compendium' },
   { offset: 0x60, icon: '👤', path: '/character', name: 'Character data' },
   { offset: 0x68, icon: '💬', path: '/dialog', name: 'Dialog' },
-  { offset: 0x70, icon: '❕', path: '/icon-graphics', name: 'Icon graphics' },
+  { offset: 0x70, icon: '🌀', path: '/icons', name: 'Icons' },
   { offset: 0x78, icon: '⛺️', path: '/camp-graphics', name: 'Camp graphics' },
   { offset: 0x80, icon: '❕', path: '/per-map-data', name: 'Per-map data' },
   { offset: 0x88, icon: '❕', path: '/battle-data', name: 'Battle data' },

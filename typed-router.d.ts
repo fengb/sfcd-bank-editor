@@ -122,9 +122,9 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/icon-graphics/': RouteRecordInfo<
-      '/icon-graphics/',
-      '/icon-graphics',
+    '/icons/': RouteRecordInfo<
+      '/icons/',
+      '/icons',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -323,9 +323,9 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/pages/icon-graphics/index.vue': {
+    'src/pages/icons/index.vue': {
       routes:
-        | '/icon-graphics/'
+        | '/icons/'
       views:
         | never
       pathParamNames:
