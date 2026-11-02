@@ -1,5 +1,6 @@
 import { formatHex } from '@/components/BytesViewer/hex'
 import BattleSprites from '@/domain/Bank/BattleSprites'
+import CampGraphics from '@/domain/Bank/CampGraphics'
 import ChapterGraphics from '@/domain/Bank/ChapterGraphics'
 import Character from '@/domain/Bank/Character'
 import Dialog from '@/domain/Bank/Dialog'
@@ -87,7 +88,7 @@ export class Bank {
       dialog: new BankToc(this.bytes, 0x68, Dialog),
 
       icons: new BankToc(this.bytes, 0x70, tmpBytesFactory),
-      churchShopGraphics: new BankToc(this.bytes, 0x78, tmpBytesFactory),
+      campGraphics: new BankToc(this.bytes, 0x78, CampGraphics),
 
       mapData: new BankToc(this.bytes, 0x80, tmpBytesFactory), // clarify name
       battleData: new BankToc(this.bytes, 0x88, tmpBytesFactory), // clarify name
