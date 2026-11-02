@@ -4,6 +4,7 @@ import ChapterGraphics from '@/domain/Bank/ChapterGraphics'
 import Character from '@/domain/Bank/Character'
 import Dialog from '@/domain/Bank/Dialog'
 import Portraits from '@/domain/Bank/Portraits'
+import WeaponSprites from '@/domain/Bank/WeaponSprites'
 
 import { readU32be } from './util'
 
@@ -17,17 +18,6 @@ export type RegionFactory<TRegion> = {
 const tmpBytesFactory = {
   decode: (bytes: Uint8Array) => bytes,
 }
-
-const enemyBattleSpritesFactory = (bankBytes: Uint8Array): RegionFactory<BattleSprites> => ({
-  decode: (bytes: Uint8Array) => {
-    const ptOffset = readU32be(bankBytes, 0x28) ?? 0
-    const portraitPointer = readU32be(bankBytes, 0x10) ?? 0
-    if (ptOffset === portraitPointer) {
-      return new BattleSprites([], bytes)
-    }
-    return BattleSprites.decode(bytes)
-  },
-})
 
 export class BankToc<TRegion = unknown> {
   address: number
@@ -81,8 +71,8 @@ export class Bank {
       portraits: new BankToc(this.bytes, 0x10, Portraits),
       allyBattleSprites: new BankToc(this.bytes, 0x18, BattleSprites),
 
-      weaponSprites: new BankToc(this.bytes, 0x20, tmpBytesFactory),
-      enemyBattleSprites: new BankToc(this.bytes, 0x28, enemyBattleSpritesFactory(this.bytes)),
+      weaponSprites: new BankToc(this.bytes, 0x20, WeaponSprites),
+      enemyBattleSprites: new BankToc(this.bytes, 0x28, BattleSprites),
 
       backgrounds: new BankToc(this.bytes, 0x30, tmpBytesFactory),
       grounds: new BankToc(this.bytes, 0x38, tmpBytesFactory), // ???
