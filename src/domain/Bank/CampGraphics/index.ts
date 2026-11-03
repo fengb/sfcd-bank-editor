@@ -17,15 +17,11 @@ export default class CampGraphics {
     return new CampGraphics(decodeCampGraphic(bytes), bytes)
   }
 
-  get tiles(): Tile[] {
-    return this.graphic?.tiles ?? []
+  get palettes(): Palette[] {
+    return this.graphic?.palettes ?? []
   }
 
-  get palette(): Palette | null {
-    return this.graphic?.palette ?? null
-  }
-
-  get metadata(): Uint8Array {
-    return this.graphic?.metadata ?? new Uint8Array()
+  get tilesets(): Tile[][] {
+    return this.graphic?.tilesets ?? []
   }
 }
