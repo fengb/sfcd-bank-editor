@@ -1,11 +1,5 @@
+import type { Palette, Tile } from '../BattleSprites/graphics'
 import { decodeIcons, type Icon } from './decode'
-
-export { type Icon }
-export { decodeIcons }
-export * from './decode'
-export * from './graphics'
-
-import type { Palette, Tile } from './graphics'
 
 export default class Icons {
   readonly icon: Icon | null
@@ -27,6 +21,6 @@ export default class Icons {
   }
 
   get palette(): Palette {
-    return this.icon?.palette!
+    return this.icon!.palette!
   }
 }
