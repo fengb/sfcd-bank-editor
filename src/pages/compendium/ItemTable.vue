@@ -4,7 +4,7 @@ import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
 import { decodeSpell } from '@/domain/Bank'
-import { readU16be } from '@/domain/Bank/util'
+import { readU16be, readU32be } from '@/domain/Bank/util'
 
 const props = defineProps<{ region: Uint8Array; offset: number }>()
 
@@ -17,7 +17,7 @@ const rows = computed(() => {
     const base = props.offset + i * RECORD_SIZE
     if (base + RECORD_SIZE > props.region.length) break
     const rec: Record<string, unknown> = { '#': i }
-    rec.mask = readU16be(props.region, base + 0x02)
+    rec.mask = readU32be(props.region, base)
     rec.range = [props.region[base + 0x05]!, props.region[base + 0x04]!]
     rec.price = readU16be(props.region, base + 0x06)
     rec.flags = props.region[base + 0x08]!
@@ -30,7 +30,7 @@ const rows = computed(() => {
 
 const columns: QTableProps['columns'] = [
   { name: 'num', label: '#', field: '#', align: 'center', style: 'width: 30px' },
-  { name: 'mask', label: 'Class mask', field: 'mask', format: (v) => formatHex(v, 4) },
+  { name: 'mask', label: 'Class mask', field: 'mask', format: (v) => formatHex(v, 8) },
   {
     name: 'range',
     label: 'Range',
