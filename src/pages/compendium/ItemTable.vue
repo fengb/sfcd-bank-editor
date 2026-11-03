@@ -3,6 +3,7 @@ import { QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
+import { decodeSpell } from '@/domain/Bank'
 import { readU16be } from '@/domain/Bank/util'
 
 const props = defineProps<{ region: Uint8Array; offset: number }>()
@@ -16,16 +17,12 @@ const rows = computed(() => {
     const base = props.offset + i * RECORD_SIZE
     if (base + RECORD_SIZE > props.region.length) break
     const rec: Record<string, unknown> = { '#': i }
-    rec.mask = formatHex(readU16be(props.region, base + 0x02), 4)
-    rec.category = formatHex(readU16be(props.region, base + 0x04), 4)
+    rec.mask = readU16be(props.region, base + 0x02)
+    rec.range = [props.region[base + 0x05]!, props.region[base + 0x04]!]
     rec.price = readU16be(props.region, base + 0x06)
-    rec.flags = formatHex(props.region[base + 0x08]!, 2)
-    rec.unknown09 = formatHex(props.region[base + 0x09]!, 2)
-    rec.attackType = formatHex(props.region[base + 0x0a]!, 2)
-    rec.attackPower = props.region[base + 0x0b]!
-    rec.extra = [...props.region.subarray(base + 0x0c, base + 0x10)]
-      .map((b) => formatHex(b, 2))
-      .join(' ')
+    rec.flags = props.region[base + 0x08]!
+    rec.useSpell = decodeSpell(props.region[base + 0x09]!)
+    rec.equip = [...props.region.subarray(base + 0x0a, base + 0x10)]
     result.push(rec)
   }
   return result
@@ -33,14 +30,41 @@ const rows = computed(() => {
 
 const columns: QTableProps['columns'] = [
   { name: 'num', label: '#', field: '#', align: 'center', style: 'width: 30px' },
-  { name: 'mask', label: 'Class mask', field: 'mask', align: 'center' },
-  { name: 'category', label: 'Weapon cat', field: 'category', align: 'center' },
+  { name: 'mask', label: 'Class mask', field: 'mask', format: (v) => formatHex(v, 4) },
+  {
+    name: 'range',
+    label: 'Range',
+    field: 'range',
+    align: 'left',
+    format: ([min, max]) => (min === max ? String(max) : `${min}-${max}`),
+  },
   { name: 'price', label: 'Price', field: 'price', align: 'right' },
-  { name: 'flags', label: 'Flags', field: 'flags', align: 'center' },
-  { name: 'unknown09', label: '+0x09', field: 'unknown09', align: 'center' },
-  { name: 'attackType', label: 'Atk type', field: 'attackType', align: 'center' },
-  { name: 'attackPower', label: 'ATK power', field: 'attackPower', align: 'center' },
-  { name: 'extra', label: 'Extra (+0x0C)', field: 'extra' },
+  {
+    name: 'flags',
+    label: 'Flags',
+    field: 'flags',
+    align: 'center',
+    format: (v: number) => {
+      const bits: [number, string][] = [
+        [0x80, '💥'],
+        [0x40, '💀'],
+        [0x20, '🧪'],
+        [0x10, '🔒'],
+        [0x08, '✨'],
+        [0x04, '💍'],
+        [0x02, '🗡️'],
+        [0x01, '❓'],
+      ]
+      return bits.map(([mask, emoji]) => ((v & mask) !== 0 ? emoji : '⬜')).join('')
+    },
+  },
+  { name: 'useSpell', label: 'Use spell', field: 'useSpell' },
+  {
+    name: 'equip',
+    label: 'Equip',
+    field: 'equip',
+    format: (equip: number[]) => equip.map((v) => formatHex(v, 2)).join(' '),
+  },
 ]
 </script>
 
@@ -50,6 +74,10 @@ const columns: QTableProps['columns'] = [
       64 item/weapon records × 16 bytes. File offset: 0x{{
         props.offset.toString(16).toUpperCase().padStart(4, '0')
       }}
+    </p>
+    <p class="text-caption q-mb-sm">
+      Flags bits: 💥 breakable, 💀 cursed, 🧪 consumable, 🔒 unsellable, ✨ rare, 💍 ring, 🗡️
+      weapon, ❓ unused (⬜ = unset)
     </p>
     <QTable
       :rows="rows"

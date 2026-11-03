@@ -8,14 +8,15 @@ const props = defineProps<{
   offsets: Record<string, number>
 }>()
 
-const columns = computed<QTableProps['columns']>(() =>
-  Object.keys(props.offsets).map((name, i) => ({
+const columns = computed<QTableProps['columns']>(() => [
+  { name: 'num', label: '#', field: 'num' },
+  ...Object.keys(props.offsets).map((name, i) => ({
     name,
     label: capitalize(name),
     field: String(i),
-    align: 'left',
+    align: 'left' as const,
   })),
-)
+])
 
 function* readString(data: Uint8Array, offset: number): Generator<[string, number]> {
   while (offset < data.length) {
@@ -45,7 +46,7 @@ const rows = computed(() => {
     names[current.key]!.push(name)
   }
 
-  return zip(...Object.values(names))
+  return zip(...Object.values(names)).map((row, num) => Object.assign(row, { num }))
 })
 </script>
 
