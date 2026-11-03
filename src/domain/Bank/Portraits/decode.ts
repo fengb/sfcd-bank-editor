@@ -6,49 +6,62 @@ import {
 } from '../BattleSprites/graphics'
 import { ByteReader, readU32be } from '../util'
 
+interface OverlayTile {
+  tile: Tile
+  target: number
+}
+
 export interface Portrait {
   index: number
   pointer: number
-  eyeTiles: number[][]
-  mouthTiles: number[][]
   palette: Palette
-  tiles: Tile[]
+  baseTiles: Tile[]
+  eyeTiles: OverlayTile[]
+  mouthTiles: OverlayTile[]
 }
 
 const MAX_PORTRAITS = 64
 
+type TileMeta = [number, number, number, number]
+
 export function decodePortrait(data: Uint8Array): {
-  eyeTiles: number[][]
-  mouthTiles: number[][]
   palette: Palette
-  tiles: Tile[]
+  baseTiles: Tile[]
+  eyeTiles: OverlayTile[]
+  mouthTiles: OverlayTile[]
 } | null {
-  try {
-    const reader = new ByteReader(data)
+  const reader = new ByteReader(data)
 
-    const eyeCount = reader.nextU16()
+  let eyeCount = reader.nextU16()
+  const eyeMeta: TileMeta[] = []
+  while (eyeCount-- > 0) {
+    eyeMeta.push(reader.nextBytes(4))
+  }
 
-    const eyeTiles: number[][] = []
-    for (let i = 0; i < eyeCount; i++) {
-      eyeTiles.push(reader.nextBytes(4))
-    }
+  let mouthCount = reader.nextU16()
+  const mouthMeta: TileMeta[] = []
+  while (mouthCount-- > 0) {
+    mouthMeta.push(reader.nextBytes(4))
+  }
 
-    const mouthCount = reader.nextU16()
+  const palette = parsePalette(Uint8Array.from(reader.nextBytes(32)))
 
-    const mouthTiles: number[][] = []
-    for (let i = 0; i < mouthCount; i++) {
-      mouthTiles.push(reader.nextBytes(4))
-    }
+  const allTiles = decodeStackGraphics(reader.rest())
+  if (allTiles?.length !== 64) return null
 
-    const palette = parsePalette(Uint8Array.from(reader.nextBytes(32)))
+  const baseTiles = allTiles.filter((_, i) => i % 8 < 6)
 
-    const tileData = data.subarray(reader.pos)
-    const tiles = decodeStackGraphics(tileData)
-    if (tiles?.length !== 64) return null
+  function extractOverlayTile(meta: TileMeta): OverlayTile {
+    const [xTgt, yTgt, xSrc, ySrc] = meta
+    const tile = allTiles![ySrc * 8 + xSrc]!
+    return { tile, target: yTgt * 6 + xTgt }
+  }
 
-    return { eyeTiles, mouthTiles, palette, tiles }
-  } catch {
-    return null
+  return {
+    palette,
+    baseTiles,
+    eyeTiles: eyeMeta.map(extractOverlayTile),
+    mouthTiles: mouthMeta.map(extractOverlayTile),
   }
 }
 
@@ -57,8 +70,6 @@ export function decodePortraits(bytes: Uint8Array): Portrait[] {
 
   for (let i = 0; i < MAX_PORTRAITS; i++) {
     const entryOffset = i * 4
-    if (entryOffset + 4 > bytes.length) break
-
     const pointer = readU32be(bytes, entryOffset)
     if (!pointer) break
 
@@ -72,10 +83,10 @@ export function decodePortraits(bytes: Uint8Array): Portrait[] {
     result.push({
       index: i,
       pointer,
+      palette: decoded.palette,
+      baseTiles: decoded.baseTiles,
       eyeTiles: decoded.eyeTiles,
       mouthTiles: decoded.mouthTiles,
-      palette: decoded.palette,
-      tiles: decoded.tiles,
     })
   }
 
