@@ -115,12 +115,10 @@ export function decodeCharacterData(bytes: Uint8Array): CharacterTables {
 
   const secondaryStart = (readU32be(bytes, AUX.SECONDARY) ?? 0) - baseOffset
   const classStart = (readU32be(bytes, AUX.CLASSES) ?? 0) - baseOffset
-  const secondaryInRange = secondaryStart >= recordsStart && secondaryStart < bytes.length
-  const classInRange = classStart >= recordsStart && classStart < bytes.length
 
   return {
-    records: decodeRecords(bytes.slice(recordsStart, secondaryStart)),
-    secondary: secondaryInRange ? decodeSecondary(bytes.slice(secondaryStart, classStart)) : [],
-    classes: classInRange ? decodeClasses(bytes.slice(classStart)) : [],
+    records: decodeRecords(bytes.subarray(recordsStart, secondaryStart)),
+    secondary: decodeSecondary(bytes.subarray(secondaryStart, classStart)),
+    classes: decodeClasses(bytes.subarray(classStart)),
   }
 }
