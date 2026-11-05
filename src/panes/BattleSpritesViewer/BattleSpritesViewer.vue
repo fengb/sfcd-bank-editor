@@ -4,7 +4,7 @@ import { QTable, QBtnToggle, type QTableProps } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
-import Tile from '@/components/Tile'
+import TileBlock from '@/components/TileBlock'
 import BattleSprites from '@/domain/Bank/BattleSprites'
 import type { BattleSprite } from '@/domain/Bank/BattleSprites/decode'
 
@@ -88,15 +88,15 @@ watch(selected, () => {
         />
       </div>
       <div class="grid grid-flow-col grid-rows-3">
-        <div v-for="(tiles, i) in tileGroups" :key="i" class="grid grid-flow-col grid-rows-4">
-          <Tile
-            v-for="(tile, j) in tiles"
-            :key="j"
-            :tile="tile"
-            :palette="activeSprite?.palettes?.[selectedPalette]!"
-            :scale="3"
-          />
-        </div>
+        <TileBlock
+          v-for="(tiles, i) in tileGroups"
+          :key="i"
+          :tiles="tiles"
+          :palette="activeSprite?.palettes?.[selectedPalette]!"
+          :scale="3"
+          flow="columns"
+          :height="4"
+        />
       </div>
     </div>
   </div>

@@ -2,7 +2,7 @@
 import { QBtnToggle } from 'quasar'
 import { computed, ref } from 'vue'
 
-import Tile from '@/components/Tile'
+import TileBlock from '@/components/TileBlock'
 import { type Palette } from '@/domain/Bank/BattleSprites'
 import { useBankFileStore } from '@/stores/bank'
 
@@ -23,20 +23,14 @@ const selectedPalette = computed<Palette>(() => camp.value.palettes[selected.val
     <QBtnToggle v-model="selected" :options="paletteOptions" dense toggle-color="primary" />
   </div>
   <div v-if="selectedPalette">
-    <div
+    <TileBlock
       v-for="(tileset, i) in camp.tilesets"
       :key="i"
-      class="grid grid-cols-16"
-      style="width: max-content"
-    >
-      <Tile
-        v-for="(tile, j) in tileset"
-        :key="j"
-        :tile="tile"
-        :palette="selectedPalette"
-        :scale="3"
-      />
-    </div>
+      :tiles="tileset"
+      :width="16"
+      :palette="selectedPalette"
+      :scale="3"
+    />
   </div>
 </template>
 

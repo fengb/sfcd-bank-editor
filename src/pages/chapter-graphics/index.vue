@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import Tile from '@/components/Tile'
+import TileBlock from '@/components/TileBlock'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
@@ -15,24 +15,8 @@ const tiles = computed(() => chapter.value.tiles)
   <h2>Chapter screen graphics</h2>
   <div v-if="graphic && palette">
     <div class="row">
-      <div class="grid grid-cols-16">
-        <Tile
-          v-for="(tile, i) in tiles.slice(0, 128)"
-          :key="i"
-          :tile="tile"
-          :palette="palette"
-          :scale="3"
-        />
-      </div>
-      <div class="grid grid-cols-16">
-        <Tile
-          v-for="(tile, i) in tiles.slice(128)"
-          :key="i"
-          :tile="tile"
-          :palette="palette"
-          :scale="3"
-        />
-      </div>
+      <TileBlock :tiles="tiles.slice(0, 128)" :width="16" :palette="palette" :scale="3" />
+      <TileBlock :tiles="tiles.slice(128)" :width="16" :palette="palette" :scale="3" />
     </div>
     <div>
       <h3>Palette</h3>

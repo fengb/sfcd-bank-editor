@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import Tile from '@/components/Tile'
+import TileBlock from '@/components/TileBlock'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
@@ -17,24 +17,20 @@ const mapSprites = computed(() => store.bank!.toc.mapSprites.region())
       :key="i"
       style="border: 1px solid #444; padding: 2px"
     >
-      <div class="grid grid-flow-col grid-rows-3" style="width: max-content">
-        <Tile
-          v-for="(tile, j) in sprite.frames[0]"
-          :key="j"
-          :tile="tile"
-          :palette="mapSprites.palette"
-          :scale="2"
-        />
-      </div>
-      <div class="grid grid-flow-col grid-rows-3" style="width: max-content">
-        <Tile
-          v-for="(tile, j) in sprite.frames[1]"
-          :key="j"
-          :tile="tile"
-          :palette="mapSprites.palette"
-          :scale="2"
-        />
-      </div>
+      <TileBlock
+        :tiles="sprite.frames[0]"
+        :palette="mapSprites.palette"
+        :scale="2"
+        flow="columns"
+        :height="3"
+      />
+      <TileBlock
+        :tiles="sprite.frames[1]"
+        :palette="mapSprites.palette"
+        :scale="2"
+        flow="columns"
+        :height="3"
+      />
     </div>
   </div>
 </template>

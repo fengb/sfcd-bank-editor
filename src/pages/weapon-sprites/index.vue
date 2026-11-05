@@ -3,7 +3,7 @@ import { chunk } from 'es-toolkit'
 import { QTable, QBtnToggle, type QTableProps } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
-import Tile from '@/components/Tile'
+import TileBlock from '@/components/TileBlock'
 import type { Palette } from '@/domain/Bank/BattleSprites/graphics'
 import type { WeaponSprite } from '@/domain/Bank/WeaponSprites/decode'
 import { useBankFileStore } from '@/stores/bank'
@@ -77,9 +77,15 @@ const tileGroups = computed(() => {
           />
         </div>
         <div class="grid grid-flow-col grid-rows-2">
-          <div v-for="(tiles, i) in tileGroups" :key="i" class="grid grid-flow-col grid-rows-4">
-            <Tile v-for="(tile, j) in tiles" :key="j" :tile="tile" :palette="palette" :scale="3" />
-          </div>
+          <TileBlock
+            v-for="(tiles, i) in tileGroups"
+            :key="i"
+            :tiles="tiles"
+            :palette="palette"
+            :scale="3"
+            flow="columns"
+            :height="4"
+          />
         </div>
       </div>
     </div>
