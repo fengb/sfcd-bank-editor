@@ -3,6 +3,7 @@ import BattleSprites from '@/domain/Bank/BattleSprites'
 import CampGraphics from '@/domain/Bank/CampGraphics'
 import ChapterGraphics from '@/domain/Bank/ChapterGraphics'
 import Character from '@/domain/Bank/Character'
+import Compendium from '@/domain/Bank/Compendium'
 import Dialog from '@/domain/Bank/Dialog'
 import Icons from '@/domain/Bank/Icons'
 import Portraits from '@/domain/Bank/Portraits'
@@ -83,7 +84,7 @@ export class Bank {
       unknown0: new BankToc(this.bytes, 0x48, tmpBytesFactory),
 
       unknown1: new BankToc(this.bytes, 0x50, tmpBytesFactory),
-      compendium: new BankToc(this.bytes, 0x58, tmpBytesFactory),
+      compendium: new BankToc(this.bytes, 0x58, Compendium),
 
       characterData: new BankToc(this.bytes, 0x60, Character),
       dialog: new BankToc(this.bytes, 0x68, Dialog),

@@ -4,11 +4,9 @@ import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
 import { decodeSpell } from '@/domain/Bank'
-import { readU16be } from '@/domain/Bank/util'
-const props = defineProps<{ region: Uint8Array; offset: number }>()
+import { type CompendiumMonster } from '@/domain/Bank/Compendium'
 
-const RECORD_SIZE = 0x38 // 56 bytes
-const RECORD_COUNT = 71
+const props = defineProps<{ monsters: CompendiumMonster[] }>()
 
 function decodeInventory(value: number): string {
   if (value === 0x007f) return ' --'
@@ -18,36 +16,26 @@ function decodeInventory(value: number): string {
 }
 
 const rows = computed(() => {
-  const result: Record<string, unknown>[] = []
-  for (let i = 0; i < RECORD_COUNT; i++) {
-    const base = props.offset + i * RECORD_SIZE
-    if (base + RECORD_SIZE > props.region.length) break
-    const rec: Record<string, unknown> = { '#': i }
-    rec.index = readU16be(props.region, base + 0x00)
-    rec.level = readU16be(props.region, base + 0x0a)
-    rec.hp = readU16be(props.region, base + 0x0c)
-    rec.field0e = readU16be(props.region, base + 0x0e)
-    rec.mp = props.region[base + 0x10]!
-    rec.atk = props.region[base + 0x12]!
-    rec.def = props.region[base + 0x14]!
-    rec.agi = props.region[base + 0x16]!
-    rec.mov = props.region[base + 0x18]!
-    rec.field1a = formatHex(readU16be(props.region, base + 0x1a), 4)
-    rec.field1e = formatHex(readU16be(props.region, base + 0x1e), 4)
-
-    rec.inventory = Array.from({ length: 4 }).map((_, s) =>
-      readU16be(props.region, base + 0x20 + s * 2),
-    )
-    rec.spells = Array.from({ length: 4 }).map((_, s) => props.region[base + 0x28 + s]!)
-
-    rec.field2c = formatHex(readU16be(props.region, base + 0x2c), 4)
-    rec.field2e = formatHex(readU16be(props.region, base + 0x2e), 4)
-    rec.aiClass = formatHex(readU16be(props.region, base + 0x30), 4)
-    rec.field34 = formatHex(readU16be(props.region, base + 0x34), 4)
-
-    result.push(rec)
-  }
-  return result
+  return props.monsters.map((rec, i) => ({
+    '#': i,
+    index: rec.index,
+    level: rec.level,
+    hp: rec.hp,
+    field0e: rec.field0e,
+    mp: rec.mp,
+    atk: rec.atk,
+    def: rec.def,
+    agi: rec.agi,
+    mov: rec.mov,
+    inventory: rec.inventory,
+    spells: rec.spells,
+    field1a: rec.field1a,
+    field1e: rec.field1e,
+    field2c: rec.field2c,
+    field2e: rec.field2e,
+    aiClass: rec.aiClass,
+    field34: rec.field34,
+  }))
 })
 
 const columns: QTableProps['columns'] = [
@@ -72,23 +60,19 @@ const columns: QTableProps['columns'] = [
     field: 'spells',
     format: (spells) => spells.map(decodeSpell).join(''),
   },
-  { name: 'field1a', label: '+0x1A', field: 'field1a' },
-  { name: 'field1e', label: '+0x1E', field: 'field1e' },
+  { name: 'field1a', label: '+0x1A', field: 'field1a', format: (v: number) => formatHex(v, 4) },
+  { name: 'field1e', label: '+0x1E', field: 'field1e', format: (v: number) => formatHex(v, 4) },
   { name: 'field0e', label: '+0x0E', field: 'field0e' },
-  { name: 'field2c', label: '+0x2C', field: 'field2c' },
-  { name: 'field2e', label: '+0x2E', field: 'field2e' },
-  { name: 'aiClass', label: 'AI class', field: 'aiClass' },
-  { name: 'field34', label: '+0x34', field: 'field34' },
+  { name: 'field2c', label: '+0x2C', field: 'field2c', format: (v: number) => formatHex(v, 4) },
+  { name: 'field2e', label: '+0x2E', field: 'field2e', format: (v: number) => formatHex(v, 4) },
+  { name: 'aiClass', label: 'AI class', field: 'aiClass', format: (v: number) => formatHex(v, 4) },
+  { name: 'field34', label: '+0x34', field: 'field34', format: (v: number) => formatHex(v, 4) },
 ]
 </script>
 
 <template>
   <div>
-    <p>
-      71 monster records × 56 bytes. File offset: 0x{{
-        props.offset.toString(16).toUpperCase().padStart(4, '0')
-      }}
-    </p>
+    <p>71 monster records × 56 bytes.</p>
     <QTable
       :rows="rows"
       :columns="columns"

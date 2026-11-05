@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { mapValues, zip } from 'es-toolkit'
+import { zip } from 'es-toolkit'
 import { QTable, type QTableProps } from 'quasar'
 import { capitalize, computed } from 'vue'
 
-const props = defineProps<{
-  region: Uint8Array
-  offsets: Record<string, number>
-}>()
+import { formatHex } from '@/components/BytesViewer/hex'
+import type { CompendiumNames } from '@/domain/Bank/Compendium'
+
+const props = defineProps<{ names: CompendiumNames }>()
 
 const columns = computed<QTableProps['columns']>(() => [
-  { name: 'num', label: '#', field: 'num' },
-  ...Object.keys(props.offsets).map((name, i) => ({
+  { name: 'num', label: '#', field: 'num', format: (val) => formatHex(val, 2) },
+  ...Object.keys(props.names).map((name, i) => ({
     name,
     label: capitalize(name),
     field: String(i),
@@ -18,35 +18,8 @@ const columns = computed<QTableProps['columns']>(() => [
   })),
 ])
 
-function* readString(data: Uint8Array, offset: number): Generator<[string, number]> {
-  while (offset < data.length) {
-    const len = data[offset++]!
-    if (len >= 0x80 || offset + len > data.length) return
-    const name = [...data.subarray(offset, offset + len)]
-      .map((c) => (c === 0x0d ? ' ' : String.fromCharCode(c)))
-      .join('')
-
-    yield [name, offset]
-
-    offset += len
-  }
-}
-
 const rows = computed(() => {
-  const names: Record<keyof typeof props.offsets, string[]> = mapValues(props.offsets, () => [])
-  const sortedOffsets = Object.entries(props.offsets).map(([key, offset]) => ({ key, offset }))
-
-  let current = sortedOffsets.shift()!
-  const startingOffset = current.offset
-  for (const [name, offset] of readString(props.region, startingOffset)) {
-    const next = sortedOffsets[0]
-    if (next && next.offset <= offset) {
-      current = sortedOffsets.shift()!
-    }
-    names[current.key]!.push(name)
-  }
-
-  return zip(...Object.values(names)).map((row, num) => Object.assign(row, { num }))
+  return zip(...Object.values(props.names)).map((row, num) => Object.assign(row, { num }))
 })
 </script>
 
