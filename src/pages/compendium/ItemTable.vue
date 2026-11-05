@@ -1,27 +1,20 @@
 <script setup lang="ts">
 import { QTable, type QTableProps } from 'quasar'
-import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
 import { decodeSpell } from '@/domain/Bank'
-import { type CompendiumItem } from '@/domain/Bank/Compendium'
+import { type CompendiumItem, type CompendiumNames } from '@/domain/Bank/Compendium'
 
-const props = defineProps<{ items: CompendiumItem[] }>()
-
-const rows = computed(() => {
-  return props.items.map((rec, i) => ({
-    '#': i,
-    mask: rec.mask,
-    range: rec.range,
-    price: rec.price,
-    flags: rec.flags,
-    useSpell: decodeSpell(rec.useSpell),
-    equip: rec.equip,
-  }))
-})
+const props = defineProps<{ items: CompendiumItem[]; names: CompendiumNames }>()
 
 const columns: QTableProps['columns'] = [
-  { name: 'num', label: '#', field: '#', align: 'center', style: 'width: 30px' },
+  {
+    name: 'item',
+    label: 'Item',
+    field: 'itemId',
+    format: (id) => `${formatHex(id, 2)} - ${props.names.items[id]}`,
+    align: 'left',
+  },
   { name: 'mask', label: 'Class mask', field: 'mask', format: (v) => formatHex(v, 8) },
   {
     name: 'range',
@@ -50,7 +43,7 @@ const columns: QTableProps['columns'] = [
       return bits.map(([mask, emoji]) => ((v & mask) !== 0 ? emoji : '⬜')).join('')
     },
   },
-  { name: 'useSpell', label: 'Use spell', field: 'useSpell' },
+  { name: 'useSpell', label: 'Use spell', field: 'useSpell', format: decodeSpell },
   {
     name: 'equip',
     label: 'Equip',
@@ -62,13 +55,12 @@ const columns: QTableProps['columns'] = [
 
 <template>
   <div>
-    <p>64 item/weapon records × 16 bytes.</p>
     <p class="text-caption q-mb-sm">
       Flags bits: 💥 breakable, 💀 cursed, 🧪 consumable, 🔒 unsellable, ✨ rare, 💍 ring, 🗡️
       weapon, ❓ unused (⬜ = unset)
     </p>
     <QTable
-      :rows="rows"
+      :rows="props.items"
       :columns="columns"
       :rows-per-page-options="[0]"
       row-key="num"

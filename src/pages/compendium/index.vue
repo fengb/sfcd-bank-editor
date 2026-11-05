@@ -14,8 +14,8 @@ const compendium = computed(() => store.bank!.toc.compendium.region())
 
 <template>
   <h2>Compendium</h2>
-  <MonsterStats :monsters="compendium.monsters" />
-  <ItemTable :items="compendium.items" />
+  <MonsterStats :monsters="compendium.monsters" :names="compendium.names" />
+  <ItemTable :items="compendium.items" :names="compendium.names" />
   <BytesViewer :bytes="compendium.spells" />
   <NamesTable :names="compendium.names" />
 </template>

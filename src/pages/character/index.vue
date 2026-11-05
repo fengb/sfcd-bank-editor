@@ -9,6 +9,7 @@ import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
 const character = computed(() => store.bank!.toc.characterData.region())
+const compendium = computed(() => store.bank!.toc.compendium.region())
 
 const STAT_KEYS = ['hp', 'mp', 'att', 'def', 'agi'] as const
 
@@ -23,8 +24,20 @@ const GROWTH: Record<number, string> = {
 }
 
 const recordColumns: QTableProps['columns'] = [
-  { name: 'hero', label: 'Hero', align: 'left', field: (row) => formatHex(row.heroId) },
-  { name: 'class', label: 'Class', align: 'left', field: (row) => formatHex(row.classId) },
+  {
+    name: 'hero',
+    label: 'Hero',
+    align: 'left',
+    field: 'heroId',
+    format: (id) => `${formatHex(id, 2)} - ${compendium.value.names.characters[id]}`,
+  },
+  {
+    name: 'class',
+    label: 'Class',
+    align: 'left',
+    field: 'classId',
+    format: (id) => compendium.value.names.classes[id],
+  },
   ...STAT_KEYS.map((key) => ({
     name: key,
     label: key.toUpperCase(),
@@ -44,7 +57,13 @@ const recordColumns: QTableProps['columns'] = [
 ]
 
 const secondaryColumns: QTableProps['columns'] = [
-  { name: 'class', label: 'Class', align: 'left', field: (row) => formatHex(row.classId) },
+  {
+    name: 'class',
+    label: 'Class',
+    align: 'left',
+    field: 'classId',
+    format: (id) => compendium.value.names.classes[id],
+  },
   { name: 'level', label: 'Level', field: 'level' },
   ...[0, 1, 2, 3].map((i) => ({
     name: `b${i + 2}`,
@@ -54,7 +73,13 @@ const secondaryColumns: QTableProps['columns'] = [
 ]
 
 const classColumns: QTableProps['columns'] = [
-  { name: 'class', label: 'Class', align: 'left', field: (row) => formatHex(row.classId) },
+  {
+    name: 'class',
+    label: 'Class',
+    field: 'classId',
+    format: (id) => compendium.value.names.classes[id],
+    align: 'left',
+  },
   { name: 'mov', label: 'MOV', field: 'mov' },
   ...[0, 1, 2, 3].map((i) => ({
     name: `b${i + 1}`,

@@ -32,6 +32,7 @@ export interface CompendiumStats {
 }
 
 export interface CompendiumItem {
+  itemId: number
   mask: number
   range: [number, number]
   price: number
@@ -41,6 +42,7 @@ export interface CompendiumItem {
 }
 
 export interface CompendiumMonster {
+  monsterId: number
   index: number
   level: number
   hp: number
@@ -112,6 +114,7 @@ export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
     const base = bytes.subarray(itemOffset + i * 16)
     if (base.length < 16) break
     items.push({
+      itemId: i,
       mask: readU32be(base, 0x00) ?? 0,
       range: [base[0x05]!, base[0x04]!],
       price: readU16be(base, 0x06),
@@ -126,6 +129,7 @@ export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
     const base = bytes.subarray(monsterOffset + i * 0x38)
     if (base.length < 0x38) break
     monsters.push({
+      monsterId: i,
       index: readU16be(base, 0x00),
       level: readU16be(base, 0x0a),
       hp: readU16be(base, 0x0c),
