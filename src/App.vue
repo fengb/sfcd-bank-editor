@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { QBtn, QBtnGroup, QFile, QTooltip } from 'quasar'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 import GlobalFileDrop, { type DropHandler } from '@/components/GlobalFileDrop.vue'
 import { PAGES } from '@/pages/index/util'
 import { useBankFileStore } from '@/stores/bank'
-import { formatHexAddress } from '@/utils/format'
 
 const store = useBankFileStore()
 const { file, bank } = storeToRefs(store)
@@ -18,22 +17,11 @@ const dropHandler: DropHandler = async (file: File) => {
   return true
 }
 
-const stats = computed(() => {
-  const loaded = file.value
-  if (loaded === null) return []
-  return [
-    { label: 'Name', value: loaded.name },
-    { label: 'Size', value: `0x${formatHexAddress(loaded.bytes.length)}` },
-  ]
-})
-
-const nav = computed(() =>
-  PAGES.map((page) => ({
-    to: page.path,
-    label: page.name,
-    icon: page.icon,
-  })),
-)
+const nav = PAGES.map((page) => ({
+  to: page.path,
+  label: page.name,
+  icon: page.icon,
+}))
 
 /**
  * QFile is single-select unless `multiple` is set, so it hands over one File.
@@ -49,8 +37,19 @@ function onSelect(selected: File | undefined): void {
   <GlobalFileDrop :drop-handler="dropHandler" />
   <main class="app">
     <header>
-      <h1>SFCD Bank Editor</h1>
-      <QBtnGroup tag="nav">
+      <div class="row justify-between items-center q-mb-md">
+        <h1 class="brand-name">Shining Force CD Bank Editor</h1>
+        <QFile
+          style="width: 150px"
+          v-model="picked"
+          :display-value="file?.name"
+          :label="file ? 'File' : 'Open File...'"
+          filled
+          dense
+          @update:model-value="onSelect"
+        />
+      </div>
+      <QBtnGroup tag="nav" spread>
         <QBtn
           v-for="item in nav"
           :color="$route.path === item.to ? 'primary' : 'secondary'"
@@ -65,12 +64,6 @@ function onSelect(selected: File | undefined): void {
           </QTooltip>
         </QBtn>
       </QBtnGroup>
-      <div class="row q-gutter-md items-center q-my-sm">
-        <QFile v-model="picked" label="Open file…" outlined @update:model-value="onSelect" />
-        <div v-for="stat in stats" :key="stat.label">
-          <strong>{{ stat.label }}:</strong> {{ stat.value }}
-        </div>
-      </div>
     </header>
 
     <RouterView v-if="bank" />
@@ -83,5 +76,11 @@ function onSelect(selected: File | undefined): void {
   max-width: 60rem;
   margin: 0 auto;
   padding: 2rem 1.25rem 4rem;
+}
+
+.brand-name {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
 }
 </style>

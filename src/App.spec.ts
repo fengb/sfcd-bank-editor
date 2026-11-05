@@ -15,7 +15,7 @@ describe('App', () => {
       global: { plugins: [createPinia(), Quasar, router] },
     })
 
-    expect(wrapper.text()).toContain('SFCD Bank Editor')
-    expect(wrapper.text()).toContain('Open file')
+    expect(wrapper.text()).toContain('Shining Force CD Bank Editor')
+    expect(wrapper.text()).toContain('Open File')
   })
 })

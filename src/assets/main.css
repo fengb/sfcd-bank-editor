@@ -5,6 +5,7 @@ h4,
 h5,
 h6 {
   margin: 1rem 0;
+  line-height: 1;
 }
 
 .grid {
