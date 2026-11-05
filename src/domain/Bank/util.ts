@@ -1,5 +1,5 @@
 export class ByteReader {
-  private pos: number
+  pos: number
 
   constructor(readonly data: Uint8Array) {
     this.data = data
@@ -15,6 +15,17 @@ export class ByteReader {
     const out = Array.from(this.data.subarray(this.pos, this.pos + n))
     this.pos += n
     return out
+  }
+
+  nextBits(n: number): number[] {
+    if (n % 8 != 0) {
+      throw new Error('nextBits must be divisible by 8')
+    }
+    const bytes = this.nextBytes(n / 8)
+    return Array.from({ length: n }, (_, i) => {
+      const byte = bytes[i >> 3]!
+      return (byte >> (7 - (i % 8))) & 1
+    })
   }
 
   nextU8(): number {

@@ -1,3 +1,4 @@
+import { ByteReader } from '../util'
 export const VALUE_MAP: Record<number, number> = {
   0: 0,
   2: 52,
@@ -207,6 +208,55 @@ export function decodeStackGraphics(input: Uint8Array): Tile[] | null {
   try {
     const linear = decodeStackGraphicsLinear(input)
     return convertTiles(linear)
+  } catch {
+    return null
+  }
+}
+export function decodeBasicGraphics(input: Uint8Array): Tile[] | null {
+  try {
+    const reader = new ByteReader(input)
+    const output: number[] = []
+    let done = false
+
+    while (!done) {
+      if (reader.pos + 2 > input.length) break
+      const commands = reader.nextBits(16)
+
+      for (const command of commands) {
+        if (done) break
+        if (command) {
+          if (reader.pos + 2 > input.length) {
+            done = true
+            break
+          }
+          const repeatCommand = reader.nextU16()
+          if (repeatCommand === 0) {
+            done = true
+            break
+          }
+          const repeats = 33 - (repeatCommand & 0x1f)
+          const wordIndex = repeatCommand >> 5
+
+          // Need at least wordIndex words of prior output to copy from.
+          if (output.length < wordIndex * 2) return null
+
+          let copyPointer = output.length - wordIndex * 2
+          for (let r = 0; r < repeats; r++) {
+            if (copyPointer + 1 >= output.length) return null
+            output.push(output[copyPointer]!, output[copyPointer + 1]!)
+            if (wordIndex !== 1) copyPointer += 2
+          }
+        } else {
+          if (reader.pos + 2 > input.length) {
+            done = true
+            break
+          }
+          output.push(...reader.nextBytes(2))
+        }
+      }
+    }
+
+    return convertTiles(output)
   } catch {
     return null
   }

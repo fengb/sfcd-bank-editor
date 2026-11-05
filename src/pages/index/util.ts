@@ -7,7 +7,7 @@ export type Page = {
 
 export const PAGES: Page[] = [
   { offset: null, icon: '🏠', path: '/', name: 'Home' },
-  { offset: 0x00, icon: '❕', path: '/map-sprites', name: 'Map sprites' },
+  { offset: 0x00, icon: '🚶', path: '/map-sprites', name: 'Map sprites' },
   { offset: 0x08, icon: '❕', path: '/map-tilesets', name: 'Map tilesets' },
   { offset: 0x10, icon: '🖼️', path: '/portraits', name: 'Portraits' },
   { offset: 0x18, icon: '🦸', path: '/ally-battle-sprites', name: 'Ally battle sprites' },
