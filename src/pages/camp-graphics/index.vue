@@ -18,8 +18,10 @@ const selectedPalette = computed<Palette>(() => camp.value.palettes[selected.val
 
 <template>
   <h2>Camp graphics</h2>
-  <div>Palette</div>
-  <QBtnToggle v-model="selected" :options="paletteOptions" dense toggle-color="primary" />
+  <div class="row items-center q-gutter-sm">
+    <div>Palette</div>
+    <QBtnToggle v-model="selected" :options="paletteOptions" dense toggle-color="primary" />
+  </div>
   <div v-if="selectedPalette">
     <div
       v-for="(tileset, i) in camp.tilesets"

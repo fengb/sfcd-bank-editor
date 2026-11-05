@@ -12,6 +12,7 @@ const store = useBankFileStore()
 const portraits = computed(() => store.bank!.toc.portraits.region())
 
 const selected = ref(0)
+const showBase = ref(true)
 const showAnim = ref(false)
 const active = computed(() => portraits.value.portraits[selected.value] ?? null)
 
@@ -28,7 +29,9 @@ const columns: QTableProps['columns'] = [
 ]
 
 const animTiles = computed(() => {
-  const result: Record<number, TileModel> = {}
+  const result: (TileModel | undefined)[] = Array.from({
+    length: active.value?.baseTiles.length ?? 0,
+  })
 
   for (const eye of active.value?.eyeTiles ?? []) {
     result[eye.target] = eye.tile
@@ -59,23 +62,46 @@ watch(columns, () => {
       @row-click="(_, row) => (selected = row.index)"
     />
     <div class="col-auto">
-      <QBtnToggle
-        v-model="showAnim"
-        :options="[
-          { label: 'Base', value: false },
-          { label: 'Anim', value: true },
-        ]"
-        dense
-        toggle-color="primary"
-      />
-      <div v-if="active" class="grid grid-cols-6">
-        <Tile
-          v-for="(tile, i) in active.baseTiles"
-          :key="i"
-          :tile="showAnim ? (animTiles[i] ?? tile) : tile"
-          :palette="active.palette"
-          :scale="3"
+      <div class="row justify-between items-center">
+        <strong>Base</strong>
+        <QBtnToggle
+          v-model="showBase"
+          :options="[
+            { label: 'Hide', value: false },
+            { label: 'Show', value: true },
+          ]"
+          dense
+          toggle-color="primary"
         />
+      </div>
+      <div class="row justify-between items-center">
+        <strong>Anim</strong>
+        <QBtnToggle
+          v-model="showAnim"
+          :options="[
+            { label: 'Hide', value: false },
+            { label: 'Show', value: true },
+          ]"
+          dense
+          toggle-color="primary"
+        />
+      </div>
+      <div v-if="active" class="grid">
+        <div v-show="showBase" class="grid grid-cols-6" style="grid-area: 1 / 1">
+          <Tile
+            v-for="(tile, i) in active.baseTiles"
+            :key="`base-${i}`"
+            :tile="tile"
+            :palette="active.palette"
+            :scale="3"
+          />
+        </div>
+        <div v-show="showAnim" class="grid grid-cols-6" style="grid-area: 1 / 1">
+          <template v-for="(tile, i) in animTiles" :key="`anim-${i}`">
+            <Tile v-if="tile" :tile="tile" :palette="active.palette" :scale="3" />
+            <div v-else style="width: 24px; height: 24px" />
+          </template>
+        </div>
       </div>
     </div>
   </div>

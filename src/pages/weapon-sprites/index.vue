@@ -67,8 +67,15 @@ const tileGroups = computed(() => {
     />
     <div class="col-auto">
       <div v-if="active">
-        <div>Frame</div>
-        <QBtnToggle v-model="selectedFrame" :options="frameOptions" dense toggle-color="primary" />
+        <div class="row items-center q-gutter-sm">
+          <div>Frame</div>
+          <QBtnToggle
+            v-model="selectedFrame"
+            :options="frameOptions"
+            dense
+            toggle-color="primary"
+          />
+        </div>
         <div class="grid grid-flow-col grid-rows-2">
           <div v-for="(tiles, i) in tileGroups" :key="i" class="grid grid-flow-col grid-rows-4">
             <Tile v-for="(tile, j) in tiles" :key="j" :tile="tile" :palette="palette" :scale="3" />

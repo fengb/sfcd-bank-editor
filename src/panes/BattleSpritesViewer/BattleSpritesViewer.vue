@@ -74,25 +74,18 @@ watch(selected, () => {
       @row-click="(_, row) => (selected = row.index)"
     />
     <div class="col-auto">
-      <div class="row justify-between">
-        <div>
-          <div>Frame</div>
-          <QBtnToggle
-            v-model="selectedFrame"
-            :options="frameOptions"
-            dense
-            toggle-color="primary"
-          />
-        </div>
-        <div>
-          <div>Palette</div>
-          <QBtnToggle
-            v-model="selectedPalette"
-            :options="paletteOptions"
-            dense
-            toggle-color="primary"
-          />
-        </div>
+      <div class="row justify-between items-center">
+        <div>Frame</div>
+        <QBtnToggle v-model="selectedFrame" :options="frameOptions" dense toggle-color="primary" />
+      </div>
+      <div class="row justify-between items-center">
+        <div>Palette</div>
+        <QBtnToggle
+          v-model="selectedPalette"
+          :options="paletteOptions"
+          dense
+          toggle-color="primary"
+        />
       </div>
       <div class="grid grid-flow-col grid-rows-3">
         <div v-for="(tiles, i) in tileGroups" :key="i" class="grid grid-flow-col grid-rows-4">
