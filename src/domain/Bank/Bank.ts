@@ -7,6 +7,7 @@ import Compendium from '@/domain/Bank/Compendium'
 import Dialog from '@/domain/Bank/Dialog'
 import Icons from '@/domain/Bank/Icons'
 import MapSprites from '@/domain/Bank/MapSprites'
+import MapTilesets from '@/domain/Bank/MapTilesets'
 import Portraits from '@/domain/Bank/Portraits'
 import WeaponSprites from '@/domain/Bank/WeaponSprites'
 
@@ -70,7 +71,7 @@ export class Bank {
   get toc() {
     return {
       mapSprites: new BankToc(this.bytes, 0x00, MapSprites),
-      mapTiles: new BankToc(this.bytes, 0x08, tmpBytesFactory),
+      mapTilesets: new BankToc(this.bytes, 0x08, MapTilesets),
 
       portraits: new BankToc(this.bytes, 0x10, Portraits),
       allyBattleSprites: new BankToc(this.bytes, 0x18, BattleSprites),

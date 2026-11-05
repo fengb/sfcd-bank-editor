@@ -30,7 +30,7 @@ describe('Bank', () => {
       const data = new Uint8Array(0x11000)
       setU32be(data, 0x8, 0x10000) // header 0x08 address; target read at 0x0000 is 0
       const bank = new Bank(data)
-      expect(bank.toc.mapTiles.slotSize()).toBe('error')
+      expect(bank.toc.mapTilesets.slotSize()).toBe('error')
     })
 
     it('returns -- when the slot stride is implausibly large', () => {
@@ -38,7 +38,7 @@ describe('Bank', () => {
       setU32be(data, 0x8, 0x10000) // header 0x08 address
       setU32be(data, 0x0, 0x20000) // target read at 0x0000
       const bank = new Bank(data)
-      expect(bank.toc.mapTiles.slotSize()).toBe('--')
+      expect(bank.toc.mapTilesets.slotSize()).toBe('--')
     })
   })
 
