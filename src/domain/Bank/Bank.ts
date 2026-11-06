@@ -6,6 +6,7 @@ import Character from '@/domain/Bank/Character'
 import Compendium from '@/domain/Bank/Compendium'
 import Dialog from '@/domain/Bank/Dialog'
 import Icons from '@/domain/Bank/Icons'
+import MapData from '@/domain/Bank/MapData'
 import MapSprites from '@/domain/Bank/MapSprites'
 import MapTilesets from '@/domain/Bank/MapTilesets'
 import Portraits from '@/domain/Bank/Portraits'
@@ -94,7 +95,7 @@ export class Bank {
       icons: new BankToc(this.bytes, 0x70, Icons),
       campGraphics: new BankToc(this.bytes, 0x78, CampGraphics),
 
-      mapData: new BankToc(this.bytes, 0x80, tmpBytesFactory), // clarify name
+      mapData: new BankToc(this.bytes, 0x80, MapData),
       battleData: new BankToc(this.bytes, 0x88, tmpBytesFactory), // clarify name
 
       unknownA: new BankToc(this.bytes, 0x90, tmpBytesFactory), // "Shared WRAM pointer table"

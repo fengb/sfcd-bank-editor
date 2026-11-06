@@ -129,6 +129,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/map-data/': RouteRecordInfo<
+      '/map-data/',
+      '/map-data',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/map-sprites/': RouteRecordInfo<
       '/map-sprites/',
       '/map-sprites',
@@ -139,13 +146,6 @@ declare module 'vue-router/auto-routes' {
     '/map-tilesets/': RouteRecordInfo<
       '/map-tilesets/',
       '/map-tilesets',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/per-map-data/': RouteRecordInfo<
-      '/per-map-data/',
-      '/per-map-data',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -331,6 +331,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/map-data/index.vue': {
+      routes:
+        | '/map-data/'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/map-sprites/index.vue': {
       routes:
         | '/map-sprites/'
@@ -342,14 +350,6 @@ declare module 'vue-router/auto-routes' {
     'src/pages/map-tilesets/index.vue': {
       routes:
         | '/map-tilesets/'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/pages/per-map-data/index.vue': {
-      routes:
-        | '/per-map-data/'
       views:
         | never
       pathParamNames:

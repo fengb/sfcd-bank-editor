@@ -23,7 +23,7 @@ export const PAGES: Page[] = [
   { offset: 0x68, icon: '💬', path: '/dialog', name: 'Dialog' },
   { offset: 0x70, icon: '🌀', path: '/icons', name: 'Icons' },
   { offset: 0x78, icon: '⛺️', path: '/camp-graphics', name: 'Camp graphics' },
-  { offset: 0x80, icon: '❕', path: '/per-map-data', name: 'Per-map data' },
+  { offset: 0x80, icon: '❕', path: '/map-data', name: 'Map data' },
   { offset: 0x88, icon: '❕', path: '/battle-data', name: 'Battle data' },
   { offset: 0x90, icon: '❔', path: '/unknown-0x90', name: 'Unknown 0x90' },
   { offset: 0x98, icon: '❔', path: '/unknown-0x98', name: 'Unknown 0x98' },
