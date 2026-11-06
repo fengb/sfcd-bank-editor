@@ -66,3 +66,40 @@ export function readU32be(data: Uint8Array, offset: number): number | null {
 export function readU16be(data: Uint8Array, offset: number): number {
   return ((data[offset]! << 8) | data[offset + 1]!) >>> 0
 }
+
+export class BitReader {
+  private pos = 0
+
+  constructor(private readonly data: Uint8Array) {}
+
+  nextBit(): number {
+    if (this.pos >= this.data.length * 8) return 0
+    const byte = this.data[this.pos >> 3]!
+    const bit = (byte >> (7 - (this.pos & 7))) & 1
+    this.pos++
+    return bit
+  }
+
+  skipBits(n: number): void {
+    this.pos += n
+  }
+
+  nextBitsValue(n: number): number {
+    let value = 0
+    for (let i = 0; i < n; i++) value = (value << 1) | this.nextBit()
+    return value
+  }
+
+  nextPrefixCodeLookup<T>(mapping: Record<string, T>): T | undefined {
+    const max = Math.max(...Object.keys(mapping).map((key) => key.length))
+
+    let code = ''
+    while (code.length < max) {
+      code += this.nextBit()
+      if (Object.prototype.hasOwnProperty.call(mapping, code)) {
+        return mapping[code]
+      }
+    }
+    return undefined
+  }
+}

@@ -12,6 +12,7 @@ import {
 export { decodeMapData } from './decode'
 
 import type { Palette } from '../BattleSprites/graphics'
+import type { DecodedTile } from './decodeBlocks'
 
 export default class MapData {
   readonly data: MapDataRegions | null
@@ -56,6 +57,14 @@ export default class MapData {
 
   get layoutBytes(): Uint8Array {
     return this.layout
+  }
+
+  get decodedBlocks(): DecodedTile[] {
+    return this.data?.decodedBlocks ?? []
+  }
+
+  get decodedLayout(): number[] {
+    return this.data?.decodedLayout ?? []
   }
 
   get areas(): MapArea[] {

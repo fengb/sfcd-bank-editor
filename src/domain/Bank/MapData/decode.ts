@@ -1,5 +1,7 @@
 import { parsePalette, type Palette } from '../BattleSprites/graphics'
 import { readU16be, readU32be } from '../util'
+import { decodeBlocks, type DecodedTile } from './decodeBlocks'
+import { decodeLayout } from './decodeLayout'
 
 const MAINCPU_WORDRAM_LOADING_OFFSET = 0x23de00
 
@@ -107,6 +109,9 @@ export interface MapDataRegions {
 
   layout: Uint8Array
   layoutBytes: Uint8Array
+
+  decodedBlocks: DecodedTile[]
+  decodedLayout: number[]
 
   areas: MapArea[]
   areasBytes: Uint8Array
@@ -332,6 +337,8 @@ export function decodeMapData(data: Uint8Array): MapDataRegions | null {
       blockBytes: blocks,
       layout,
       layoutBytes: layout,
+      decodedBlocks: decodeBlocks(blocks),
+      decodedLayout: decodeLayout(layout),
       areas: parseAreas(areasBytes),
       areasBytes,
       flagCopies: parseFlagCopies(flagCopiesBytes),
