@@ -1,11 +1,5 @@
+import type { Palette, Tile } from '../BattleSprites/graphics'
 import { decodeChapterGraphic, type ChapterGraphic } from './decode'
-
-export { type ChapterGraphic }
-export { decodeChapterGraphic }
-export * from './decode'
-export * from './graphics'
-
-import type { Palette, Tile } from './graphics'
 
 export default class ChapterGraphics {
   readonly graphic: ChapterGraphic | null

@@ -1,10 +1,5 @@
 import { decodePortraits, type Portrait } from './decode'
 
-export { type Portrait }
-export { decodePortraits }
-export * from './decode'
-export * from './graphics'
-
 export default class Portraits {
   readonly portraits: Portrait[]
   readonly bytes: Uint8Array

@@ -68,9 +68,9 @@ export function readU16be(data: Uint8Array, offset: number): number {
 }
 
 export class BitReader {
-  private pos = 0
+  protected pos = 0
 
-  constructor(private readonly data: Uint8Array) {}
+  constructor(protected readonly data: Uint8Array) {}
 
   nextBit(): number {
     if (this.pos >= this.data.length * 8) return 0
@@ -78,6 +78,14 @@ export class BitReader {
     const bit = (byte >> (7 - (this.pos & 7))) & 1
     this.pos++
     return bit
+  }
+
+  nextBits(count: number): number[] {
+    const result = []
+    while (count-- > 0) {
+      result.push(this.nextBit())
+    }
+    return result
   }
 
   skipBits(n: number): void {
@@ -88,6 +96,14 @@ export class BitReader {
     let value = 0
     for (let i = 0; i < n; i++) value = (value << 1) | this.nextBit()
     return value
+  }
+
+  nextZeroes(maxZeros: number = Infinity): number {
+    let count = 0
+    while (count < maxZeros && this.nextBit() === 0) {
+      count++
+    }
+    return count
   }
 
   nextPrefixCodeLookup<T>(mapping: Record<string, T>): T | undefined {

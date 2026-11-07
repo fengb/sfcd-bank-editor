@@ -12,7 +12,7 @@ const tilesets = computed(() => store.bank!.toc.mapTilesets.region().tiles ?? []
 
 const decodedBlocks = computed<DecodedTile[]>(() => mapData.value.decodedBlocks ?? [])
 
-const decodedLayout = computed<number[]>(() => mapData.value.decodedLayout ?? [])
+const decodedLayout = computed(() => mapData.value.decodedLayout ?? [])
 
 const blockCount = computed(() => Math.floor(mapData.value.decodedBlocks.length / 9))
 
@@ -109,18 +109,17 @@ function renderLayout(): void {
   const blockTiles = 3
   const blockPx = tileSize * blockTiles
   const blocksPerRow = 64
-  const size = blocksPerRow * blockPx
-  canvas.width = size
-  canvas.height = size
+  canvas.width = 64 * blockPx
+  canvas.height = 32 * blockPx
   const ctx = canvas.getContext('2d')
   if (!ctx) return
   ctx.fillStyle = '#111'
-  ctx.fillRect(0, 0, size, size)
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  layout.forEach((blockNumber, bi) => {
+  layout.forEach((entry, bi) => {
     const bx = bi % blocksPerRow
     const by = Math.floor(bi / blocksPerRow)
-    const slice = blocks.slice(blockNumber * 9, blockNumber * 9 + 9)
+    const slice = blocks.slice(entry.block * 9, entry.block * 9 + 9)
     if (slice.length < 9) return
     slice.forEach((tileDesc, t) => {
       const tx = t % blockTiles
@@ -166,9 +165,7 @@ watch(
   <canvas ref="blocksCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
 
   <h3>Decoded layout ({{ decodedLayout.length }} blocks)</h3>
-  <div style="overflow: auto; max-height: 70vh">
-    <canvas ref="layoutCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
-  </div>
+  <canvas ref="layoutCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
 
   <BytesViewer :bytes="mapData.blocks" title="Blocks (raw)" />
   <BytesViewer :bytes="mapData.layout" title="Layout (raw)" />

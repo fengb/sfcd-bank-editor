@@ -1,4 +1,4 @@
-import { ByteReader } from '../util'
+import { BitReader, ByteReader } from '../util'
 export const VALUE_MAP: Record<number, number> = {
   0: 0,
   2: 52,
@@ -97,104 +97,51 @@ const COMMAND_PATTERNS: Record<string, number[]> = {
   '1110': [1, 0, 0, 0],
 }
 
-class StackGraphicsReader {
-  private readonly data: Uint8Array
-  private readonly history: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+function decodeStackGraphicsLinear(input: Uint8Array): number[] {
+  const reader = new BitReader(input)
 
-  private currentBit = -1
+  const history: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 
-  constructor(input: Uint8Array) {
-    this.data = input
-  }
+  function nextValue(): number {
+    const valueIndex = reader.nextPrefixCodeLookup(VALUE_CODE_TO_INDEX)!
 
-  private nextBit(): number {
-    this.currentBit++
-    const byte = this.data[this.currentBit >> 3]
-    if (byte === undefined) {
-      throw new Error('Unexpected end of input')
-    }
-    return (byte >> (7 - (this.currentBit & 7))) & 1
-  }
-
-  private nextPrefixCodeLookup<T>(mapping: Record<string, T>): T | undefined {
-    const max = Math.max(...Object.keys(mapping).map((key) => key.length))
-
-    let code = ''
-    while (code.length < max) {
-      code += this.nextBit()
-      if (Object.prototype.hasOwnProperty.call(mapping, code)) {
-        return mapping[code]
-      }
-    }
-    return undefined
-  }
-
-  nextCommandPattern(): number[] {
-    const command = this.nextPrefixCodeLookup(COMMAND_PATTERNS)
-    if (command !== undefined) return command
-
-    const custom: number[] = []
-    for (let i = 0; i < 4; i++) {
-      custom.push(this.nextBit())
-    }
-    return custom
-  }
-
-  private nextValue(): number {
-    const valueIndex = this.nextPrefixCodeLookup(VALUE_CODE_TO_INDEX)!
-
-    const value = this.history[valueIndex]!
+    const value = history[valueIndex]!
     if (valueIndex !== 0) {
-      this.history.splice(valueIndex, 1)
-      this.history.unshift(value)
+      history.splice(valueIndex, 1)
+      history.unshift(value)
     }
     return value
   }
 
-  nextWordValue(): number {
+  function nextWordValue(): number {
     let value = 0
     for (let i = 0; i < 4; i++) {
-      value = (value << 4) | this.nextValue()
+      value = (value << 4) | nextValue()
     }
     return value
   }
-
-  nextCopyOffset(): number {
-    let offset = 0
-    for (let i = 0; i < 11; i++) {
-      offset = (offset << 1) | this.nextBit()
-    }
-    return offset
-  }
-
-  nextCopyLength(): number {
-    let length = 2
-    while (this.nextBit() === 0) {
-      length++
-    }
-    return length
-  }
-}
-
-function decodeStackGraphicsLinear(input: Uint8Array): number[] {
-  const decoder = new StackGraphicsReader(input)
 
   const output: number[] = []
   while (true) {
     const commands: number[] = []
     for (let i = 0; i < 4; i++) {
-      commands.push(...decoder.nextCommandPattern())
+      const command = reader.nextPrefixCodeLookup(COMMAND_PATTERNS)
+      if (command) {
+        commands.push(...command)
+      } else {
+        commands.push(...reader.nextBits(4))
+      }
     }
     for (const command of commands) {
       if (command === 0) {
-        const value = decoder.nextWordValue()
+        const value = nextWordValue()
         output.push((value >> 8) & 0xff, value & 0xff)
       } else {
-        const copyOffset = decoder.nextCopyOffset()
+        const copyOffset = reader.nextBitsValue(11)
         if (copyOffset === 0) {
           return output
         }
-        const copyLength = decoder.nextCopyLength()
+        const copyLength = 2 + reader.nextZeroes()
         for (let j = 0; j < copyLength; j++) {
           const idx = output.length - 2 * copyOffset
           output.push(output[idx]!, output[idx + 1]!)

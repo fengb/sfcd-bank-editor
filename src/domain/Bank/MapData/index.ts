@@ -1,3 +1,4 @@
+import type { Palette } from '../BattleSprites/graphics'
 import {
   decodeMapData,
   type MapDataRegions,
@@ -9,10 +10,8 @@ import {
   type MapItem,
   type MapAnimation,
 } from './decode'
-export { decodeMapData } from './decode'
-
-import type { Palette } from '../BattleSprites/graphics'
 import type { DecodedTile } from './decodeBlocks'
+import type { LayoutEntry } from './decodeLayout'
 
 export default class MapData {
   readonly data: MapDataRegions | null
@@ -63,7 +62,7 @@ export default class MapData {
     return this.data?.decodedBlocks ?? []
   }
 
-  get decodedLayout(): number[] {
+  get decodedLayout(): LayoutEntry[] {
     return this.data?.decodedLayout ?? []
   }
 

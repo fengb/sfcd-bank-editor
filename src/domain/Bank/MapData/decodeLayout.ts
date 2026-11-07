@@ -2,20 +2,47 @@ import { isEqual } from 'es-toolkit'
 
 import { BitReader } from '../util'
 
-interface LayoutEntry {
+export type LayoutTerrain = 'open' | 'stairsRight' | 'stairsLeft' | 'blocked'
+
+export const INTERACTIONS = [
+  'none',
+  'step',
+  'hideRoofs',
+  'showRoofs',
+  'warp',
+  'trigger',
+  'chest',
+  'search',
+  'layerUp',
+  'layerDown',
+  'table',
+  'vase',
+  'barrel',
+  'shelf',
+  'caravan',
+  'raft',
+] as const
+
+export type LayoutInteraction = (typeof INTERACTIONS)[number]
+
+export interface LayoutEntry {
   block: number
-  flags: number
+  terrain: LayoutTerrain
+  interaction: LayoutInteraction
 }
 
-export function decodeLayout(data: Uint8Array): number[] {
-  const blocks: number[] = new Array(64 * 64).fill(0)
-  const cellFlags: number[] = new Array(64 * 64)
+export function decodeLayout(data: Uint8Array): LayoutEntry[] {
+  const entries: LayoutEntry[] = Array.from({ length: 64 * 32 }, () => ({
+    block: 0,
+    terrain: 'open',
+    interaction: 'none',
+  }))
 
   const leftHistory = new Map<number, LayoutEntry[]>()
   const upperHistory = new Map<number, LayoutEntry[]>()
 
-  let blocksetCursor = 2
-  let blockCursor = 0
+  let blockCursor = 2
+  let entryCursor = 0
   const reader = new BitReader(data)
 
   function saveStack(map: Map<number, LayoutEntry[]>, key: number, entry: LayoutEntry): void {
@@ -24,123 +51,100 @@ export function decodeLayout(data: Uint8Array): number[] {
     map.set(key, newStack)
   }
 
-  function decodeFlags(): number {
+  function decodeFlags(): { terrain: LayoutTerrain; interaction: LayoutInteraction } {
     const flags = reader.nextPrefixCodeLookup({
-      '00': 0,
-      '01': 0xc000,
-      '100': 0x4000,
-      '101': 0x8000,
-      '110': -0x0000,
-      '111': -0x8000,
+      '00': { terrain: 'open', interaction: 'none' },
+      '01': { terrain: 'blocked', interaction: 'none' },
+      '100': { terrain: 'stairsRight', interaction: 'none' },
+      '101': { terrain: 'stairsLeft', interaction: 'none' },
+      '110': { terrain: 'open' },
+      '111': { terrain: 'blocked' },
     })!
-    if (flags > 0 || Object.is(flags, 0)) {
-      return flags
+    if (!flags.interaction) {
+      const bits = reader.nextBitsValue(5)
+      flags.interaction = INTERACTIONS[bits] ?? 'none'
     }
-
-    return -flags & (reader.nextBitsValue(5) << 10)
+    return flags as { terrain: LayoutTerrain; interaction: LayoutInteraction }
   }
 
-  while (blockCursor < 64 * 64) {
-    if (reader.nextBit() === 0) {
-      if (reader.nextBit() === 0) {
-        // 00 : output next block from block set
-        blocksetCursor++
-        const blockNumber = blocksetCursor
-        const flags = decodeFlags()
-        blocks[blockCursor] = blockNumber
-        cellFlags[blockCursor] = flags
-        const entry: LayoutEntry = { block: blockNumber, flags }
-        const leftKey = blockCursor > 0 ? blocks[blockCursor - 1]! : 0
-        const upperKey = blockCursor > 63 ? blocks[blockCursor - 64]! : 0
-        saveStack(leftHistory, leftKey, entry)
-        saveStack(upperHistory, upperKey, entry)
-        blockCursor++
-      } else {
-        // 01 : copy section
-        let count = 0
-        while (reader.nextBit() === 0) count++
-        const value = reader.nextBitsValue(count)
-        const result = value + (1 << count)
-        const offset = reader.nextBit() === 1 ? 1 : 64
-        for (let i = 0; i < result; i++) {
-          if (blockCursor < 64 * 64) {
-            const sourceIndex = blockCursor - offset
-            if (sourceIndex < 0 || blocks[sourceIndex] == null) break
-            blocks[blockCursor] = blocks[sourceIndex]
-            cellFlags[blockCursor] = cellFlags[sourceIndex]!
-            blockCursor++
-          }
-        }
+  while (entryCursor < 64 * 32) {
+    const op = reader.nextPrefixCodeLookup({
+      '1': 'reference',
+      '00': 'literal',
+      '01': 'copyRun',
+    })!
+
+    if (op === 'literal') {
+      blockCursor++
+      const flags = decodeFlags()
+      const entry: LayoutEntry = { block: blockCursor, ...flags }
+      entries[entryCursor] = entry
+      const leftEntry = entries[entryCursor - 1]
+      const upperEntry = entries[entryCursor - 64]
+      saveStack(leftHistory, leftEntry?.block ?? 0, entry)
+      saveStack(upperHistory, upperEntry?.block ?? 0, entry)
+      entryCursor++
+    } else if (op === 'copyRun') {
+      const count = reader.nextZeroes()
+      const value = reader.nextBitsValue(count)
+      const totalCopies = value + (1 << count)
+      const offset = reader.nextBit() === 1 ? 1 : 64
+      for (let i = 0; i < totalCopies; i++) {
+        if (entryCursor >= 64 * 32) break
+        const sourceIndex = entryCursor - offset
+        if (sourceIndex < 0 || !entries[sourceIndex]) break
+        entries[entryCursor] = { ...entries[sourceIndex]! }
+        entryCursor++
       }
-    } else {
-      // 1...
-      const leftBlockCursor = blockCursor > 0 ? blocks[blockCursor - 1]! : 0
-      const upperBlockCursor = blockCursor > 63 ? blocks[blockCursor - 64]! : 0
+    } else if (op === 'reference') {
+      const leftEntry = entries[entryCursor - 1]
+      const upperEntry = entries[entryCursor - 64]
 
-      const leftStack = leftHistory.get(leftBlockCursor)
-      const leftAvailable = leftStack?.length! > 0
-      const upperStack = upperHistory.get(upperBlockCursor)
-      const upperAvailable = upperStack?.length! > 0
+      const leftStack = leftHistory.get(leftEntry?.block ?? 0) ?? []
+      const leftAvailable = leftStack.length > 0
+      const upperStack = upperHistory.get(upperEntry?.block ?? 0) ?? []
+      const upperAvailable = upperStack.length > 0
 
-      let commandType = 2 // CUSTOM
-      if (leftAvailable) {
-        if (reader.nextBit() === 0) {
-          commandType = 0 // LEFT
-        } else {
-          if (upperAvailable) {
-            if (reader.nextBit() === 0) {
-              commandType = 1 // UPPER
-            } else {
-              commandType = 2
-            }
-          } else {
-            commandType = 2
-          }
-        }
-      } else {
-        if (upperAvailable) {
-          if (reader.nextBit() === 0) {
-            commandType = 1
-          } else {
-            commandType = 2
-          }
-        } else {
-          commandType = 2
-        }
+      let commandType = 2
+      if (leftAvailable && upperAvailable) {
+        commandType = reader.nextPrefixCodeLookup({
+          '0': 0,
+          '10': 1,
+          '11': 2,
+        })!
+      } else if (leftAvailable) {
+        commandType = reader.nextPrefixCodeLookup({
+          '0': 0,
+          '1': 2,
+        })!
+      } else if (upperAvailable) {
+        commandType = reader.nextPrefixCodeLookup({
+          '0': 1,
+          '1': 2,
+        })!
       }
 
       let targetEntry: LayoutEntry | undefined
-      if (commandType < 2) {
-        const stack = (commandType === 0 ? leftStack : upperStack) ?? []
-
-        let stackTarget = 0
-        for (let i = 0; i < stack.length - 1; i++) {
-          if (reader.nextBit() === 0) {
-            stackTarget++
-          } else {
-            break
-          }
-        }
-        targetEntry = stack[stackTarget]
+      if (commandType === 0 || commandType === 1) {
+        const stack = commandType === 0 ? leftStack : upperStack
+        const targetIndex = reader.nextZeroes(stack.length - 1)
+        targetEntry = stack[targetIndex]
       } else {
-        const length = blocksetCursor.toString(2).length
+        const length = blockCursor.toString(2).length
         const value = reader.nextBitsValue(length)
         const flags = decodeFlags()
-        targetEntry = { block: value, flags }
+        targetEntry = { block: value, ...flags }
       }
 
       if (targetEntry) {
-        blocks[blockCursor] = targetEntry.block
-        cellFlags[blockCursor] = targetEntry.flags
-        const entry: LayoutEntry = { block: targetEntry.block, flags: targetEntry.flags }
-        const leftKey = blockCursor > 0 ? blocks[blockCursor - 1]! : 0
-        const upperKey = blockCursor > 63 ? blocks[blockCursor - 64]! : 0
-        saveStack(leftHistory, leftKey, entry)
-        saveStack(upperHistory, upperKey, entry)
+        entries[entryCursor] = { ...targetEntry }
+        const leftEntry = entries[entryCursor - 1]
+        const upperEntry = entries[entryCursor - 64]
+        saveStack(leftHistory, leftEntry?.block ?? 0, targetEntry)
+        saveStack(upperHistory, upperEntry?.block ?? 0, targetEntry)
       }
-      blockCursor++
+      entryCursor++
     }
   }
-
-  return blocks
+  return entries
 }
