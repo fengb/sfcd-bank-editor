@@ -95,89 +95,78 @@ const COMMAND_PATTERNS: Record<string, number[]> = {
   '1110': [1, 0, 0, 0],
 }
 
-function decodeStackGraphicsLinear(input: Uint8Array): number[] {
-  const reader = new BitReader(input)
+class MtfList {
+  constructor(private readonly values: number[]) {}
 
-  const history: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-
-  function nextValue(): number {
-    const valueIndex = reader.nextPrefixCodeLookup(VALUE_CODE_TO_INDEX)!
-
-    const value = history[valueIndex]!
-    if (valueIndex !== 0) {
-      history.splice(valueIndex, 1)
-      history.unshift(value)
+  get(index: number): number {
+    if (index === 0) {
+      return this.values[0]!
     }
-    return value
-  }
-
-  function nextWordValue(): number {
-    let value = 0
-    for (let i = 0; i < 4; i++) {
-      value = (value << 4) | nextValue()
-    }
-    return value
-  }
-
-  const output: number[] = []
-  while (true) {
-    const commands: number[] = []
-    for (let i = 0; i < 4; i++) {
-      const command = reader.nextPrefixCodeLookup(COMMAND_PATTERNS)
-      if (command) {
-        commands.push(...command)
-      } else {
-        commands.push(...reader.nextBits(4))
-      }
-    }
-    for (const command of commands) {
-      if (command === 0) {
-        const value = nextWordValue()
-        output.push(...splitBits(value, [8, 8]))
-      } else {
-        const copyOffset = reader.nextBitsValue(11)
-        if (copyOffset === 0) {
-          return output
-        }
-        const copyLength = 2 + reader.nextZeroes()
-        for (let j = 0; j < copyLength; j++) {
-          const idx = output.length - 2 * copyOffset
-          output.push(output[idx]!, output[idx + 1]!)
-        }
-      }
-    }
+    const [value] = this.values.splice(index, 1)
+    this.values.unshift(value!)
+    return value!
   }
 }
 
 export function decodeStackGraphics(input: Uint8Array): Tile[] | null {
   try {
-    const linear = decodeStackGraphicsLinear(input)
-    return convertTiles(linear)
+    const reader = new BitReader(input)
+    const history = new MtfList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+
+    function nextWordValue(): number {
+      let value = 0
+      for (let i = 0; i < 4; i++) {
+        const valueIndex = reader.nextPrefixCodeLookup(VALUE_CODE_TO_INDEX)!
+        const newValue = history.get(valueIndex)
+        value = (value << 4) | newValue
+      }
+      return value
+    }
+
+    const output: number[] = []
+    out: while (true) {
+      const commands: number[] = []
+      for (let i = 0; i < 4; i++) {
+        const command = reader.nextPrefixCodeLookup(COMMAND_PATTERNS) ?? reader.nextBits(4)
+        commands.push(...command)
+      }
+      for (const command of commands) {
+        if (command === 0) {
+          const value = nextWordValue()
+          output.push(...splitBits(value, [8, 8]))
+        } else {
+          const copyOffset = reader.nextBitsValue(11)
+          if (copyOffset === 0) {
+            break out
+          }
+          const copyLength = 2 + reader.nextZeroes()
+          for (let j = 0; j < copyLength; j++) {
+            const idx = output.length - 2 * copyOffset
+            output.push(output[idx]!, output[idx + 1]!)
+          }
+        }
+      }
+    }
+
+    return convertTiles(output)
   } catch {
     return null
   }
 }
+
 export function decodeBasicGraphics(input: Uint8Array): Tile[] | null {
   try {
     const reader = new ByteReader(input)
-    const output: number[] = []
-    let done = false
 
-    while (!done) {
-      if (reader.pos + 2 > input.length) break
+    const output: number[] = []
+    out: while (reader.bytesRemaining() >= 2) {
       const commands = reader.nextBits(16)
 
       for (const command of commands) {
-        if (done) break
         if (command) {
-          if (reader.pos + 2 > input.length) {
-            done = true
-            break
-          }
           const repeatCommand = reader.nextU16()
           if (repeatCommand === 0) {
-            done = true
-            break
+            break out
           }
           const [wordIndex, repeatCode] = splitBits(repeatCommand, [11, 5])
           const repeats = 33 - repeatCode
@@ -192,10 +181,6 @@ export function decodeBasicGraphics(input: Uint8Array): Tile[] | null {
             if (wordIndex !== 1) copyPointer += 2
           }
         } else {
-          if (reader.pos + 2 > input.length) {
-            done = true
-            break
-          }
           output.push(...reader.nextBytes(2))
         }
       }

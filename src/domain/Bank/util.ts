@@ -6,8 +6,8 @@ export class ByteReader {
     this.pos = 0
   }
 
-  isEof(remaining: number = 1): boolean {
-    return this.pos + remaining > this.data.length
+  bytesRemaining(): number {
+    return this.data.length - this.pos
   }
 
   nextBytes(n: 1): [number]

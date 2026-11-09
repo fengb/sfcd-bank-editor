@@ -35,4 +35,12 @@ describe('splitBits', () => {
     expect(flags).toBe(2)
     expect(idx).toBe(0x1f)
   })
+
+  it('discards bits beyond the declared widths', () => {
+    expect(splitBits(0xffff, [4, 4])).toEqual([0xf, 0xf])
+  })
+
+  it('handles a zero width field', () => {
+    expect(splitBits(0b1010, [4, 0])).toEqual([0b1010, 0])
+  })
 })
