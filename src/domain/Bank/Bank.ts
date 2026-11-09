@@ -11,6 +11,7 @@ import MapSprites from '@/domain/Bank/MapSprites'
 import MapTilesets from '@/domain/Bank/MapTilesets'
 import Portraits from '@/domain/Bank/Portraits'
 import WeaponSprites from '@/domain/Bank/WeaponSprites'
+import { splitBits } from '@/utils/bits'
 
 import { readU32be } from './util'
 
@@ -129,13 +130,12 @@ export class Bank {
 
 export function decodeSpell(value: number): string {
   if (value === 0x3f) return ' --'
-  const idx = value & 0x3f
-  const flags = value & 0xc0
+  const [flags, idx] = splitBits(value, [2, 6])
   const flagsDisplay: Record<number, string> = {
-    [0x00]: '¹',
-    [0x40]: '²',
-    [0x80]: '³',
-    [0xc0]: '⁴',
+    0: '¹',
+    1: '²',
+    2: '³',
+    3: '⁴',
   }
   return `${formatHex(idx, 2)}${flagsDisplay[flags]}`
 }

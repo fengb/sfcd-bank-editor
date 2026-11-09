@@ -4,13 +4,14 @@ import { QTable, type QTableProps } from 'quasar'
 import { formatHex } from '@/components/BytesViewer/hex'
 import { decodeSpell } from '@/domain/Bank'
 import { type CompendiumMonster, type CompendiumNames } from '@/domain/Bank/Compendium'
+import { splitBits } from '@/utils/bits'
 
 const props = defineProps<{ monsters: CompendiumMonster[]; names: CompendiumNames }>()
 
 function decodeInventory(value: number): string {
   if (value === 0x007f) return ' --'
-  const equipped = (value & 0x80) !== 0
-  const idx = value & 0x7f
+  const [equippedBit, idx] = splitBits(value, [1, 7])
+  const equipped = equippedBit !== 0
   return `${formatHex(idx, 2)}${equipped ? '+' : ' '}`
 }
 

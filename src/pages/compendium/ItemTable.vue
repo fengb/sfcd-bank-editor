@@ -3,6 +3,7 @@ import { QMenu, QTable, QTd, type QTableProps } from 'quasar'
 
 import { formatHex } from '@/components/BytesViewer/hex'
 import { type CompendiumItem, type CompendiumNames } from '@/domain/Bank/Compendium'
+import { splitBits } from '@/utils/bits'
 
 import ClassMask from './ClassMask.vue'
 import ItemFlags from './ItemFlags.vue'
@@ -11,13 +12,12 @@ const props = defineProps<{ items: CompendiumItem[]; names: CompendiumNames }>()
 
 function formatSpell(value: number, names: CompendiumNames): string | null {
   if (value === 0x3f) return null
-  const idx = value & 0x3f
-  const flags = value & 0xc0
+  const [flags, idx] = splitBits(value, [2, 6])
   const flagsDisplay: Record<number, string> = {
-    [0x00]: '¹',
-    [0x40]: '²',
-    [0x80]: '³',
-    [0xc0]: '⁴',
+    0: '¹',
+    1: '²',
+    2: '³',
+    3: '⁴',
   }
   return `${formatHex(idx, 2)}${flagsDisplay[flags]} ${names.spells[idx]}`
 }

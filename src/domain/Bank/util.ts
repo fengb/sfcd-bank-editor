@@ -6,6 +6,10 @@ export class ByteReader {
     this.pos = 0
   }
 
+  isEof(remaining: number = 1): boolean {
+    return this.pos + remaining > this.data.length
+  }
+
   nextBytes(n: 1): [number]
   nextBytes(n: 2): [number, number]
   nextBytes(n: 3): [number, number, number]
@@ -68,9 +72,9 @@ export function readU16be(data: Uint8Array, offset: number): number {
 }
 
 export class BitReader {
-  protected pos = 0
+  private pos = 0
 
-  constructor(protected readonly data: Uint8Array) {}
+  constructor(private readonly data: Uint8Array) {}
 
   nextBit(): number {
     if (this.pos >= this.data.length * 8) return 0

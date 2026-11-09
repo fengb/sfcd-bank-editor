@@ -1,4 +1,6 @@
-import { BitReader, ByteReader } from '../util'
+import { splitBits } from '@/utils/bits'
+
+import { BitReader, ByteReader, readU16be } from '../util'
 export const VALUE_MAP: Record<number, number> = {
   0: 0,
   2: 52,
@@ -38,11 +40,8 @@ export type Tile = {
 export function parsePalette(data: Uint8Array): Palette {
   const colors: Color[] = []
   for (let i = 0; i + 1 < data.length; i += 2) {
-    const first = data[i]!
-    const second = data[i + 1]!
-    const b = first & 0x0f
-    const g = (second & 0xf0) >> 4
-    const r = second & 0x0f
+    const cram = readU16be(data, i)
+    const [, b, g, r] = splitBits(cram, [4, 4, 4, 4])
     colors.push([VALUE_MAP[r & 0x0e] ?? 0, VALUE_MAP[g & 0x0e] ?? 0, VALUE_MAP[b & 0x0e] ?? 0])
   }
   while (colors.length < 16) {
@@ -59,8 +58,7 @@ export function convertTiles(data: number[]): Tile[] {
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x += 2) {
         const currentByte = data[t * 32 + Math.floor((y * 8 + x) / 2)]!
-        const firstPixel = (currentByte & 0xf0) >> 4
-        const secondPixel = currentByte & 0x0f
+        const [firstPixel, secondPixel] = splitBits(currentByte, [4, 4])
         pixelGrid[x]![y] = firstPixel
         pixelGrid[x + 1]![y] = secondPixel
       }
@@ -135,7 +133,7 @@ function decodeStackGraphicsLinear(input: Uint8Array): number[] {
     for (const command of commands) {
       if (command === 0) {
         const value = nextWordValue()
-        output.push((value >> 8) & 0xff, value & 0xff)
+        output.push(...splitBits(value, [8, 8]))
       } else {
         const copyOffset = reader.nextBitsValue(11)
         if (copyOffset === 0) {
@@ -181,8 +179,8 @@ export function decodeBasicGraphics(input: Uint8Array): Tile[] | null {
             done = true
             break
           }
-          const repeats = 33 - (repeatCommand & 0x1f)
-          const wordIndex = repeatCommand >> 5
+          const [wordIndex, repeatCode] = splitBits(repeatCommand, [11, 5])
+          const repeats = 33 - repeatCode
 
           // Need at least wordIndex words of prior output to copy from.
           if (output.length < wordIndex * 2) return null
