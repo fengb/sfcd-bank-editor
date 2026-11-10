@@ -52,10 +52,10 @@ export function encodeCharacterData(tables: CharacterTables, baseOffset: number 
 
   const classesBytes = classes.flatMap((entry) => [
     entry.mov,
-    entry.unknown[0]!,
-    entry.unknown[1]!,
-    entry.unknown[2]!,
-    entry.unknown[3]!,
+    0,
+    0,
+    entry.unitClass,
+    entry.unknown04,
   ])
 
   const total = classStart + classesBytes.length

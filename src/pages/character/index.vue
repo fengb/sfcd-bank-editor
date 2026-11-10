@@ -58,6 +58,13 @@ const recordColumns: QTableProps['columns'] = [
 
 const secondaryColumns: QTableProps['columns'] = [
   {
+    name: 'hero',
+    label: 'Hero',
+    align: 'left',
+    field: 'heroId',
+    format: (id) => `${formatHex(id, 2)} - ${compendium.value.names.characters[id]}`,
+  },
+  {
     name: 'class',
     label: 'Class',
     align: 'left',
@@ -77,15 +84,17 @@ const classColumns: QTableProps['columns'] = [
     name: 'class',
     label: 'Class',
     field: 'classId',
-    format: (id) => compendium.value.names.classes[id],
+    format: (id) => `${formatHex(id, 2)} - ${compendium.value.names.classes[id]}`,
     align: 'left',
   },
   { name: 'mov', label: 'MOV', field: 'mov' },
-  ...[0, 1, 2, 3].map((i) => ({
-    name: `b${i + 1}`,
-    label: `b${i + 1}`,
-    field: (row: { unknown: number[] }) => formatHex(row.unknown[i]!),
-  })),
+  { name: 'unitClass', label: 'Unit Class', field: 'unitClass', format: formatHex },
+  {
+    name: 'unknown04',
+    label: 'Unknown 0x04',
+    field: 'unknown04',
+    format: (val) => formatHex(val, 2),
+  },
 ]
 </script>
 

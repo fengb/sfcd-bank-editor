@@ -15,6 +15,16 @@ function decodeInventory(value: number): string {
   return `${formatHex(idx, 2)}${equipped ? '+' : ' '}`
 }
 
+function formatHexes(array: number[]): string {
+  return array.map((n) => formatHex(n, 2)).join(' ')
+}
+
+function formatSpellResist(raw: number): string {
+  if (!raw) return ''
+  const values = splitBits(raw, [2, 2, 2, 2])
+  return values.map((val) => val.toString(2).padStart(2, '0')).join(' ')
+}
+
 const columns: QTableProps['columns'] = [
   {
     name: 'monster',
@@ -23,14 +33,17 @@ const columns: QTableProps['columns'] = [
     format: (id) => `${formatHex(id, 2)} - ${props.names.monsters[id]}`,
     align: 'left',
   },
-  { name: 'index', label: 'Idx', field: 'index' },
-  { name: 'level', label: 'Lvl', field: 'level' },
+  { name: 'index', label: 'Index', field: 'index' },
+  { name: 'level', label: 'Level', field: 'level' },
   { name: 'hp', label: 'HP', field: 'hp' },
   { name: 'mp', label: 'MP', field: 'mp' },
   { name: 'atk', label: 'ATK', field: 'atk' },
   { name: 'def', label: 'DEF', field: 'def' },
   { name: 'agi', label: 'AGI', field: 'agi' },
   { name: 'mov', label: 'MOV', field: 'mov' },
+  { name: 'unknown1a', label: '0x1A', field: 'unknown1a', format: (v) => formatHex(v, 2) },
+  { name: 'spellResist', label: 'Spell Res', field: 'spellResist', format: formatSpellResist },
+  { name: 'unknown1c', label: 'Unknown 0x1C', field: 'unknown1c', format: formatHexes },
   {
     name: 'inventory',
     label: 'Inventory',
@@ -43,13 +56,8 @@ const columns: QTableProps['columns'] = [
     field: 'spells',
     format: (spells) => spells.map(decodeSpell).join(''),
   },
-  { name: 'field1a', label: '+0x1A', field: 'field1a', format: (v: number) => formatHex(v, 4) },
-  { name: 'field1e', label: '+0x1E', field: 'field1e', format: (v: number) => formatHex(v, 4) },
-  { name: 'field0e', label: '+0x0E', field: 'field0e' },
-  { name: 'field2c', label: '+0x2C', field: 'field2c', format: (v: number) => formatHex(v, 4) },
-  { name: 'field2e', label: '+0x2E', field: 'field2e', format: (v: number) => formatHex(v, 4) },
-  { name: 'aiClass', label: 'AI class', field: 'aiClass', format: (v: number) => formatHex(v, 4) },
-  { name: 'field34', label: '+0x34', field: 'field34', format: (v: number) => formatHex(v, 4) },
+  { name: 'unitClass', label: 'Unit Class', field: 'unitClass', format: formatHex },
+  { name: 'unknown32', label: 'Unknown 0x32', field: 'unknown32', format: formatHexes },
 ]
 </script>
 

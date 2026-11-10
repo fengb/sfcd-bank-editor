@@ -42,7 +42,8 @@ export type SecondaryEntry = {
 export type ClassEntry = {
   classId: number
   mov: number
-  unknown: [number, number, number, number]
+  unitClass: number
+  unknown04: number
 }
 
 export type CharacterTables = {
@@ -96,7 +97,8 @@ function decodeClasses(bytes: Uint8Array): ClassEntry[] {
   return chunk([...bytes], CLASS_ENTRY_SIZE).map((entry, classId) => ({
     classId,
     mov: entry[0]!,
-    unknown: [entry[1]!, entry[2]!, entry[3]!, entry[4]!],
+    unitClass: entry[3]!,
+    unknown04: entry[4]!,
   }))
 }
 

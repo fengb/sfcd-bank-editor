@@ -126,10 +126,12 @@ describe('decodeCharacterData', () => {
     expect(classes[0]).toEqual({
       classId: 0x00,
       mov: 6,
-      unknown: [0x00, 0x00, 0x10, 0x03],
+      unitClass: 0x10,
+      unknown04: 0x03,
     })
     expect(classes[4]?.mov).toBe(5)
-    expect(classes[4]?.unknown).toEqual([0x00, 0x00, 0x10, 0x03])
+    expect(classes[4]?.unitClass).toEqual(0x10)
+    expect(classes[4]?.unknown04).toEqual(0x03)
   })
 
   it('returns empty tables for buffers too short to hold a header', () => {
