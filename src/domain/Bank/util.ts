@@ -7,7 +7,7 @@ export class ByteReader {
   }
 
   bytesRemaining(): number {
-    return this.data.length - this.pos
+    return Math.max(0, this.data.length - this.pos)
   }
 
   nextBytes(n: 1): [number]
@@ -76,6 +76,10 @@ export class BitReader {
 
   constructor(private readonly data: Uint8Array) {}
 
+  bitsRemaining(): number {
+    return Math.max(0, this.data.length * 8 - this.pos)
+  }
+
   nextBit(): number {
     if (this.pos >= this.data.length * 8) return 0
     const byte = this.data[this.pos >> 3]!
@@ -104,7 +108,7 @@ export class BitReader {
 
   nextZeroes(maxZeros: number = Infinity): number {
     let count = 0
-    while (count < maxZeros && this.nextBit() === 0) {
+    while (count < maxZeros && this.bitsRemaining() > 0 && this.nextBit() === 0) {
       count++
     }
     return count

@@ -124,7 +124,7 @@ export function decodeStackGraphics(input: Uint8Array): Tile[] | null {
     }
 
     const output: number[] = []
-    out: while (true) {
+    out: while (reader.bitsRemaining()) {
       const commands: number[] = []
       for (let i = 0; i < 4; i++) {
         const command = reader.nextPrefixCodeLookup(COMMAND_PATTERNS) ?? reader.nextBits(4)
