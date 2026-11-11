@@ -109,6 +109,11 @@ class MtfList {
 }
 
 export function decodeStackGraphics(input: Uint8Array): Tile[] | null {
+  const linear = decodeStackData(input)
+  return linear ? convertTiles(linear) : null
+}
+
+export function decodeStackData(input: Uint8Array): number[] | null {
   try {
     const reader = new BitReader(input)
     const history = new MtfList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
@@ -148,7 +153,7 @@ export function decodeStackGraphics(input: Uint8Array): Tile[] | null {
       }
     }
 
-    return convertTiles(output)
+    return output
   } catch {
     return null
   }

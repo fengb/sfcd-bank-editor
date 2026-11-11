@@ -1,4 +1,5 @@
 import { formatHex } from '@/components/BytesViewer/hex'
+import BattleData from '@/domain/Bank/BattleData'
 import BattleSprites from '@/domain/Bank/BattleSprites'
 import CampGraphics from '@/domain/Bank/CampGraphics'
 import ChapterGraphics from '@/domain/Bank/ChapterGraphics'
@@ -97,7 +98,7 @@ export class Bank {
       campGraphics: new BankToc(this.bytes, 0x78, CampGraphics),
 
       mapData: new BankToc(this.bytes, 0x80, MapData),
-      battleData: new BankToc(this.bytes, 0x88, tmpBytesFactory), // clarify name
+      battleData: new BankToc(this.bytes, 0x88, BattleData),
 
       unknownA: new BankToc(this.bytes, 0x90, tmpBytesFactory), // "Shared WRAM pointer table"
       unknownB: new BankToc(this.bytes, 0x98, tmpBytesFactory), // "Pointer table into 0xA0"
