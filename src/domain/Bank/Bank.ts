@@ -100,10 +100,10 @@ export class Bank {
       mapData: new BankToc(this.bytes, 0x80, MapData),
       battleData: new BankToc(this.bytes, 0x88, BattleData),
 
-      unknownA: new BankToc(this.bytes, 0x90, tmpBytesFactory), // "Shared WRAM pointer table"
-      unknownB: new BankToc(this.bytes, 0x98, tmpBytesFactory), // "Pointer table into 0xA0"
+      unknownA: new BankToc(this.bytes, 0x90, tmpBytesFactory),
+      map2Tilesets: new BankToc(this.bytes, 0x98, MapTilesets),
 
-      unknownC: new BankToc(this.bytes, 0xa0, tmpBytesFactory),
+      map2Data: new BankToc(this.bytes, 0xa0, MapData),
       chapterGraphics: new BankToc(this.bytes, 0xa8, ChapterGraphics),
 
       pad0: new BankToc(this.bytes, 0xb0, tmpBytesFactory),

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import BytesViewer from '@/components/BytesViewer'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const bytes = computed(() => store.bank!.toc.unknownB.region())
+const tilesets = computed(() => store.bank!.toc.map2Tilesets.region())
 </script>
 
 <template>
-  <BytesViewer :bytes="bytes" title="Unknown 0x98" />
+  <BytesViewer :bytes="tilesets" title="Unknown 0x98" />
 </template>

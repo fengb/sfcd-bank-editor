@@ -4,14 +4,14 @@ import { computed, ref, watch } from 'vue'
 
 import { BYTES_PER_ROW, formatHex, parseHexOffset, toPrintable } from './hex'
 
-const props = defineProps<{ title?: string; bytes: Uint8Array }>()
+const props = defineProps<{ title?: string; bytes: Uint8Array | number[] }>()
 
 const rows = computed(() =>
   Array.from({ length: Math.ceil(props.bytes.length / BYTES_PER_ROW) }, (_, i) => {
     const offset = i * BYTES_PER_ROW
     return {
       offset,
-      bytes: props.bytes.subarray(offset, offset + BYTES_PER_ROW),
+      bytes: props.bytes.slice(offset, offset + BYTES_PER_ROW),
     }
   }),
 )
