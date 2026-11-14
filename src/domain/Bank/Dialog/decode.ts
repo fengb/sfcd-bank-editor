@@ -1,6 +1,6 @@
 import { invert, mapValues } from 'es-toolkit'
 
-import { readU16be, readU32be } from '../util'
+import { BitReader, readU16be, readU32be } from '../util'
 
 export const OFFSET = 0x22e000
 
@@ -56,14 +56,14 @@ export interface HuffmanTree {
   tokens: number[]
   tree: number[]
 }
-function decodeHuffmanTreeShape(treeBits: Generator<number>): {
+function decodeHuffmanTreeShape(treeBits: BitReader): {
   leafCount: number
   totalCount: number
 } {
   let nonLeafCount = 0
   let leafCount = 0
   while (leafCount <= nonLeafCount) {
-    const bit = treeBits.next().value
+    const bit = treeBits.nextBit()
     if (bit === 0) nonLeafCount++
     else leafCount++
   }
@@ -71,20 +71,12 @@ function decodeHuffmanTreeShape(treeBits: Generator<number>): {
 }
 
 export function splitTree(data: Uint8Array, offset: number): HuffmanTree {
-  const { leafCount, totalCount } = decodeHuffmanTreeShape(bitsOf(data, offset))
+  const { leafCount, totalCount } = decodeHuffmanTreeShape(new BitReader(data.subarray(offset)))
   const treeByteCount = (totalCount + 7) >> 3
   return {
     tokens: Array.from({ length: leafCount }).map((_, i) => data[offset - leafCount + i]!),
     tree: Array.from({ length: treeByteCount }).map((_, i) => data[offset + i]!),
   }
-}
-
-export function* bitsOf(bytes: ArrayLike<number>, baseOffset = 0): Generator<number> {
-  const totalBits = (bytes.length - baseOffset) * 8
-  for (let index = 0; index < totalBits; index++) {
-    yield (bytes[baseOffset + (index >> 3)]! >> (7 - (index & 7))) & 1
-  }
-  throw new Error('bits exhausted')
 }
 
 export function decodeTokens(
@@ -93,15 +85,15 @@ export function decodeTokens(
   offset: number,
 ): number[] {
   const result: number[] = []
-  const stringBits = bitsOf(data, offset)
+  const stringBits = new BitReader(data.subarray(offset))
 
   let huffmanTree = trees[0xfe]
   while (huffmanTree) {
-    const treeBits = bitsOf(huffmanTree.tree)
+    const treeBits = new BitReader(huffmanTree.tree)
     let tokensSkipCounter = 0
 
     while (true) {
-      const treeBit = treeBits.next().value
+      const treeBit = treeBits.nextBit()
       if (treeBit !== 0) {
         const token = huffmanTree.tokens.at(-1 - tokensSkipCounter)!
         if (token === 0xfe) return result
@@ -112,7 +104,7 @@ export function decodeTokens(
         break
       }
 
-      const stringBit = stringBits.next().value
+      const stringBit = stringBits.nextBit()
       if (stringBit === 1) {
         tokensSkipCounter += decodeHuffmanTreeShape(treeBits).leafCount
       }

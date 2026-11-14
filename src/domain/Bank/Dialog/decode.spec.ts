@@ -4,7 +4,6 @@ import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
 import {
-  bitsOf,
   splitTree,
   decodeTokens,
   decodeString,
@@ -33,34 +32,6 @@ describe('decodeDialog', () => {
       "They didn't know danger↵lay in wait for them↵...just beyond the horizon.⏹",
     )
     expect(strings.every((s) => typeof s === 'string' && s.length > 0)).toBe(true)
-  })
-})
-
-describe('bitsOf', () => {
-  it('yields bits MSB-first', () => {
-    const gen = bitsOf(new Uint8Array([0b10110000]))
-    const bits = Array.from({ length: 8 }, () => gen.next().value)
-    expect(bits).toEqual([1, 0, 1, 1, 0, 0, 0, 0])
-  })
-
-  it('respects baseOffset', () => {
-    const gen = bitsOf(new Uint8Array([0, 0b11001100]), 1)
-    const bits = Array.from({ length: 4 }, () => gen.next().value)
-    expect(bits).toEqual([1, 1, 0, 0])
-  })
-
-  it('counts', () => {
-    const bytes = new Uint8Array(3600)
-    let n = 0
-    try {
-      for (const bit of bitsOf(bytes, 1)) {
-        n++
-        void bit
-      }
-    } catch {
-      // expected exhaustion throw after all bits
-    }
-    expect(n).toBe(3599 * 8)
   })
 })
 

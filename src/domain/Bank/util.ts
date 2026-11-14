@@ -74,7 +74,7 @@ export function readU16be(data: Uint8Array, offset: number): number {
 export class BitReader {
   private pos = 0
 
-  constructor(private readonly data: Uint8Array) {}
+  constructor(private readonly data: ArrayLike<number>) {}
 
   bitsRemaining(): number {
     return Math.max(0, this.data.length * 8 - this.pos)
