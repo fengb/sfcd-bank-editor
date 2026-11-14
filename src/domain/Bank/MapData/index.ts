@@ -30,32 +30,8 @@ export default class MapData {
     return this.data?.header ?? 0
   }
 
-  get pointers(): number[] {
-    return this.data?.pointers ?? []
-  }
-
   get palette(): Palette | null {
     return this.data?.palette ?? null
-  }
-
-  get paletteBytes(): Uint8Array {
-    return this.data?.paletteBytes ?? new Uint8Array()
-  }
-
-  get blocks(): Uint8Array {
-    return this.data?.blocks ?? new Uint8Array()
-  }
-
-  get blockBytes(): Uint8Array {
-    return this.blocks
-  }
-
-  get layout(): Uint8Array {
-    return this.data?.layout ?? new Uint8Array()
-  }
-
-  get layoutBytes(): Uint8Array {
-    return this.layout
   }
 
   get decodedBlocks(): DecodedTile[] {
@@ -70,64 +46,32 @@ export default class MapData {
     return this.data?.areas ?? []
   }
 
-  get areasBytes(): Uint8Array {
-    return this.data?.areasBytes ?? new Uint8Array()
-  }
-
   get flagCopies(): MapFlagCopy[] {
     return this.data?.flagCopies ?? []
-  }
-
-  get flagCopiesBytes(): Uint8Array {
-    return this.data?.flagCopiesBytes ?? new Uint8Array()
   }
 
   get stepCopies(): MapStepCopy[] {
     return this.data?.stepCopies ?? []
   }
 
-  get stepCopiesBytes(): Uint8Array {
-    return this.data?.stepCopiesBytes ?? new Uint8Array()
-  }
-
   get layer2Copies(): MapLayer2Copy[] {
     return this.data?.layer2Copies ?? []
-  }
-
-  get layer2CopiesBytes(): Uint8Array {
-    return this.data?.layer2CopiesBytes ?? new Uint8Array()
   }
 
   get warps(): MapWarp[] {
     return this.data?.warps ?? []
   }
 
-  get warpsBytes(): Uint8Array {
-    return this.data?.warpsBytes ?? new Uint8Array()
-  }
-
   get chestItems(): MapItem[] {
     return this.data?.chestItems ?? []
-  }
-
-  get chestItemsBytes(): Uint8Array {
-    return this.data?.chestItemsBytes ?? new Uint8Array()
   }
 
   get otherItems(): MapItem[] {
     return this.data?.otherItems ?? []
   }
 
-  get otherItemsBytes(): Uint8Array {
-    return this.data?.otherItemsBytes ?? new Uint8Array()
-  }
-
   get animation(): MapAnimation | null {
     return this.data?.animation ?? null
-  }
-
-  get animationBytes(): Uint8Array | null {
-    return this.data?.animationBytes ?? null
   }
 
   get graphic(): MapDataRegions | null {

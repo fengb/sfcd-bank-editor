@@ -1,19 +1,11 @@
+import { chunk, takeWhile } from 'es-toolkit'
+
 import { parsePalette, type Palette } from '../BattleSprites/graphics'
-import { readU16be, readU32be } from '../util'
+import { decodeSegments, readU16be } from '../util'
 import { decodeBlocks, type DecodedTile } from './decodeBlocks'
 import { decodeLayout, type LayoutEntry } from './decodeLayout'
 
 const MAINCPU_WORDRAM_LOADING_OFFSET = 0x23de00
-
-function readI16be(data: Uint8Array, cursor: number): number {
-  if (cursor + 1 >= data.length) return 0
-  const value = (data[cursor]! << 8) | data[cursor + 1]!
-  return value >= 0x8000 ? value - 0x10000 : value
-}
-
-function readU8(data: Uint8Array, cursor: number): number {
-  return cursor < data.length ? data[cursor]! : 0
-}
 
 export interface MapArea {
   layer1StartX: number
@@ -99,195 +91,109 @@ export interface MapAnimation {
 
 export interface MapDataRegions {
   header: number
-  pointers: number[]
 
   palette: Palette | null
-  paletteBytes: Uint8Array
-
-  blocks: Uint8Array
-  blockBytes: Uint8Array
-
-  layout: Uint8Array
-  layoutBytes: Uint8Array
-
   decodedBlocks: DecodedTile[]
   decodedLayout: LayoutEntry[]
-
   areas: MapArea[]
-  areasBytes: Uint8Array
-
   flagCopies: MapFlagCopy[]
-  flagCopiesBytes: Uint8Array
-
   stepCopies: MapStepCopy[]
-  stepCopiesBytes: Uint8Array
-
   layer2Copies: MapLayer2Copy[]
-  layer2CopiesBytes: Uint8Array
-
   warps: MapWarp[]
-  warpsBytes: Uint8Array
-
   chestItems: MapItem[]
-  chestItemsBytes: Uint8Array
-
   otherItems: MapItem[]
-  otherItemsBytes: Uint8Array
-
   animation: MapAnimation | null
-  animationBytes: Uint8Array | null
-
-  bytes: Uint8Array
-}
-
-export type MapData = MapDataRegions
-
-function resolvePointer(data: Uint8Array, pointer: number): number {
-  if (pointer === 0 || pointer === 0xffffffff) return -1
-  const offset = pointer - MAINCPU_WORDRAM_LOADING_OFFSET
-  if (offset < 0 || offset >= data.length) return -1
-  return offset
-}
-
-function sliceRegion(data: Uint8Array, pointer: number, size: number): Uint8Array {
-  const offset = resolvePointer(data, pointer)
-  if (offset < 0) return new Uint8Array()
-  const end = Math.min(data.length, offset + size)
-  return data.subarray(offset, end)
 }
 
 function parseAreas(data: Uint8Array): MapArea[] {
-  const result: MapArea[] = []
-  let cursor = 0
-  while (cursor + 30 <= data.length) {
-    const first = readI16be(data, cursor)
-    if (first === -1) break
-    result.push({
-      layer1StartX: readI16be(data, cursor + 0),
-      layer1StartY: readI16be(data, cursor + 2),
-      layer1EndX: readI16be(data, cursor + 4),
-      layer1EndY: readI16be(data, cursor + 6),
-      foregroundLayer2StartX: readI16be(data, cursor + 8),
-      foregroundLayer2StartY: readI16be(data, cursor + 10),
-      backgroundLayer2StartX: readI16be(data, cursor + 12),
-      backgroundLayer2StartY: readI16be(data, cursor + 14),
-      layer1ParallaxX: readI16be(data, cursor + 16),
-      layer1ParallaxY: readI16be(data, cursor + 18),
-      layer2ParallaxX: readI16be(data, cursor + 20),
-      layer2ParallaxY: readI16be(data, cursor + 22),
-      layer1AutoscrollX: readU8(data, cursor + 24),
-      layer1AutoscrollY: readU8(data, cursor + 25),
-      layer2AutoscrollX: readU8(data, cursor + 26),
-      layer2AutoscrollY: readU8(data, cursor + 27),
-      layerType: readU8(data, cursor + 28),
-      defaultMusic: readU8(data, cursor + 29),
-    })
-    cursor += 30
-  }
-  return result
+  return takeWhile(chunk([...data], 30), (entry) => entry[0] !== 0xff || entry[1] !== 0xff).map(
+    (entry) => ({
+      layer1StartX: readU16be(entry, +0),
+      layer1StartY: readU16be(entry, +2),
+      layer1EndX: readU16be(entry, +4),
+      layer1EndY: readU16be(entry, +6),
+      foregroundLayer2StartX: readU16be(entry, +8),
+      foregroundLayer2StartY: readU16be(entry, +10),
+      backgroundLayer2StartX: readU16be(entry, +12),
+      backgroundLayer2StartY: readU16be(entry, +14),
+      layer1ParallaxX: readU16be(entry, +16),
+      layer1ParallaxY: readU16be(entry, +18),
+      layer2ParallaxX: readU16be(entry, +20),
+      layer2ParallaxY: readU16be(entry, +22),
+      layer1AutoscrollX: entry[+24]!,
+      layer1AutoscrollY: entry[+25]!,
+      layer2AutoscrollX: entry[+26]!,
+      layer2AutoscrollY: entry[+27]!,
+      layerType: entry[+28]!,
+      defaultMusic: entry[+29]!,
+    }),
+  )
 }
 
 function parseFlagCopies(data: Uint8Array): MapFlagCopy[] {
-  const result: MapFlagCopy[] = []
-  let cursor = 0
-  while (cursor + 8 <= data.length) {
-    const flag = readI16be(data, cursor)
-    if (flag === -1) break
-    result.push({
-      flag,
-      sourceX: readU8(data, cursor + 2),
-      sourceY: readU8(data, cursor + 3),
-      width: readU8(data, cursor + 4),
-      height: readU8(data, cursor + 5),
-      destX: readU8(data, cursor + 6),
-      destY: readU8(data, cursor + 7),
-    })
-    cursor += 8
-  }
-  return result
+  return takeWhile(chunk([...data], 8), (entry) => entry[0] !== 0xff || entry[1] !== 0xff).map(
+    (entry) => ({
+      flag: readU16be(entry, 0),
+      sourceX: entry[+2]!,
+      sourceY: entry[+3]!,
+      width: entry[+4]!,
+      height: entry[+5]!,
+      destX: entry[+6]!,
+      destY: entry[+7]!,
+    }),
+  )
 }
 
 function parseStepCopies(data: Uint8Array): MapStepCopy[] {
-  const result: MapStepCopy[] = []
-  let cursor = 0
-  while (cursor + 8 <= data.length) {
-    const triggerX = readU8(data, cursor)
-    if (triggerX === 0xff) break
-    result.push({
-      triggerX,
-      triggerY: readU8(data, cursor + 1),
-      sourceX: readU8(data, cursor + 2),
-      sourceY: readU8(data, cursor + 3),
-      width: readU8(data, cursor + 4),
-      height: readU8(data, cursor + 5),
-      destX: readU8(data, cursor + 6),
-      destY: readU8(data, cursor + 7),
-    })
-    cursor += 8
-  }
-  return result
-}
-
-function parseLayer2Copies(data: Uint8Array): MapLayer2Copy[] {
-  const base = parseStepCopies(data)
-  return base.map((s) => ({ ...s }))
+  return takeWhile(chunk([...data], 8), (entry) => entry[0] !== 0xff).map((entry) => ({
+    triggerX: entry[0]!,
+    triggerY: entry[1]!,
+    sourceX: entry[2]!,
+    sourceY: entry[+3]!,
+    width: entry[+4]!,
+    height: entry[+5]!,
+    destX: entry[+6]!,
+    destY: entry[+7]!,
+  }))
 }
 
 function parseWarps(data: Uint8Array): MapWarp[] {
-  const result: MapWarp[] = []
-  let cursor = 0
-  while (cursor + 8 <= data.length) {
-    const triggerX = readU8(data, cursor)
-    const triggerY = readU8(data, cursor + 1)
-    if (triggerX === 0xff && triggerY === 0xff) break
-    result.push({
-      triggerX,
-      triggerY,
-      destMap: String(readU8(data, cursor + 3)),
-      destX: readU8(data, cursor + 4),
-      destY: readU8(data, cursor + 5),
-      facing: String(readU8(data, cursor + 6)),
-    })
-    cursor += 8
-  }
-  return result
+  return takeWhile(chunk([...data], 8), (entry) => entry[0] !== 0xff || entry[1] !== 0xff).map(
+    (entry) => ({
+      triggerX: entry[0]!,
+      triggerY: entry[1]!,
+      destMap: String(entry[3]),
+      destX: entry[4]!,
+      destY: entry[5]!,
+      facing: String(entry[6]),
+    }),
+  )
 }
 
 function parseItems(data: Uint8Array): MapItem[] {
-  const result: MapItem[] = []
-  let cursor = 0
-  while (cursor + 4 <= data.length) {
-    const x = readU8(data, cursor)
-    const y = readU8(data, cursor + 1)
-    if (x === 0xff && y === 0xff) break
-    result.push({
-      x,
-      y,
-      flag: readU8(data, cursor + 2),
-      item: String(readU8(data, cursor + 3)),
-    })
-    cursor += 4
-  }
-  return result
+  return takeWhile(chunk([...data], 4), (entry) => entry[0] !== 0xff && entry[1] !== 0xff).map(
+    (entry) => ({
+      x: entry[0]!,
+      y: entry[1]!,
+      flag: entry[2]!,
+      item: String(data[3]),
+    }),
+  )
 }
 
 function parseAnimation(data: Uint8Array): MapAnimation | null {
   if (data.length < 4) return null
-  const tileset = readI16be(data, 0)
-  const length = readI16be(data, 2)
-  const frames: MapAnimationFrame[] = []
-  let cursor = 4
-  while (cursor + 8 <= data.length) {
-    const start = readI16be(data, cursor)
-    if (start === -1) break
-    frames.push({
-      start,
-      length: readI16be(data, cursor + 2),
-      dest: readI16be(data, cursor + 4),
-      delay: readI16be(data, cursor + 6),
-    })
-    cursor += 8
-  }
+  const tileset = readU16be(data, 0)
+  const length = readU16be(data, 2)
+  const frames = takeWhile(
+    chunk([...data.subarray(4)], 8),
+    (entry) => entry[0] !== 0xff && entry[1] !== 0xff,
+  ).map((entry) => ({
+    start: readU16be(entry, 0),
+    length: readU16be(entry, 2),
+    dest: readU16be(entry, 4),
+    delay: readU16be(entry, 6),
+  }))
   return { tileset, length, frames }
 }
 
@@ -297,65 +203,33 @@ export function decodeMapData(data: Uint8Array): MapDataRegions | null {
 
     const header = readU16be(data, 0)
 
-    const pointers: number[] = []
-    const maxEntries = Math.min(16, Math.floor((data.length - 2) / 4))
-    for (let i = 0; i < maxEntries; i++) {
-      const pointer = readU32be(data, 2 + i * 4) ?? 0
-      pointers.push(pointer)
-      if (pointer === 0 || pointer === 0xffffffff) break
-    }
-
-    const paletteBytes = sliceRegion(data, pointers[0] ?? 0, 0x20)
-    let palette: Palette | null = null
-    try {
-      if (paletteBytes.length >= 0x20) palette = parsePalette(paletteBytes)
-    } catch {
-      palette = null
-    }
-
-    const blocks = sliceRegion(data, pointers[1] ?? 0, 0x1000)
-    const layout = sliceRegion(data, pointers[2] ?? 0, 0x1000)
-    const areasBytes = sliceRegion(data, pointers[3] ?? 0, 0x100)
-    const flagCopiesBytes = sliceRegion(data, pointers[4] ?? 0, 0x100)
-    const stepCopiesBytes = sliceRegion(data, pointers[5] ?? 0, 0x100)
-    const layer2CopiesBytes = sliceRegion(data, pointers[6] ?? 0, 0x100)
-    const warpsBytes = sliceRegion(data, pointers[7] ?? 0, 0x100)
-    const chestItemsBytes = sliceRegion(data, pointers[8] ?? 0, 0x100)
-    const otherItemsBytes = sliceRegion(data, pointers[9] ?? 0, 0x100)
-    const animationPointer = pointers[10] ?? 0
-    const animationBytes =
-      animationPointer && animationPointer !== 0xffffffff
-        ? sliceRegion(data, animationPointer, 0x100)
-        : null
+    const segments = decodeSegments(data, MAINCPU_WORDRAM_LOADING_OFFSET, {
+      palette: 0x02,
+      blocks: 0x06,
+      layout: 0x0a,
+      areas: 0x0e,
+      flagCopies: 0x12,
+      stepCopies: 0x16,
+      layer2Copies: 0x1a,
+      warps: 0x1e,
+      chestItems: 0x22,
+      otherItems: 0x26,
+      animations: 0x2a,
+    })
 
     return {
       header,
-      pointers,
-      palette,
-      paletteBytes,
-      blocks,
-      blockBytes: blocks,
-      layout,
-      layoutBytes: layout,
-      decodedBlocks: decodeBlocks(blocks),
-      decodedLayout: decodeLayout(layout),
-      areas: parseAreas(areasBytes),
-      areasBytes,
-      flagCopies: parseFlagCopies(flagCopiesBytes),
-      flagCopiesBytes,
-      stepCopies: parseStepCopies(stepCopiesBytes),
-      stepCopiesBytes,
-      layer2Copies: parseLayer2Copies(layer2CopiesBytes),
-      layer2CopiesBytes,
-      warps: parseWarps(warpsBytes),
-      warpsBytes,
-      chestItems: parseItems(chestItemsBytes),
-      chestItemsBytes,
-      otherItems: parseItems(otherItemsBytes),
-      otherItemsBytes,
-      animation: animationBytes ? parseAnimation(animationBytes) : null,
-      animationBytes,
-      bytes: data,
+      palette: parsePalette(segments.palette),
+      decodedBlocks: decodeBlocks(segments.blocks),
+      decodedLayout: decodeLayout(segments.layout),
+      areas: parseAreas(segments.areas),
+      flagCopies: parseFlagCopies(segments.flagCopies),
+      stepCopies: parseStepCopies(segments.stepCopies),
+      layer2Copies: parseStepCopies(segments.layer2Copies),
+      warps: parseWarps(segments.warps),
+      chestItems: parseItems(segments.chestItems),
+      otherItems: parseItems(segments.otherItems),
+      animation: parseAnimation(segments.animations),
     }
   } catch {
     return null

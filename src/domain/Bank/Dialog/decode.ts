@@ -1,6 +1,6 @@
 import { invert, mapValues } from 'es-toolkit'
 
-import { BitReader, readU16be, readU32be } from '../util'
+import { BitReader, decodeSegments, readU16be, readU32be } from '../util'
 
 export const OFFSET = 0x22e000
 
@@ -82,10 +82,9 @@ export function splitTree(data: Uint8Array, offset: number): HuffmanTree {
 export function decodeTokens(
   trees: Record<number, HuffmanTree | null>,
   data: Uint8Array,
-  offset: number,
 ): number[] {
   const result: number[] = []
-  const stringBits = new BitReader(data.subarray(offset))
+  const stringBits = new BitReader(data)
 
   let huffmanTree = trees[0xfe]
   while (huffmanTree) {
@@ -113,12 +112,8 @@ export function decodeTokens(
   return result
 }
 
-export function decodeString(
-  trees: Record<number, HuffmanTree | null>,
-  data: Uint8Array,
-  offset: number,
-): string {
-  const tokens = decodeTokens(trees, data, offset)
+export function decodeString(trees: Record<number, HuffmanTree | null>, data: Uint8Array): string {
+  const tokens = decodeTokens(trees, data)
   return tokens
     .map((token, i) => {
       const prev = tokens[i - 1]
@@ -137,7 +132,7 @@ export function decodeDialogPage(
     const lineLength = data[pagePointer] ?? 0
     if (lineLength === 0 || lineLength === 0xff) break
     if (pagePointer + 1 + lineLength > data.length) break
-    result.push(decodeString(trees, data, pagePointer + 1))
+    result.push(decodeString(trees, data.subarray(pagePointer + 1)))
     pagePointer += lineLength + 1
   }
   return result
@@ -146,34 +141,35 @@ export function decodeDialogPage(
 export function decodeDialogPages(
   trees: Record<number, HuffmanTree | null>,
   bytes: Uint8Array,
-  dialogOffsetsPointer: number,
+  offset: number,
 ): string[] {
   const result: string[] = []
-  for (let off = dialogOffsetsPointer; off + 4 <= bytes.length; off += 4) {
-    const begin = (readU32be(bytes, off) ?? 0) - OFFSET
-    if (begin < 0 || begin + 1 > bytes.length) break
-    const pageBytes = bytes.subarray(begin)
+  for (let off = 0; off + 4 <= bytes.length; off += 4) {
+    const begin = (readU32be(bytes, off) ?? 0) - offset
+    const absolute = bytes.byteOffset + begin
+    if (absolute < 0 || absolute >= bytes.buffer.byteLength) break
+    // `begin` is negative so we need to break into the buffer
+    const pageBytes = new Uint8Array(bytes.buffer, absolute)
     result.push(...decodeDialogPage(trees, pageBytes))
   }
   return result
 }
 
 export function decodeDialog(data: Uint8Array): string[] {
-  const dialogPointer = (readU32be(data, 0) ?? 0) - OFFSET
-  const treeOffsetsPointer = (readU32be(data, 0x40) ?? 0) - OFFSET
-  const treeDataPointer = (readU32be(data, 0x4a) ?? 0) - OFFSET
+  const segments = decodeSegments(data, OFFSET, {
+    textData: 0x00,
+    treeOffsets: 0x40,
+    treeData: 0x4a,
+  })
 
-  const offsetsRegion = data.subarray(treeOffsetsPointer, treeDataPointer)
-  const treeData = data.subarray(treeDataPointer, dialogPointer)
-
-  const count = offsetsRegion.length >> 1
+  const count = segments.treeOffsets.length >> 1
   const huffmanTreeOffsets = Array.from<number>({ length: count }).map((_, i) =>
-    readU16be(offsetsRegion, i * 2),
+    readU16be(segments.treeOffsets, i * 2),
   )
 
   const trees = huffmanTreeOffsets.map((offset) =>
-    offset === 0xffff ? null : splitTree(treeData, offset),
+    offset === 0xffff ? null : splitTree(segments.treeData, offset),
   )
 
-  return decodeDialogPages(trees, data, dialogPointer)
+  return decodeDialogPages(trees, segments.textData, OFFSET + segments.textData.segmentOffset)
 }

@@ -37,7 +37,7 @@ describe('encodeTokens => decodeTokens', () => {
       12: { freq: 1, left: { token: 0xfe, freq: 1 }, right: { token: 12, freq: 1 } },
     }
     const encoded = encodeTokens(trees, [12])
-    expect(decodeTokens(huffmanTrees, encoded, 0)).toEqual([12])
+    expect(decodeTokens(huffmanTrees, encoded)).toEqual([12])
   })
 })
 
@@ -52,7 +52,7 @@ describe('stringToTokens => encodeTokens => decodeString', () => {
       12: { freq: 1, left: { token: 0xfe, freq: 1 }, right: { token: 12, freq: 1 } },
     }
     const encoded = encodeTokens(trees, stringToTokens('A'))
-    expect(decodeString(huffmanTrees, encoded, 0)).toBe('A')
+    expect(decodeString(huffmanTrees, encoded)).toBe('A')
   })
 
   it('round-trips a prefixed string', () => {
@@ -67,7 +67,7 @@ describe('stringToTokens => encodeTokens => decodeString', () => {
       1: { freq: 1, left: { token: 0xfe, freq: 1 }, right: { token: 1, freq: 1 } },
     }
     const encoded = encodeTokens(trees, stringToTokens('Ⓝ1'))
-    expect(decodeString(huffmanTrees, encoded, 0)).toBe('Ⓝ1')
+    expect(decodeString(huffmanTrees, encoded)).toBe('Ⓝ1')
   })
 })
 

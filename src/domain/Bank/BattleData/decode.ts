@@ -1,5 +1,5 @@
 import { decodeStackData } from '../BattleSprites/graphics'
-import { readU16be, readU32be } from '../util'
+import { decodeSegments, readU16be } from '../util'
 
 const BATTLE_BASE = 0x236800
 
@@ -48,21 +48,11 @@ export interface BattleSpriteSet {
 }
 
 export interface BattleDataRegions {
-  terrainPointer: number
-  spritesetPointer: number
-  spritesetBisPointer: number
-
-  terrain: Uint8Array
+  terrain: number[]
   spriteset: BattleSpriteSet
   spritesetBis: BattleSpriteSet
 
   bytes: Uint8Array
-}
-
-function resolvePointer(data: Uint8Array, pointer: number): number {
-  const offset = pointer - BATTLE_BASE
-  if (offset < 0 || offset >= data.length) return -1
-  return offset
 }
 
 export function decodeSpriteSet(data: Uint8Array): BattleSpriteSet {
@@ -135,34 +125,16 @@ export function decodeSpriteSet(data: Uint8Array): BattleSpriteSet {
 
 export function decodeBattleData(data: Uint8Array): BattleDataRegions | null {
   try {
-    if (!data || data.length < 12) return null
-
-    const terrainPointer = readU32be(data, 0) ?? 0
-    const spritesetPointer = readU32be(data, 4) ?? 0
-    const spritesetBisPointer = readU32be(data, 8) ?? 0
-
-    const terrainOffset = resolvePointer(data, terrainPointer)
-    const terrain = new Uint8Array(decodeStackData(data.subarray(terrainOffset)) ?? [])
-
-    const spritesetOffset = resolvePointer(data, spritesetPointer)
-    const spriteset =
-      spritesetOffset >= 0
-        ? decodeSpriteSet(data.subarray(spritesetOffset))
-        : { allies: [], enemies: [], aiRegions: [], aiPoints: [] }
-
-    const spritesetBisOffset = resolvePointer(data, spritesetBisPointer)
-    const spritesetBis =
-      spritesetBisOffset >= 0
-        ? decodeSpriteSet(data.subarray(spritesetBisOffset))
-        : { allies: [], enemies: [], aiRegions: [], aiPoints: [] }
+    const segments = decodeSegments(data, BATTLE_BASE, {
+      terrain: 0x00,
+      sprintset: 0x04,
+      sprintsetBis: 0x08,
+    })
 
     return {
-      terrainPointer,
-      spritesetPointer,
-      spritesetBisPointer,
-      terrain,
-      spriteset,
-      spritesetBis,
+      terrain: decodeStackData(segments.terrain) ?? [],
+      spriteset: decodeSpriteSet(segments.sprintset),
+      spritesetBis: decodeSpriteSet(segments.sprintsetBis),
       bytes: data,
     }
   } catch {

@@ -1,19 +1,6 @@
 import { chunk, chunkBy } from 'es-toolkit'
 
-import { readU32be } from '../util'
-
-const POINTER_SIZE = 4
-const AUX = {
-  CHAR_PTRS: 0x00,
-  DUPLICATE: 0x04, // dupe
-  SECONDARY: 0x08,
-  CLASSES: 0x0c,
-} as const
-const AUX_POINTER_COUNT = 4
-/** The sub-array of character pointers follows the aux entries: 4 × 4 = 0x10. */
-const CHAR_PTR_START = AUX_POINTER_COUNT * POINTER_SIZE
-const STATS_PER_RECORD = 5 // HP, MP, ATT, DEF, AGI
-const RECORD_PAYLOAD = 1 + STATS_PER_RECORD * 2 // class id + (growth, value) pairs for stats
+import { decodeSegments } from '../util'
 
 const SECONDARY_ENTRY_SIZE = 6
 const CLASS_ENTRY_SIZE = 5
@@ -73,7 +60,7 @@ function decodeRecords(bytes: Uint8Array): CharacterRecord[] {
         def: statPair(entry, 7),
         agi: statPair(entry, 9),
       },
-      spells: iterPair(entry.slice(RECORD_PAYLOAD)).map(([level, spell]) => ({
+      spells: iterPair(entry.slice(11)).map(([level, spell]) => ({
         level: level,
         spell: spell,
       })),
@@ -103,24 +90,15 @@ function decodeClasses(bytes: Uint8Array): ClassEntry[] {
 }
 
 export function decodeCharacterData(bytes: Uint8Array): CharacterTables {
-  const empty = { records: [], secondary: [], classes: [] }
-
-  const headerA = readU32be(bytes, AUX.CHAR_PTRS)
-  if (headerA === null) return empty
-  // ROM encodes actual pointer so adjust for relative addressing here
-  const baseOffset = headerA - CHAR_PTR_START
-
-  // The first character pointer targets the first record, packed right after
-  // the sub-array; its distance from the sub-array start is the array itself.
-  const recordsStart = (readU32be(bytes, CHAR_PTR_START) ?? 0) - baseOffset
-  if (recordsStart <= CHAR_PTR_START || recordsStart > bytes.length) return empty
-
-  const secondaryStart = (readU32be(bytes, AUX.SECONDARY) ?? 0) - baseOffset
-  const classStart = (readU32be(bytes, AUX.CLASSES) ?? 0) - baseOffset
+  const segments = decodeSegments(bytes, 0x232c00, {
+    secondary: 0x08,
+    classes: 0x0c,
+    records: 0x10,
+  })
 
   return {
-    records: decodeRecords(bytes.subarray(recordsStart, secondaryStart)),
-    secondary: decodeSecondary(bytes.subarray(secondaryStart, classStart)),
-    classes: decodeClasses(bytes.subarray(classStart)),
+    records: decodeRecords(segments.records),
+    secondary: decodeSecondary(segments.secondary),
+    classes: decodeClasses(segments.classes),
   }
 }

@@ -1,3 +1,5 @@
+import { clamp, mapValues, uniq } from 'es-toolkit'
+
 export class ByteReader {
   pos: number
 
@@ -56,7 +58,7 @@ export class ByteReader {
   }
 }
 
-export function readU32be(data: Uint8Array, offset: number): number | null {
+export function readU32be(data: Uint8Array | number[], offset: number): number | null {
   if (offset < 0 || offset + 4 > data.length) return null
   return (
     ((data[offset + 0]! << 24) |
@@ -67,7 +69,7 @@ export function readU32be(data: Uint8Array, offset: number): number | null {
   )
 }
 
-export function readU16be(data: Uint8Array, offset: number): number {
+export function readU16be(data: Uint8Array | number[], offset: number): number {
   return ((data[offset]! << 8) | data[offset + 1]!) >>> 0
 }
 
@@ -126,4 +128,26 @@ export class BitReader {
     }
     return undefined
   }
+}
+
+export function decodeSegments<T extends Record<string, number>>(
+  bytes: Uint8Array,
+  baseOffset: number,
+  headerMapping: T,
+): { [K in keyof T]: Uint8Array & { segmentOffset: number } } {
+  const offsets = mapValues(headerMapping, (headerOffset) => {
+    const offset = (readU32be(bytes, headerOffset) ?? 0) - baseOffset
+    return offset < 0 || offset > bytes.length ? bytes.length : offset
+  })
+  const sortedOffsets = uniq(Object.values<number>(offsets)).sort((a, b) => a - b)
+
+  const result = {} as { [K in keyof T]: Uint8Array & { segmentOffset: number } }
+  for (const key in offsets) {
+    const offset = offsets[key]
+
+    const at = sortedOffsets.indexOf(offset)
+    const nextOffset = sortedOffsets[at + 1]
+    result[key] = Object.assign(bytes.subarray(offset, nextOffset), { segmentOffset: offset })
+  }
+  return result
 }

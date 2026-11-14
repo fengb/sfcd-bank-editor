@@ -70,13 +70,6 @@ const aiPointColumns: QTableProps['columns'] = [
 <template>
   <h2>Battle data</h2>
 
-  <h3>Pointers</h3>
-  <ul>
-    <li>Terrain: {{ battleData.terrainPointer }}</li>
-    <li>Spriteset: {{ battleData.spritesetPointer }}</li>
-    <li>Spriteset (bis): {{ battleData.spritesetBisPointer }}</li>
-  </ul>
-
   <BytesViewer :bytes="battleData.terrain" title="Terrain (raw)" />
 
   <div class="row items-center q-gutter-md q-mb-md">

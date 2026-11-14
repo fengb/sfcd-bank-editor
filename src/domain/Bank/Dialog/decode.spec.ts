@@ -12,7 +12,6 @@ import {
   decodeDialog,
   CHAR_TO_TOKEN,
   TOKEN_TO_CHAR,
-  OFFSET,
 } from './decode'
 
 const path = resolve(import.meta.dirname, 'decode.test.bin')
@@ -54,7 +53,7 @@ describe('decodeTokens', () => {
     const trees = {
       0xfe: { tokens: [12, 0xfe], tree: [0b01100000] },
     }
-    const tokens = decodeTokens(trees, new Uint8Array([0x80]), 0)
+    const tokens = decodeTokens(trees, new Uint8Array([0x80]))
     expect(tokens).toEqual([12])
   })
 })
@@ -64,7 +63,7 @@ describe('decodeString', () => {
     const trees = {
       0xfe: { tokens: [12, 0xfe], tree: [0b01100000] },
     }
-    expect(decodeString(trees, new Uint8Array([0x80]), 0)).toBe('A')
+    expect(decodeString(trees, new Uint8Array([0x80]))).toBe('A')
   })
 })
 
@@ -73,7 +72,7 @@ describe('decodeString intermediate specials', () => {
     const trees = {
       0xfe: { tokens: [0xef, 0xfe], tree: [0b01100000] },
     }
-    expect(decodeString(trees, new Uint8Array([0x80]), 0)).toBe('↵')
+    expect(decodeString(trees, new Uint8Array([0x80]))).toBe('↵')
   })
 })
 
@@ -112,10 +111,11 @@ describe('decodeDialogPages', () => {
     const trees = {
       0xfe: { tokens: [12, 0xfe], tree: [0b01100000] },
     }
-    const bytes = new Uint8Array(20)
-    new DataView(bytes.buffer).setUint32(0, OFFSET + 10, false)
-    bytes[10] = 1
-    bytes[11] = 0x80
-    expect(decodeDialogPages(trees, bytes, 0)).toEqual(['A'])
+    const buffer = new Uint8Array(40)
+    const bytes = buffer.subarray(20)
+    new DataView(buffer.buffer).setUint32(20, 10, false)
+    buffer[10] = 1
+    buffer[11] = 0x80
+    expect(decodeDialogPages(trees, bytes, 20)).toEqual(['A'])
   })
 })

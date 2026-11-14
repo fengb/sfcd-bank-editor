@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 
-import BytesViewer from '@/components/BytesViewer'
 import type { DecodedTile } from '@/domain/Bank/MapData/decodeBlocks'
 import { useBankFileStore } from '@/stores/bank'
 
@@ -166,9 +165,6 @@ watch(
 
   <h3>Decoded layout ({{ decodedLayout.length }} blocks)</h3>
   <canvas ref="layoutCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
-
-  <BytesViewer :bytes="mapData.blocks" title="Blocks (raw)" />
-  <BytesViewer :bytes="mapData.layout" title="Layout (raw)" />
 
   <div v-for="section in sections" :key="section.name">
     <h3>{{ section.name }} ({{ section.count }})</h3>

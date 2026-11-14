@@ -13,24 +13,8 @@ export default class BattleData {
     return new BattleData(decodeBattleData(bytes), bytes)
   }
 
-  get terrainPointer(): number {
-    return this.data?.terrainPointer ?? 0
-  }
-
-  get spritesetPointer(): number {
-    return this.data?.spritesetPointer ?? 0
-  }
-
-  get spritesetBisPointer(): number {
-    return this.data?.spritesetBisPointer ?? 0
-  }
-
-  get terrain(): Uint8Array {
-    return this.data?.terrain ?? new Uint8Array()
-  }
-
-  get terrainBytes(): Uint8Array {
-    return this.terrain
+  get terrain(): number[] {
+    return this.data?.terrain ?? []
   }
 
   get spriteset(): BattleSpriteSet {
@@ -39,9 +23,5 @@ export default class BattleData {
 
   get spritesetBis(): BattleSpriteSet {
     return this.data?.spritesetBis ?? { allies: [], enemies: [], aiRegions: [], aiPoints: [] }
-  }
-
-  get graphic(): BattleDataRegions | null {
-    return this.data
   }
 }

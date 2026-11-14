@@ -1,4 +1,6 @@
-import { ByteReader, readU16be, readU32be } from '../util'
+import { chunk } from 'es-toolkit'
+
+import { ByteReader, decodeSegments, readU16be, readU32be } from '../util'
 
 /** RAM base used by the pointer header; subtracting it yields file offsets. */
 export const RAM_BASE = 0x233200
@@ -76,84 +78,54 @@ export interface CompendiumData {
   spells: Uint8Array
 }
 
-export function parseHeader(bytes: Uint8Array, headerNumber: number): number {
-  const pointer = readU32be(bytes, headerNumber * 4) ?? 0
-  return pointer - RAM_BASE
-}
-
 export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
-  const nameOffsets = {
-    items: parseHeader(bytes, 0),
-    classes: parseHeader(bytes, 1),
-    spells: parseHeader(bytes, 2),
-    characters: parseHeader(bytes, 3),
-    monsters: parseHeader(bytes, 4),
-  }
+  const segments = decodeSegments(bytes, RAM_BASE, {
+    itemNames: 0x00,
+    classNames: 0x04,
+    spellNames: 0x08,
+    characterNames: 0x0c,
+    monsterNames: 0x10,
 
-  const names: CompendiumNames = {
-    items: [],
-    classes: [],
-    spells: [],
-    characters: [],
-    monsters: [],
-  }
-
-  names.items = decodeString(bytes.subarray(nameOffsets.items, nameOffsets.classes))
-  names.classes = decodeString(bytes.subarray(nameOffsets.classes, nameOffsets.spells))
-  names.spells = decodeString(bytes.subarray(nameOffsets.spells, nameOffsets.characters))
-  names.characters = decodeString(bytes.subarray(nameOffsets.characters, nameOffsets.monsters))
-  names.monsters = decodeString(bytes.subarray(nameOffsets.monsters))
-
-  const itemOffset = parseHeader(bytes, 5)
-  const spellOffset = parseHeader(bytes, 6)
-  const monsterOffset = parseHeader(bytes, 7)
-
-  const items: CompendiumItem[] = []
-  for (let i = 0; i < names.items.length; i++) {
-    const base = bytes.subarray(itemOffset + i * 16)
-    if (base.length < 16) break
-    items.push({
-      itemId: i,
-      mask: readU32be(base, 0x00) ?? 0,
-      range: [base[0x05]!, base[0x04]!],
-      price: readU16be(base, 0x06),
-      flags: base[0x08]!,
-      useSpell: base[0x09]!,
-      equip: [...base.subarray(0x0a, 0x10)],
-    })
-  }
-
-  const monsters: CompendiumMonster[] = []
-  for (let i = 0; i < names.monsters.length; i++) {
-    const base = bytes.subarray(monsterOffset + i * 0x38)
-    if (base.length < 0x38) break
-    // Unreferenced bytes (0x01 - 0x0a, 0x11, 0x1c, etc) are confirmed zeroes
-    monsters.push({
-      monsterId: i,
-      index: base[0x00]!,
-      level: base[0x0b]!,
-      hp: readU16be(base, 0x0c),
-      mp: base[0x10]!,
-      atk: base[0x12]!,
-      def: base[0x14]!,
-      agi: base[0x16]!,
-      mov: base[0x18]!,
-      unknown1a: base[0x1a]!,
-      spellResist: base[0x1b]!,
-      unknown1c: [...base.subarray(0x1c, 0x20)],
-      inventory: Array.from({ length: 4 }, (_, s) => readU16be(base, 0x20 + s * 2)),
-      spells: [...base.subarray(0x28, 0x28 + 4)],
-      unitClass: base[0x31]!,
-      unknown32: [...base.subarray(0x32, 0x38)],
-    })
-  }
-
-  const spells = bytes.subarray(spellOffset, spellOffset + 576)
+    items: 0x14,
+    spells: 0x18,
+    monsters: 0x1c,
+  })
 
   return {
-    names,
-    items,
-    monsters,
-    spells,
+    names: {
+      items: decodeString(segments.itemNames),
+      classes: decodeString(segments.classNames),
+      spells: decodeString(segments.spellNames),
+      characters: decodeString(segments.characterNames),
+      monsters: decodeString(segments.monsterNames),
+    },
+    items: chunk([...segments.items], 16).map((entry, i) => ({
+      itemId: i,
+      mask: readU32be(entry, 0x00) ?? 0,
+      range: [entry[0x05]!, entry[0x04]!] as [number, number],
+      price: readU16be(entry, 0x06),
+      flags: entry[0x08]!,
+      useSpell: entry[0x09]!,
+      equip: entry.slice(0x0a),
+    })),
+    monsters: chunk([...segments.monsters], 0x38).map((entry, i) => ({
+      monsterId: i,
+      index: entry[0x00]!,
+      level: entry[0x0b]!,
+      hp: readU16be(entry, 0x0c),
+      mp: entry[0x10]!,
+      atk: entry[0x12]!,
+      def: entry[0x14]!,
+      agi: entry[0x16]!,
+      mov: entry[0x18]!,
+      unknown1a: entry[0x1a]!,
+      spellResist: entry[0x1b]!,
+      unknown1c: entry.slice(0x1c, 0x20),
+      inventory: Array.from({ length: 4 }, (_, s) => readU16be(entry, 0x20 + s * 2)),
+      spells: entry.slice(0x28, 0x28 + 4),
+      unitClass: entry[0x31]!,
+      unknown32: entry.slice(0x32),
+    })),
+    spells: segments.spells,
   }
 }
