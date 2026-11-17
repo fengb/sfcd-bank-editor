@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import PaletteDisplay from '@/components/PaletteDisplay'
 import TileBlock from '@/components/TileBlock'
 import { useBankFileStore } from '@/stores/bank'
-import { paletteRgb } from '@/utils/color'
 
 const store = useBankFileStore()
 const chapter = computed(() => store.bank!.toc.chapterGraphics.region())
@@ -21,17 +21,7 @@ const tiles = computed(() => chapter.value.tiles)
     </div>
     <div>
       <h3>Palette</h3>
-      <div class="row q-gutter-xs">
-        <div
-          v-for="(color, i) in palette"
-          :key="i"
-          :style="{
-            background: paletteRgb(color),
-          }"
-          style="width: 24px; height: 24px; border: 1px solid #555"
-          :title="`#${i}`"
-        />
-      </div>
+      <PaletteDisplay :palette="palette" />
     </div>
   </div>
   <p v-else class="text-grey">No chapter screen graphics in this bank.</p>

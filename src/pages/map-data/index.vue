@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 
+import PaletteDisplay from '@/components/PaletteDisplay'
 import type { Palette } from '@/domain/Bank/BattleSprites'
 import type { DecodedTile } from '@/domain/Bank/MapData/decodeBlocks'
 import { useBankFileStore } from '@/stores/bank'
@@ -150,17 +151,7 @@ watch(
 
   <div v-if="mapData.palette">
     <h3>Palette</h3>
-    <div class="row q-gutter-xs">
-      <div
-        v-for="(color, i) in mapData.palette"
-        :key="i"
-        :style="{
-          background: paletteRgb(color),
-        }"
-        style="width: 24px; height: 24px; border: 1px solid #555"
-        :title="`#${i}`"
-      />
-    </div>
+    <PaletteDisplay :palette="mapData.palette" />
   </div>
 
   <h3>Decoded blocks ({{ blockCount }})</h3>
