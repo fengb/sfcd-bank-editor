@@ -3,6 +3,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 
 import type { Palette, Tile } from '@/domain/Bank/BattleSprites/graphics'
+import { paletteRgb } from '@/utils/color'
 
 const props = defineProps<{
   tile: Tile
@@ -35,8 +36,7 @@ function render(): void {
     for (let px = 0; px < 8; px++) {
       const colorIndex = props.tile.pixels[px]?.[py] ?? 0
       if (colorIndex === 0) continue
-      const color = props.palette?.[colorIndex] ?? [0, 0, 0]
-      ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+      ctx.fillStyle = paletteRgb(props.palette[colorIndex] ?? [0, 0, 0])
       ctx.fillRect(px, py, 1, 1)
     }
   }

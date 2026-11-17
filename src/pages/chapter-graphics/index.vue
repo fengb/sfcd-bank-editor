@@ -3,6 +3,7 @@ import { computed } from 'vue'
 
 import TileBlock from '@/components/TileBlock'
 import { useBankFileStore } from '@/stores/bank'
+import { paletteRgb } from '@/utils/color'
 
 const store = useBankFileStore()
 const chapter = computed(() => store.bank!.toc.chapterGraphics.region())
@@ -24,7 +25,9 @@ const tiles = computed(() => chapter.value.tiles)
         <div
           v-for="(color, i) in palette"
           :key="i"
-          :style="{ background: `rgb(${color[0]}, ${color[1]}, ${color[2]})` }"
+          :style="{
+            background: paletteRgb(color),
+          }"
           style="width: 24px; height: 24px; border: 1px solid #555"
           :title="`#${i}`"
         />

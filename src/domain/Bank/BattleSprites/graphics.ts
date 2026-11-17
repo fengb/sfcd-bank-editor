@@ -1,19 +1,9 @@
 import { splitBits } from '@/utils/bits'
 
 import { BitReader, ByteReader, readU16be } from '../util'
-export const VALUE_MAP: Record<number, number> = {
-  0: 0,
-  2: 52,
-  4: 87,
-  6: 116,
-  8: 144,
-  10: 172,
-  12: 206,
-  14: 255,
-}
 
-export type Color = [number, number, number]
-
+export type ColorChannel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+export type Color = [ColorChannel, ColorChannel, ColorChannel]
 export type Palette = [
   Color,
   Color,
@@ -37,12 +27,12 @@ export type Tile = {
   pixels: number[][]
 }
 
-export function parsePalette(data: Uint8Array): Palette {
+export function parsePalette(data: Uint8Array | number[]): Palette {
   const colors: Color[] = []
   for (let i = 0; i + 1 < data.length; i += 2) {
     const cram = readU16be(data, i)
     const [, b, g, r] = splitBits(cram, [4, 4, 4, 4])
-    colors.push([VALUE_MAP[r & 0x0e] ?? 0, VALUE_MAP[g & 0x0e] ?? 0, VALUE_MAP[b & 0x0e] ?? 0])
+    colors.push([(r >> 1) as ColorChannel, (g >> 1) as ColorChannel, (b >> 1) as ColorChannel])
   }
   while (colors.length < 16) {
     colors.push([0, 0, 0])

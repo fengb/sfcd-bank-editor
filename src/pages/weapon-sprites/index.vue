@@ -4,7 +4,7 @@ import { QTable, QBtnToggle, type QTableProps } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
 import TileBlock from '@/components/TileBlock'
-import type { Palette } from '@/domain/Bank/BattleSprites/graphics'
+import type { Color, Palette } from '@/domain/Bank/BattleSprites/graphics'
 import type { WeaponSprite } from '@/domain/Bank/WeaponSprites/decode'
 import { useBankFileStore } from '@/stores/bank'
 
@@ -18,11 +18,11 @@ const active = computed<WeaponSprite | null>(
 )
 
 const palette = computed<Palette>(() => {
-  const colors: [number, number, number][] = Array.from({ length: 16 }, () => [0, 0, 0])
-  colors[1] = [255, 255, 255]
+  const colors: Color[] = Array.from({ length: 16 }, () => [0, 0, 0])
+  colors[1] = [7, 7, 7]
   colors[2] = [0, 0, 0]
-  colors[14] = [192, 192, 192]
-  colors[15] = [128, 128, 128]
+  colors[14] = [6, 6, 6]
+  colors[15] = [3, 3, 3]
   return colors as Palette
 })
 

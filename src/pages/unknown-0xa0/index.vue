@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 
+import type { Palette } from '@/domain/Bank/BattleSprites'
 import type { DecodedTile } from '@/domain/Bank/MapData/decodeBlocks'
 import { useBankFileStore } from '@/stores/bank'
+import { paletteRgb } from '@/utils/color'
 
 const store = useBankFileStore()
 const mapData = computed(() => store.bank!.toc.map2Data.region())
@@ -43,7 +45,7 @@ function drawTile(
   desc: DecodedTile,
   x0: number,
   y0: number,
-  palette: (readonly [number, number, number])[] | null,
+  palette: Palette,
 ): void {
   const base = tileAt(desc)
   if (!base || !palette) return
@@ -53,8 +55,7 @@ function drawTile(
       const srcY = desc.vFlip ? 7 - py : py
       const idx = base.pixels[srcX]?.[srcY] ?? 0
       if (idx === 0) continue
-      const color = palette[idx] ?? [0, 0, 0]
-      ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+      ctx.fillStyle = paletteRgb(palette[idx] ?? [0, 0, 0])
       ctx.fillRect(x0 + px, y0 + py, 1, 1)
     }
   }
@@ -153,7 +154,9 @@ watch(
       <div
         v-for="(color, i) in mapData.palette"
         :key="i"
-        :style="{ background: `rgb(${color[0]}, ${color[1]}, ${color[2]})` }"
+        :style="{
+          background: paletteRgb(color),
+        }"
         style="width: 24px; height: 24px; border: 1px solid #555"
         :title="`#${i}`"
       />
