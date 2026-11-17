@@ -2,7 +2,6 @@
 import { QBtnToggle, QTable, type QTableProps } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
-import { formatHex } from '@/components/BytesViewer/hex'
 import Tile from '@/components/Tile'
 import type { Tile as TileModel } from '@/domain/Bank/BattleSprites'
 import type { Portrait } from '@/domain/Bank/Portraits/decode'
@@ -18,12 +17,6 @@ const active = computed(() => portraits.value.portraits[selected.value] ?? null)
 
 const columns: QTableProps['columns'] = [
   { name: 'index', label: 'Index', field: 'index' },
-  {
-    name: 'pointer',
-    label: 'Pointer',
-    field: 'pointer',
-    format: (val: number) => formatHex(val, 2),
-  },
   { name: 'eyes', label: 'Eyes', field: (row: Portrait) => row.eyeTiles.length },
   { name: 'mouths', label: 'Mouths', field: (row: Portrait) => row.mouthTiles.length },
 ]

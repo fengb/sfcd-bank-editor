@@ -1,7 +1,7 @@
 import { chunk, takeWhile } from 'es-toolkit'
 
 import { parsePalette, type Palette } from '../BattleSprites/graphics'
-import { decodeSegments, readU16be } from '../util'
+import { extractSegments, readU16be } from '../util'
 import { decodeBlocks, type DecodedTile } from './decodeBlocks'
 import { decodeLayout, type LayoutEntry } from './decodeLayout'
 
@@ -203,7 +203,7 @@ export function decodeMapData(data: Uint8Array): MapDataRegions | null {
 
     const header = readU16be(data, 0)
 
-    const segments = decodeSegments(data, MAINCPU_WORDRAM_LOADING_OFFSET, {
+    const segments = extractSegments(data, MAINCPU_WORDRAM_LOADING_OFFSET, {
       palette: 0x02,
       blocks: 0x06,
       layout: 0x0a,

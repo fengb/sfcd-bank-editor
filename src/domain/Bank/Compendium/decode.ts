@@ -1,6 +1,6 @@
 import { chunk } from 'es-toolkit'
 
-import { ByteReader, decodeSegments, readU16be, readU32be } from '../util'
+import { ByteReader, extractSegments, readU16be, readU32be } from '../util'
 
 /** RAM base used by the pointer header; subtracting it yields file offsets. */
 export const RAM_BASE = 0x233200
@@ -79,7 +79,7 @@ export interface CompendiumData {
 }
 
 export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
-  const segments = decodeSegments(bytes, RAM_BASE, {
+  const segments = extractSegments(bytes, RAM_BASE, {
     itemNames: 0x00,
     classNames: 0x04,
     spellNames: 0x08,

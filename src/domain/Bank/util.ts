@@ -1,4 +1,4 @@
-import { clamp, mapValues, uniq } from 'es-toolkit'
+import { mapValues, uniq } from 'es-toolkit'
 
 export class ByteReader {
   pos: number
@@ -130,7 +130,7 @@ export class BitReader {
   }
 }
 
-export function decodeSegments<T extends Record<string, number>>(
+export function extractSegments<T extends Record<string, number>>(
   bytes: Uint8Array,
   baseOffset: number,
   headerMapping: T,
@@ -149,5 +149,27 @@ export function decodeSegments<T extends Record<string, number>>(
     const nextOffset = sortedOffsets[at + 1]
     result[key] = Object.assign(bytes.subarray(offset, nextOffset), { segmentOffset: offset })
   }
+  return result
+}
+
+export function extractRecords(
+  bytes: Uint8Array,
+  baseOffset: number,
+  maxItems?: number,
+): Uint8Array[] {
+  const dataStart = (readU32be(bytes, 0) ?? 0) - baseOffset
+  const possibleItems = dataStart / 4
+  const endIter = Math.min(possibleItems, maxItems ?? Infinity)
+
+  const result: Uint8Array[] = []
+  for (let i = 0; i < endIter; i++) {
+    const offset = readU32be(bytes, i * 4)! - baseOffset
+
+    if (offset > bytes.length) {
+      return result
+    }
+    result.push(bytes.subarray(offset))
+  }
+
   return result
 }

@@ -1,5 +1,5 @@
 import { decodeStackData } from '../BattleSprites/graphics'
-import { decodeSegments, readU16be } from '../util'
+import { extractSegments, readU16be } from '../util'
 
 const BATTLE_BASE = 0x236800
 
@@ -125,7 +125,7 @@ export function decodeSpriteSet(data: Uint8Array): BattleSpriteSet {
 
 export function decodeBattleData(data: Uint8Array): BattleDataRegions | null {
   try {
-    const segments = decodeSegments(data, BATTLE_BASE, {
+    const segments = extractSegments(data, BATTLE_BASE, {
       terrain: 0x00,
       sprintset: 0x04,
       sprintsetBis: 0x08,

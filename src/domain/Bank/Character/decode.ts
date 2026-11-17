@@ -1,6 +1,6 @@
 import { chunk, chunkBy } from 'es-toolkit'
 
-import { decodeSegments } from '../util'
+import { extractSegments } from '../util'
 
 const SECONDARY_ENTRY_SIZE = 6
 const CLASS_ENTRY_SIZE = 5
@@ -90,7 +90,7 @@ function decodeClasses(bytes: Uint8Array): ClassEntry[] {
 }
 
 export function decodeCharacterData(bytes: Uint8Array): CharacterTables {
-  const segments = decodeSegments(bytes, 0x232c00, {
+  const segments = extractSegments(bytes, 0x232c00, {
     secondary: 0x08,
     classes: 0x0c,
     records: 0x10,

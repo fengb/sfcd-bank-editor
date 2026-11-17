@@ -1,10 +1,12 @@
+import { isNotNil } from 'es-toolkit'
+
 import {
   decodeStackGraphics,
   parsePalette,
   type Tile,
   type Palette,
 } from '../BattleSprites/graphics'
-import { ByteReader, readU32be } from '../util'
+import { ByteReader, extractRecords } from '../util'
 
 interface OverlayTile {
   tile: Tile
@@ -13,7 +15,6 @@ interface OverlayTile {
 
 export interface Portrait {
   index: number
-  pointer: number
   palette: Palette
   baseTiles: Tile[]
   eyeTiles: OverlayTile[]
@@ -47,7 +48,10 @@ export function decodePortrait(data: Uint8Array): {
   const palette = parsePalette(Uint8Array.from(reader.nextBytes(32)))
 
   const allTiles = decodeStackGraphics(reader.rest())
-  if (allTiles?.length !== 64) return null
+  if (allTiles?.length !== 64) {
+    debugger
+    return null
+  }
 
   const baseTiles = allTiles.filter((_, i) => i % 8 < 6)
 
@@ -66,29 +70,19 @@ export function decodePortrait(data: Uint8Array): {
 }
 
 export function decodePortraits(bytes: Uint8Array): Portrait[] {
-  const result: Portrait[] = []
-
-  for (let i = 0; i < MAX_PORTRAITS; i++) {
-    const entryOffset = i * 4
-    const pointer = readU32be(bytes, entryOffset)
-    if (!pointer) break
-
-    const regionOffset = pointer - 0x10000 - bytes.byteOffset
-    if (regionOffset < 0 || regionOffset >= bytes.length) break
-
-    const data = bytes.subarray(regionOffset)
-    const decoded = decodePortrait(data)
-    if (!decoded) break
-
-    result.push({
-      index: i,
-      pointer,
-      palette: decoded.palette,
-      baseTiles: decoded.baseTiles,
-      eyeTiles: decoded.eyeTiles,
-      mouthTiles: decoded.mouthTiles,
+  return extractRecords(bytes, 0x10000 + bytes.byteOffset, MAX_PORTRAITS)
+    .map((entry, i) => {
+      const decoded = decodePortrait(entry)!
+      if (!decoded) {
+        return null
+      }
+      return {
+        index: i,
+        palette: decoded.palette,
+        baseTiles: decoded.baseTiles,
+        eyeTiles: decoded.eyeTiles,
+        mouthTiles: decoded.mouthTiles,
+      }
     })
-  }
-
-  return result
+    .filter(isNotNil)
 }

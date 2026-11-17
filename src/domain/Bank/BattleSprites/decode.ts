@@ -88,15 +88,7 @@ export function decodeBattleSpriteBlock(block: Uint8Array): DecodedBattleSprite 
     const entry = i * 2
     const relFrameOffset = entry + readU16be(frameTable, entry)
 
-    const nextEntry = entry + 2
-    const relNextFrameOffset =
-      i + 1 < frameSlotCount ? nextEntry + readU16be(frameTable, nextEntry) : frameTable.length
-
-    if (relNextFrameOffset <= relFrameOffset || relNextFrameOffset > frameTable.length) {
-      return null
-    }
-
-    const tileData = frameTable.subarray(relFrameOffset, relNextFrameOffset)
+    const tileData = frameTable.subarray(relFrameOffset)
     const frame = decodeStackGraphics(tileData)
     if (!frame?.length) return null
 

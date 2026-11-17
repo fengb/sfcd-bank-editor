@@ -1,6 +1,6 @@
 import { invert, mapValues } from 'es-toolkit'
 
-import { BitReader, decodeSegments, readU16be, readU32be } from '../util'
+import { BitReader, extractSegments, readU16be, readU32be } from '../util'
 
 export const OFFSET = 0x22e000
 
@@ -156,7 +156,7 @@ export function decodeDialogPages(
 }
 
 export function decodeDialog(data: Uint8Array): string[] {
-  const segments = decodeSegments(data, OFFSET, {
+  const segments = extractSegments(data, OFFSET, {
     textData: 0x00,
     treeOffsets: 0x40,
     treeData: 0x4a,
