@@ -23,10 +23,16 @@ const allyColumns: QTableProps['columns'] = [
     label: 'Index',
     field: 'index',
     align: 'left',
-    format: (val) => `${formatHex(val, 2)} - ${compendium.value.names.characters[val]}`,
+    format: (val) => formatHex(val, 2),
   },
   { name: 'x', label: 'X', field: 'x' },
   { name: 'y', label: 'Y', field: 'y' },
+  {
+    name: 'unknown',
+    label: 'Unknown',
+    field: 'unknown',
+    format: (val) => val.map((v: number) => formatHex(v, 2)).join(' '),
+  },
 ]
 
 const enemyColumns: QTableProps['columns'] = [
@@ -59,6 +65,12 @@ const aiRegionColumns: QTableProps['columns'] = [
   { name: 'y3', label: 'Y3', field: 'y3' },
   { name: 'x4', label: 'X4', field: 'x4' },
   { name: 'y4', label: 'Y4', field: 'y4' },
+  {
+    name: 'unknown',
+    label: 'Unknown',
+    field: 'unknown',
+    format: (val) => val.map((v: number) => formatHex(v, 2)).join(' '),
+  },
 ]
 
 const aiPointColumns: QTableProps['columns'] = [

@@ -1,5 +1,5 @@
 import { decodeStackData } from '../BattleSprites/graphics'
-import { extractSegments, readU16be } from '../util'
+import { ByteReader, extractSegments, readU16be } from '../util'
 
 const BATTLE_BASE = 0x236800
 
@@ -7,6 +7,7 @@ export interface BattleAlly {
   index: number
   x: number
   y: number
+  unknown: number[]
 }
 
 export interface BattleEnemy {
@@ -33,6 +34,7 @@ export interface BattleAIRegion {
   y3: number
   x4: number
   y4: number
+  unknown: number[]
 }
 
 export interface BattleAIPoint {
@@ -56,71 +58,65 @@ export interface BattleDataRegions {
 }
 
 export function decodeSpriteSet(data: Uint8Array): BattleSpriteSet {
-  const result: BattleSpriteSet = { allies: [], enemies: [], aiRegions: [], aiPoints: [] }
-  if (data.length < 4) return result
+  const reader = new ByteReader(data)
 
-  const alliesNumber = data[0]!
-  const enemiesNumber = data[1]!
-  const aiRegionsNumber = data[2]!
-  const aiPointsNumber = data[3]!
+  const alliesNumber = reader.nextU8()
+  const enemiesNumber = reader.nextU8()
+  const aiRegionsNumber = reader.nextU8()
+  const aiPointsNumber = reader.nextU8()
 
-  let cursor = 4
-  for (let i = 0; i < alliesNumber; i++) {
-    result.allies.push({
-      index: data[cursor + 0] ?? 0,
-      x: data[cursor + 1] ?? 0,
-      y: data[cursor + 2] ?? 0,
-    })
-    cursor += 12
-  }
+  const allies = Array.from({ length: alliesNumber }, () => {
+    const entry = reader.nextBytes(12)
+    return {
+      index: entry[0] ?? 0,
+      x: entry[1] ?? 0,
+      y: entry[2] ?? 0,
+      unknown: entry.slice(3),
+    }
+  })
 
-  const enemyStart = 4 + alliesNumber * 12
-  cursor = enemyStart
-  for (let i = 0; i < enemiesNumber; i++) {
-    result.enemies.push({
-      index: data[cursor + 0] ?? 0,
-      x: data[cursor + 1] ?? 0,
-      y: data[cursor + 2] ?? 0,
-      ai: data[cursor + 3] ?? 0,
-      item: readU16be(data, cursor + 4),
-      moveOrder: data[cursor + 6] ?? 0,
-      triggerRegion: data[cursor + 7] ?? 0,
-      byte8: data[cursor + 8] ?? 0,
-      byte9: data[cursor + 9] ?? 0,
-      byte10: data[cursor + 10] ?? 0,
-      spawnParams: data[cursor + 11] ?? 0,
-    })
-    cursor += 12
-  }
+  const enemies = Array.from({ length: enemiesNumber }, () => {
+    const entry = reader.nextBytes(12)
+    return {
+      index: entry[0] ?? 0,
+      x: entry[1] ?? 0,
+      y: entry[2] ?? 0,
+      ai: entry[3] ?? 0,
+      item: readU16be(entry, 4),
+      moveOrder: entry[6] ?? 0,
+      triggerRegion: entry[7] ?? 0,
+      byte8: entry[8] ?? 0,
+      byte9: entry[9] ?? 0,
+      byte10: entry[10] ?? 0,
+      spawnParams: entry[11] ?? 0,
+    }
+  })
 
-  const regionStart = 4 + alliesNumber * 12 + enemiesNumber * 12
-  cursor = regionStart
-  for (let i = 0; i < aiRegionsNumber; i++) {
-    result.aiRegions.push({
-      type: data[cursor + 0] ?? 0,
-      x1: data[cursor + 2] ?? 0,
-      y1: data[cursor + 3] ?? 0,
-      x2: data[cursor + 4] ?? 0,
-      y2: data[cursor + 5] ?? 0,
-      x3: data[cursor + 6] ?? 0,
-      y3: data[cursor + 7] ?? 0,
-      x4: data[cursor + 8] ?? 0,
-      y4: data[cursor + 9] ?? 0,
-    })
-    cursor += 12
-  }
+  const aiRegions = Array.from({ length: aiRegionsNumber }, () => {
+    const entry = reader.nextBytes(12)
+    return {
+      type: entry[0] ?? 0,
+      x1: entry[2] ?? 0,
+      y1: entry[3] ?? 0,
+      x2: entry[4] ?? 0,
+      y2: entry[5] ?? 0,
+      x3: entry[6] ?? 0,
+      y3: entry[7] ?? 0,
+      x4: entry[8] ?? 0,
+      y4: entry[9] ?? 0,
+      unknown: entry.slice(10),
+    }
+  })
 
-  const pointStart = 4 + alliesNumber * 12 + enemiesNumber * 12 + aiRegionsNumber * 12
-  cursor = pointStart
-  for (let i = 0; i < aiPointsNumber; i++) {
-    result.aiPoints.push({
-      x: data[cursor + 0] ?? 0,
-      y: data[cursor + 1] ?? 0,
-    })
-    cursor += 2
-  }
+  const aiPoints = Array.from({ length: aiPointsNumber }, () => {
+    const entry = reader.nextBytes(2)
+    return {
+      x: entry[0] ?? 0,
+      y: entry[1] ?? 0,
+    }
+  })
 
-  return result
+  return { allies, enemies, aiRegions, aiPoints }
 }
 
 export function decodeBattleData(data: Uint8Array): BattleDataRegions | null {
