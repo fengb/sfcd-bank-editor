@@ -16,7 +16,6 @@ const selectedPalette = ref<number>(0)
 
 const columns: QTableProps['columns'] = [
   { name: 'index', label: 'Index', field: 'index' },
-  { name: 'pointer', label: 'Pointer', field: 'pointer', format: (val) => formatHex(val, 2) },
   { name: 'animSpeed', label: 'Animation Speed', field: 'animSpeed' },
   { name: 'unknown', label: 'Unknown', field: 'unknown', format: (val) => formatHex(val, 2) },
   { name: 'palettes', label: 'Palettes', field: (row) => row.palettes.length },
