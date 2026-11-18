@@ -1,7 +1,7 @@
 import { chunk, takeWhile } from 'es-toolkit'
 
 import { parsePalette, type Palette } from '../BattleSprites/graphics'
-import { extractSegments, readU16be } from '../util'
+import { extractSections, readU16be } from '../util'
 import { decodeBlocks, type DecodedTile } from './decodeBlocks'
 import { decodeLayout, type LayoutEntry } from './decodeLayout'
 
@@ -203,7 +203,7 @@ export function decodeMapData(data: Uint8Array): MapDataRegions | null {
 
     const header = readU16be(data, 0)
 
-    const segments = extractSegments(data, MAINCPU_WORDRAM_LOADING_OFFSET, {
+    const sections = extractSections(data, MAINCPU_WORDRAM_LOADING_OFFSET, {
       palette: 0x02,
       blocks: 0x06,
       layout: 0x0a,
@@ -219,17 +219,17 @@ export function decodeMapData(data: Uint8Array): MapDataRegions | null {
 
     return {
       header,
-      palette: parsePalette(segments.palette),
-      decodedBlocks: decodeBlocks(segments.blocks),
-      decodedLayout: decodeLayout(segments.layout),
-      areas: parseAreas(segments.areas),
-      flagCopies: parseFlagCopies(segments.flagCopies),
-      stepCopies: parseStepCopies(segments.stepCopies),
-      layer2Copies: parseStepCopies(segments.layer2Copies),
-      warps: parseWarps(segments.warps),
-      chestItems: parseItems(segments.chestItems),
-      otherItems: parseItems(segments.otherItems),
-      animation: parseAnimation(segments.animations),
+      palette: parsePalette(sections.palette),
+      decodedBlocks: decodeBlocks(sections.blocks),
+      decodedLayout: decodeLayout(sections.layout),
+      areas: parseAreas(sections.areas),
+      flagCopies: parseFlagCopies(sections.flagCopies),
+      stepCopies: parseStepCopies(sections.stepCopies),
+      layer2Copies: parseStepCopies(sections.layer2Copies),
+      warps: parseWarps(sections.warps),
+      chestItems: parseItems(sections.chestItems),
+      otherItems: parseItems(sections.otherItems),
+      animation: parseAnimation(sections.animations),
     }
   } catch {
     return null

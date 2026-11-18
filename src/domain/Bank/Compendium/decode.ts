@@ -1,6 +1,6 @@
 import { chunk } from 'es-toolkit'
 
-import { ByteReader, extractSegments, readU16be, readU32be } from '../util'
+import { ByteReader, extractSections, readU16be, readU32be } from '../util'
 
 /** RAM base used by the pointer header; subtracting it yields file offsets. */
 export const RAM_BASE = 0x233200
@@ -79,7 +79,7 @@ export interface CompendiumData {
 }
 
 export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
-  const segments = extractSegments(bytes, RAM_BASE, {
+  const sections = extractSections(bytes, RAM_BASE, {
     itemNames: 0x00,
     classNames: 0x04,
     spellNames: 0x08,
@@ -93,13 +93,13 @@ export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
 
   return {
     names: {
-      items: decodeString(segments.itemNames),
-      classes: decodeString(segments.classNames),
-      spells: decodeString(segments.spellNames),
-      characters: decodeString(segments.characterNames),
-      monsters: decodeString(segments.monsterNames),
+      items: decodeString(sections.itemNames),
+      classes: decodeString(sections.classNames),
+      spells: decodeString(sections.spellNames),
+      characters: decodeString(sections.characterNames),
+      monsters: decodeString(sections.monsterNames),
     },
-    items: chunk([...segments.items], 16).map((entry, i) => ({
+    items: chunk([...sections.items], 16).map((entry, i) => ({
       itemId: i,
       mask: readU32be(entry, 0x00) ?? 0,
       range: [entry[0x05]!, entry[0x04]!] as [number, number],
@@ -108,7 +108,7 @@ export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
       useSpell: entry[0x09]!,
       equip: entry.slice(0x0a),
     })),
-    monsters: chunk([...segments.monsters], 0x38).map((entry, i) => ({
+    monsters: chunk([...sections.monsters], 0x38).map((entry, i) => ({
       monsterId: i,
       index: entry[0x00]!,
       level: entry[0x0b]!,
@@ -126,6 +126,6 @@ export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
       unitClass: entry[0x31]!,
       unknown32: entry.slice(0x32),
     })),
-    spells: segments.spells,
+    spells: sections.spells,
   }
 }

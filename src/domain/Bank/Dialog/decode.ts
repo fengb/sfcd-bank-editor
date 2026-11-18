@@ -1,6 +1,6 @@
 import { invert, mapValues } from 'es-toolkit'
 
-import { BitReader, extractSegments, readU16be, readU32be } from '../util'
+import { BitReader, extractSections, readU16be, readU32be } from '../util'
 
 export const OFFSET = 0x22e000
 
@@ -156,20 +156,20 @@ export function decodeDialogPages(
 }
 
 export function decodeDialog(data: Uint8Array): string[] {
-  const segments = extractSegments(data, OFFSET, {
+  const sections = extractSections(data, OFFSET, {
     textData: 0x00,
     treeOffsets: 0x40,
     treeData: 0x4a,
   })
 
-  const count = segments.treeOffsets.length >> 1
+  const count = sections.treeOffsets.length >> 1
   const huffmanTreeOffsets = Array.from<number>({ length: count }).map((_, i) =>
-    readU16be(segments.treeOffsets, i * 2),
+    readU16be(sections.treeOffsets, i * 2),
   )
 
   const trees = huffmanTreeOffsets.map((offset) =>
-    offset === 0xffff ? null : splitTree(segments.treeData, offset),
+    offset === 0xffff ? null : splitTree(sections.treeData, offset),
   )
 
-  return decodeDialogPages(trees, segments.textData, OFFSET + segments.textData.segmentOffset)
+  return decodeDialogPages(trees, sections.textData, OFFSET + sections.textData.segmentOffset)
 }

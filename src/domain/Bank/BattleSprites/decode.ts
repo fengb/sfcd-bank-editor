@@ -1,6 +1,6 @@
 import { chunk } from 'es-toolkit'
 
-import { extractRecords, readU16be } from '../util'
+import { extractEntries, readU16be } from '../util'
 import { decodeStackGraphics, parsePalette, type Tile, type Palette } from './graphics'
 
 export interface BattleSprite {
@@ -14,11 +14,11 @@ export interface BattleSprite {
 const MAX_SPRITES = 64
 
 export function decodeBattleSprites(bytes: Uint8Array): BattleSprite[] {
-  const records = extractRecords(bytes, 0x10000 + bytes.byteOffset, MAX_SPRITES)
+  const entries = extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_SPRITES)
 
   const result: BattleSprite[] = []
 
-  for (const [i, block] of records.entries()) {
+  for (const [i, block] of entries.entries()) {
     const decoded = decodeBattleSpriteBlock(block)
     if (!decoded) break
     result.push({

@@ -1,5 +1,5 @@
 import { decodeBasicGraphics, type Palette, type Tile } from '../BattleSprites/graphics'
-import { extractRecords } from '../util'
+import { extractEntries } from '../util'
 
 export const MAP_SPRITE_PALETTE: Palette = [
   [0, 0, 0],
@@ -29,7 +29,7 @@ const MAX_MAP_SPRITES = 4096
 const MAP_FRAME_TILE_COUNT = 9
 
 export function decodeMapSprites(bytes: Uint8Array): MapSprite[] {
-  return extractRecords(bytes, 0x10000 + bytes.byteOffset, MAX_MAP_SPRITES).map((entry, index) => {
+  return extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_MAP_SPRITES).map((entry, index) => {
     const tiles = decodeBasicGraphics(entry)!
     return {
       index,

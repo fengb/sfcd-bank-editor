@@ -6,7 +6,7 @@ import {
   type Tile,
   type Palette,
 } from '../BattleSprites/graphics'
-import { ByteReader, extractRecords } from '../util'
+import { ByteReader, extractEntries } from '../util'
 
 interface OverlayTile {
   tile: Tile
@@ -70,7 +70,7 @@ export function decodePortrait(data: Uint8Array): {
 }
 
 export function decodePortraits(bytes: Uint8Array): Portrait[] {
-  return extractRecords(bytes, 0x10000 + bytes.byteOffset, MAX_PORTRAITS)
+  return extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_PORTRAITS)
     .map((entry, i) => {
       const decoded = decodePortrait(entry)!
       if (!decoded) {

@@ -4,7 +4,7 @@ import {
   type Tile,
   type Palette,
 } from '../BattleSprites/graphics'
-import { extractSegments } from '../util'
+import { extractSections } from '../util'
 
 export interface CampGraphic {
   palettes: Palette[]
@@ -17,7 +17,7 @@ const PALETTE_SIZE = 0x20
 
 export function decodeCampGraphic(data: Uint8Array): CampGraphic | null {
   try {
-    const segments = extractSegments(data, BASE, {
+    const sections = extractSections(data, BASE, {
       palettes: 0x00,
       0: 0x04,
       1: 0x08,
@@ -26,14 +26,14 @@ export function decodeCampGraphic(data: Uint8Array): CampGraphic | null {
     })
 
     const palettes = Array.from({ length: 4 }, (_, i) =>
-      parsePalette(segments.palettes.subarray(i * PALETTE_SIZE, (i + 1) * PALETTE_SIZE)),
+      parsePalette(sections.palettes.subarray(i * PALETTE_SIZE, (i + 1) * PALETTE_SIZE)),
     )
 
     const tilesets = [
-      decodeStackGraphics(segments[0])!,
-      decodeStackGraphics(segments[1])!,
-      decodeStackGraphics(segments[2])!,
-      decodeStackGraphics(segments[3])!,
+      decodeStackGraphics(sections[0])!,
+      decodeStackGraphics(sections[1])!,
+      decodeStackGraphics(sections[2])!,
+      decodeStackGraphics(sections[3])!,
     ]
     if (tilesets.some((t) => !t)) {
       return null

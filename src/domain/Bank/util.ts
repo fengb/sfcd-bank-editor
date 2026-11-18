@@ -130,7 +130,7 @@ export class BitReader {
   }
 }
 
-export function extractSegments<T extends Record<string, number>>(
+export function extractSections<T extends Record<string, number>>(
   bytes: Uint8Array,
   baseOffset: number,
   headerMapping: T,
@@ -152,7 +152,7 @@ export function extractSegments<T extends Record<string, number>>(
   return result
 }
 
-export function extractRecords(
+export function extractEntries(
   bytes: Uint8Array,
   baseOffset: number,
   maxItems?: number,
