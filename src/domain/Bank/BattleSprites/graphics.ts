@@ -1,3 +1,5 @@
+import { chunk } from 'es-toolkit'
+
 import { splitBits } from '@/utils/bits'
 
 import { BitReader, ByteReader, readU16be } from '../util'
@@ -23,8 +25,21 @@ export type Palette = [
   Color,
 ]
 
+export type ColorIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15
+
+export type PixelGrid = [
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+  [ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex, ColorIndex],
+]
+
 export type Tile = {
-  pixels: number[][]
+  pixels: PixelGrid
 }
 
 export function parsePalette(data: Uint8Array | number[]): Palette {
@@ -41,21 +56,18 @@ export function parsePalette(data: Uint8Array | number[]): Palette {
 }
 
 export function convertTiles(data: number[]): Tile[] {
-  const tileCount = Math.floor(data.length / 32)
-  const tiles: Tile[] = []
-  for (let t = 0; t < tileCount; t++) {
-    const pixelGrid: number[][] = Array.from({ length: 8 }, () => [])
+  return chunk(data, 32).map((entry) => {
+    const pixels = Array.from({ length: 8 }, () => Array(8).fill(0)) as PixelGrid
     for (let y = 0; y < 8; y++) {
       for (let x = 0; x < 8; x += 2) {
-        const currentByte = data[t * 32 + Math.floor((y * 8 + x) / 2)]!
+        const currentByte = entry[Math.floor((y * 8 + x) / 2)]!
         const [firstPixel, secondPixel] = splitBits(currentByte, [4, 4])
-        pixelGrid[x]![y] = firstPixel
-        pixelGrid[x + 1]![y] = secondPixel
+        pixels[x]![y] = firstPixel as ColorIndex
+        pixels[x + 1]![y] = secondPixel as ColorIndex
       }
     }
-    tiles.push({ pixels: pixelGrid })
-  }
-  return tiles
+    return { pixels }
+  })
 }
 
 const VALUE_CODE_TO_INDEX: Record<string, number> = {

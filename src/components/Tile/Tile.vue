@@ -36,7 +36,7 @@ function render(): void {
     for (let px = 0; px < 8; px++) {
       const colorIndex = props.tile.pixels[px]?.[py] ?? 0
       if (colorIndex === 0) continue
-      ctx.fillStyle = paletteRgb(props.palette[colorIndex] ?? [0, 0, 0])
+      ctx.fillStyle = paletteRgb(props.palette[colorIndex])
       ctx.fillRect(px, py, 1, 1)
     }
   }

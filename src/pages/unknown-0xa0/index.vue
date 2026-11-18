@@ -35,12 +35,6 @@ const sections = computed(() => [
 const layoutCanvas = ref<HTMLCanvasElement | null>(null)
 const blocksCanvas = ref<HTMLCanvasElement | null>(null)
 
-function tileAt(desc: DecodedTile): { pixels: number[][] } | null {
-  const base = tilesets.value[desc.tileId]
-  if (!base) return null
-  return base
-}
-
 function drawTile(
   ctx: CanvasRenderingContext2D,
   desc: DecodedTile,
@@ -48,15 +42,15 @@ function drawTile(
   y0: number,
   palette: Palette,
 ): void {
-  const base = tileAt(desc)
-  if (!base || !palette) return
+  const tile = tilesets.value[desc.tileId]
+  if (!tile || !palette) return
   for (let py = 0; py < 8; py++) {
     for (let px = 0; px < 8; px++) {
       const srcX = desc.hFlip ? 7 - px : px
       const srcY = desc.vFlip ? 7 - py : py
-      const idx = base.pixels[srcX]?.[srcY] ?? 0
+      const idx = tile.pixels[srcX]?.[srcY] ?? 0
       if (idx === 0) continue
-      ctx.fillStyle = paletteRgb(palette[idx] ?? [0, 0, 0])
+      ctx.fillStyle = paletteRgb(palette[idx])
       ctx.fillRect(x0 + px, y0 + py, 1, 1)
     }
   }
