@@ -11,16 +11,13 @@ function baseTile(tileId: number): DecodedTile {
   return { tileId, hFlip: false, vFlip: false, priority: false }
 }
 
-const createInitialBlocks = (): DecodedTile[] => {
-  const result: DecodedTile[] = Array.from({ length: 9 }, () => baseTile(0))
-
-  const first = [0x22e, 0x22f, 0xa2e, 0x23e, 0x23f, 0xa3e, 0x24e, 0x24f, 0xa4e]
-  const second = [0x22c, 0x22d, 0xa2c, 0x23c, 0x23d, 0xa3c, 0x24e, 0x24f, 0xa4e]
-
-  result.push(...first.map((num) => baseTile(num - 0x80)))
-  result.push(...second.map((num) => baseTile(num - 0x80)))
-  return result
-}
+const INITIAL_BLOCKS = [
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [0x1ae, 0x1af, 0x9ae, 0x1be, 0x1bf, 0x9be, 0x1ce, 0x1cf, 0x9ce],
+  [0x1ac, 0x1ad, 0x9ac, 0x1bc, 0x1bd, 0x9bc, 0x1ce, 0x1cf, 0x9ce],
+]
+  .flat()
+  .map(baseTile)
 
 export function decodeBlocks(blockData: Uint8Array): DecodedTile[] {
   const rightTileHistory: DecodedTile[] = []
@@ -28,7 +25,7 @@ export function decodeBlocks(blockData: Uint8Array): DecodedTile[] {
 
   const bits = new BitReader(blockData)
 
-  const commandNumber = bits.nextBitsValue(14)
+  const commandCount = bits.nextBitsValue(14)
 
   function lastTile(): DecodedTile {
     return { ...outputData.at(-1)! }
@@ -102,10 +99,10 @@ export function decodeBlocks(blockData: Uint8Array): DecodedTile[] {
     const hFlip = bits.nextBit() !== 0
     return nextTile(highPriority, vFlip, hFlip)
   }
-  const outputData: DecodedTile[] = createInitialBlocks()
+  const outputData: DecodedTile[] = INITIAL_BLOCKS
 
   try {
-    for (let i = 0; i < commandNumber; i++) {
+    for (let i = 0; i < commandCount; i++) {
       const makeTile = bits.nextPrefixCodeLookup({
         '00': lastTile,
         '01': neighborTile,
