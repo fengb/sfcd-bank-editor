@@ -5,7 +5,7 @@ import BattleSpritesViewer from '@/panes/BattleSpritesViewer'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const battleSprites = computed(() => store.bank!.toc.allyBattleSprites.region())
+const battleSprites = computed(() => store.bank!.regions.allyBattleSprites)
 </script>
 
 <template>

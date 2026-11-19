@@ -5,7 +5,7 @@ import BytesViewer from '@/components/BytesViewer'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const bytes = computed(() => store.bank!.bytes)
+const bytes = computed(() => store.bank!.decoder!.bytes)
 </script>
 
 <template>

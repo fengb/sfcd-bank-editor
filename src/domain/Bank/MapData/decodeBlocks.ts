@@ -99,7 +99,7 @@ export function decodeBlocks(blockData: Uint8Array): DecodedTile[] {
     const hFlip = bits.nextBit() !== 0
     return nextTile(highPriority, vFlip, hFlip)
   }
-  const outputData: DecodedTile[] = INITIAL_BLOCKS
+  const outputData: DecodedTile[] = [...INITIAL_BLOCKS]
 
   try {
     for (let i = 0; i < commandCount; i++) {

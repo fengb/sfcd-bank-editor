@@ -3,15 +3,13 @@ import { decodeChapterGraphic, type ChapterGraphic } from './decode'
 
 export default class ChapterGraphics {
   readonly graphic: ChapterGraphic | null
-  readonly bytes: Uint8Array
 
-  constructor(graphic: ChapterGraphic | null = null, bytes: Uint8Array = new Uint8Array()) {
+  constructor(graphic: ChapterGraphic | null = null) {
     this.graphic = graphic
-    this.bytes = bytes
   }
 
   static decode(bytes: Uint8Array): ChapterGraphics {
-    return new ChapterGraphics(decodeChapterGraphic(bytes), bytes)
+    return new ChapterGraphics(decodeChapterGraphic(bytes))
   }
 
   get tiles(): Tile[] {

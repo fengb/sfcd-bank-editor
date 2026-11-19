@@ -52,7 +52,7 @@ export const useBankFileStore = defineStore('bankFile', () => {
 
   const bytes = computed<Uint8Array | null>(() => file.value?.bytes ?? null)
 
-  const bank = computed<Bank | null>(() => (file.value ? new Bank(file.value.bytes) : null))
+  const bank = computed<Bank | null>(() => (file.value ? Bank.decode(file.value.bytes) : null))
 
   /** Read the first file in `source` fully into memory. */
   async function load(source: File | undefined): Promise<void> {

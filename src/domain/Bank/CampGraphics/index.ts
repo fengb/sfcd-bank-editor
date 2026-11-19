@@ -6,15 +6,13 @@ import type { Palette, Tile } from '../BattleSprites/graphics'
 
 export default class CampGraphics {
   readonly graphic: CampGraphic | null
-  readonly bytes: Uint8Array
 
-  constructor(graphic: CampGraphic | null = null, bytes: Uint8Array = new Uint8Array()) {
+  constructor(graphic: CampGraphic | null = null) {
     this.graphic = graphic
-    this.bytes = bytes
   }
 
   static decode(bytes: Uint8Array): CampGraphics {
-    return new CampGraphics(decodeCampGraphic(bytes), bytes)
+    return new CampGraphics(decodeCampGraphic(bytes))
   }
 
   get palettes(): Palette[] {

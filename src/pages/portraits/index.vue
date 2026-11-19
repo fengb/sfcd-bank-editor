@@ -8,7 +8,7 @@ import type { Portrait } from '@/domain/Bank/Portraits/decode'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const portraits = computed(() => store.bank!.toc.portraits.region())
+const portraits = computed(() => store.bank!.regions.portraits)
 
 const selected = ref(0)
 const showBase = ref(true)

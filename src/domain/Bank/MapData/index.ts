@@ -15,15 +15,13 @@ import type { LayoutEntry } from './decodeLayout'
 
 export default class MapData {
   readonly data: MapDataRegions | null
-  readonly bytes: Uint8Array
 
-  constructor(data: MapDataRegions | null = null, bytes: Uint8Array = new Uint8Array()) {
+  constructor(data: MapDataRegions | null = null) {
     this.data = data
-    this.bytes = bytes
   }
 
   static decode(bytes: Uint8Array): MapData {
-    return new MapData(decodeMapData(bytes), bytes)
+    return new MapData(decodeMapData(bytes))
   }
 
   get header(): number {

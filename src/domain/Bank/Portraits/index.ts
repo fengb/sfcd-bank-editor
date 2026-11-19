@@ -2,15 +2,13 @@ import { decodePortraits, type Portrait } from './decode'
 
 export default class Portraits {
   readonly portraits: Portrait[]
-  readonly bytes: Uint8Array
 
-  constructor(portraits: Portrait[] = [], bytes: Uint8Array = new Uint8Array()) {
+  constructor(portraits: Portrait[] = []) {
     this.portraits = portraits
-    this.bytes = bytes
   }
 
   static decode(bytes: Uint8Array): Portraits {
-    return new Portraits(decodePortraits(bytes), bytes)
+    return new Portraits(decodePortraits(bytes))
   }
 
   get items(): Portrait[] {

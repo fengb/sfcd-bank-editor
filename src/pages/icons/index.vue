@@ -7,7 +7,7 @@ import TileBlock from '@/components/TileBlock'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const icons = computed(() => store.bank!.toc.icons.region())
+const icons = computed(() => store.bank!.regions.icons)
 
 const menu = computed(() => icons.value.tiles.slice(1, 1 + 90))
 const misc = computed(() => icons.value.tiles.slice(91, 276))

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { QBanner, QTable, type QTableProps } from 'quasar'
+import { QTable, type QTableProps } from 'quasar'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -10,9 +10,9 @@ import { useBankFileStore } from '@/stores/bank'
 import { PAGES } from './util'
 
 const store = useBankFileStore()
-const bank = computed(() => store.bank!)
+const decoder = computed(() => store.bank!.decoder!)
 
-const rows = computed(() => Object.values(bank.value.toc))
+const rows = computed(() => Object.values(decoder.value.toc))
 
 const router = useRouter()
 
@@ -37,15 +37,10 @@ const columns: QTableProps['columns'] = [
     format: (v) => formatHex(v, 6),
   },
   {
-    name: 'extent',
-    label: 'Extent',
-    field: 'extent',
+    name: 'size',
+    label: 'Size',
+    field: 'size',
     format: (v) => formatHex(v, 6),
-  },
-  {
-    name: 'slot-size',
-    label: 'Slot Size',
-    field: (row: BankToc) => row.slotSize(),
   },
 ]
 </script>
@@ -54,9 +49,9 @@ const columns: QTableProps['columns'] = [
   <h3>Summary</h3>
   <dl>
     <dt>Book</dt>
-    <dd>{{ bank.bytes[0x124] }}</dd>
+    <dd>{{ decoder.bytes[0x124] }}</dd>
     <dt>Chapter</dt>
-    <dd>{{ bank.bytes[0x125] }}</dd>
+    <dd>{{ decoder.bytes[0x125] }}</dd>
   </dl>
   <QTable
     :rows="rows"
@@ -67,11 +62,5 @@ const columns: QTableProps['columns'] = [
     hide-bottom
     @row-click="onRowClick"
   >
-    <template #top>
-      <QBanner v-if="bank.isDummy" dense>
-        This file is a 5-byte <code>DUMMY</code> placeholder. The bank number is not in use, so
-        there is no block directory to read.
-      </QBanner>
-    </template>
   </QTable>
 </template>

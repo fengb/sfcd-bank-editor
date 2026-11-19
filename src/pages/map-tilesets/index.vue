@@ -6,7 +6,7 @@ import { MAP_SPRITE_PALETTE } from '@/domain/Bank/MapSprites/decode'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const mapTilesets = computed(() => store.bank!.toc.mapTilesets.region())
+const mapTilesets = computed(() => store.bank!.regions.mapTilesets)
 </script>
 
 <template>

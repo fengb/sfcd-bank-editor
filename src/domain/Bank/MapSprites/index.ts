@@ -3,15 +3,13 @@ import { decodeMapSprites, MAP_SPRITE_PALETTE, type MapSprite } from './decode'
 
 export default class MapSprites {
   readonly sprites: MapSprite[]
-  readonly bytes: Uint8Array
 
-  constructor(sprites: MapSprite[] = [], bytes: Uint8Array = new Uint8Array()) {
+  constructor(sprites: MapSprite[] = []) {
     this.sprites = sprites
-    this.bytes = bytes
   }
 
   static decode(bytes: Uint8Array): MapSprites {
-    return new MapSprites(decodeMapSprites(bytes), bytes)
+    return new MapSprites(decodeMapSprites(bytes))
   }
 
   get items(): MapSprite[] {

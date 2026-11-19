@@ -9,7 +9,7 @@ import type { WeaponSprite } from '@/domain/Bank/WeaponSprites/decode'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const weaponSprites = computed(() => store.bank!.toc.weaponSprites.region())
+const weaponSprites = computed(() => store.bank!.regions.weaponSprites)
 
 const selected = ref<number>(0)
 const selectedFrame = ref<number>(0)

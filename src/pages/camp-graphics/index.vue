@@ -7,7 +7,7 @@ import { type Palette } from '@/domain/Bank/BattleSprites'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const camp = computed(() => store.bank!.toc.campGraphics.region())
+const camp = computed(() => store.bank!.regions.campGraphics)
 
 const selected = ref(0)
 const paletteOptions = computed(() =>

@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const tilesets = computed(() => store.bank!.toc.map2Tilesets.region())
+const tilesets = computed(() => store.bank!.regions.map2Tilesets)
 </script>
 
 <template>

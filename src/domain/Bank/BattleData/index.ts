@@ -2,15 +2,13 @@ import { decodeBattleData, type BattleDataRegions, type BattleSpriteSet } from '
 
 export default class BattleData {
   readonly data: BattleDataRegions | null
-  readonly bytes: Uint8Array
 
-  constructor(data: BattleDataRegions | null = null, bytes: Uint8Array = new Uint8Array()) {
+  constructor(data: BattleDataRegions | null = null) {
     this.data = data
-    this.bytes = bytes
   }
 
   static decode(bytes: Uint8Array): BattleData {
-    return new BattleData(decodeBattleData(bytes), bytes)
+    return new BattleData(decodeBattleData(bytes))
   }
 
   get terrain(): number[] {

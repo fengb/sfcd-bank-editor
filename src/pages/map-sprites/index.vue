@@ -5,7 +5,7 @@ import TileBlock from '@/components/TileBlock'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const mapSprites = computed(() => store.bank!.toc.mapSprites.region())
+const mapSprites = computed(() => store.bank!.regions.mapSprites)
 </script>
 
 <template>

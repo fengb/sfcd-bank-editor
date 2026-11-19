@@ -5,7 +5,7 @@ import BytesViewer from '@/components/BytesViewer'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const bytes = computed(() => store.bank!.toc.spellGraphics.region())
+const bytes = computed(() => store.bank!.regions.spellGraphics.data)
 </script>
 
 <template>

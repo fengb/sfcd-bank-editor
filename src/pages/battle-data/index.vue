@@ -4,13 +4,14 @@ import { computed, ref } from 'vue'
 
 import BytesViewer from '@/components/BytesViewer'
 import { formatHex } from '@/components/BytesViewer/hex'
-import type { BattleDataRegions, BattleSpriteSet } from '@/domain/Bank/BattleData/decode'
+import BattleData from '@/domain/Bank/BattleData'
+import type { BattleSpriteSet } from '@/domain/Bank/BattleData/decode'
 import type Compendium from '@/domain/Bank/Compendium'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const battleData = computed<BattleDataRegions>(() => store.bank!.toc.battleData.region())
-const compendium = computed<Compendium>(() => store.bank!.toc.compendium.region())
+const battleData = computed<BattleData>(() => store.bank!.regions.battleData)
+const compendium = computed<Compendium>(() => store.bank!.regions.compendium)
 
 const selected = ref<'main' | 'bis'>('main')
 const activeSet = computed<BattleSpriteSet>(() => {
@@ -137,7 +138,7 @@ const aiPointColumns: QTableProps['columns'] = [
     />
   </div>
 
-  <BytesViewer :bytes="battleData.bytes" title="Battle data (raw)" />
+  <!-- raw bytes view removed: region no longer stores source bytes -->
 </template>
 
 <style scoped>

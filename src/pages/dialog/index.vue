@@ -5,7 +5,7 @@ import { computed } from 'vue'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const dialog = computed(() => store.bank!.toc.dialog.region())
+const dialog = computed(() => store.bank!.regions.dialog)
 
 const rows = computed(() => dialog.value.strings.map((d, index) => ({ index, dialog: d })))
 

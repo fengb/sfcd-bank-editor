@@ -8,8 +8,8 @@ import { type CharacterRecord } from '@/domain/Bank/Character'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const character = computed(() => store.bank!.toc.characterData.region())
-const compendium = computed(() => store.bank!.toc.compendium.region())
+const character = computed(() => store.bank!.regions.characterData)
+const compendium = computed(() => store.bank!.regions.compendium)
 
 const STAT_KEYS = ['hp', 'mp', 'att', 'def', 'agi'] as const
 

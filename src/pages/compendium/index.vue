@@ -9,7 +9,7 @@ import MonsterStats from './MonsterStats.vue'
 import NamesTable from './NamesTable.vue'
 
 const store = useBankFileStore()
-const compendium = computed(() => store.bank!.toc.compendium.region())
+const compendium = computed(() => store.bank!.regions.compendium)
 </script>
 
 <template>

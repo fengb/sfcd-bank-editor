@@ -94,13 +94,6 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/contents/': RouteRecordInfo<
-      '/contents/',
-      '/contents',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     '/dialog/': RouteRecordInfo<
       '/dialog/',
       '/dialog',
@@ -286,14 +279,6 @@ declare module 'vue-router/auto-routes' {
     'src/pages/compendium/index.vue': {
       routes:
         | '/compendium/'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/pages/contents/index.vue': {
-      routes:
-        | '/contents/'
       views:
         | never
       pathParamNames:

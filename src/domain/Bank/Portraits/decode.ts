@@ -49,7 +49,6 @@ export function decodePortrait(data: Uint8Array): {
 
   const allTiles = decodeStackGraphics(reader.rest())
   if (allTiles?.length !== 64) {
-    debugger
     return null
   }
 

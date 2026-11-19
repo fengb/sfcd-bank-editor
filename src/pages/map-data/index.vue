@@ -8,9 +8,9 @@ import { useBankFileStore } from '@/stores/bank'
 import { paletteRgb } from '@/utils/color'
 
 const store = useBankFileStore()
-const mapData = computed(() => store.bank!.toc.mapData.region())
+const mapData = computed(() => store.bank!.regions.mapData)
 
-const tilesets = computed(() => store.bank!.toc.mapTilesets.region().tiles)
+const tilesets = computed(() => store.bank!.regions.mapTilesets.tiles)
 
 const decodedBlocks = computed<DecodedTile[]>(() => mapData.value.decodedBlocks ?? [])
 
