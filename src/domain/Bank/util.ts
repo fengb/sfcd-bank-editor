@@ -1,4 +1,4 @@
-import { mapValues, uniq } from 'es-toolkit'
+import { mapValues, uniq, windowed } from 'es-toolkit'
 
 export class ByteReader {
   pos: number
@@ -161,15 +161,22 @@ export function extractEntries(
   const possibleItems = dataStart / 4
   const endIter = Math.min(possibleItems, maxItems ?? Infinity)
 
-  const result: Uint8Array[] = []
+  const offsets: number[] = []
   for (let i = 0; i < endIter; i++) {
     const offset = readU32be(bytes, i * 4)! - baseOffset
 
-    if (offset > bytes.length) {
-      return result
+    if (offset < 0 || offset >= bytes.length) {
+      break
     }
-    result.push(bytes.subarray(offset))
+    offsets.push(offset)
   }
 
-  return result
+  const nexts = Object.fromEntries(
+    windowed(
+      uniq(offsets).sort((a, b) => a - b),
+      2,
+    ),
+  )
+
+  return offsets.map((offset) => bytes.subarray(offset, nexts[offset]))
 }
