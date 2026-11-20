@@ -2,34 +2,51 @@
 import { chunk } from 'es-toolkit'
 import { computed } from 'vue'
 
-import Tile from '@/components/Tile'
 import TileBlock from '@/components/TileBlock'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
 const icons = computed(() => store.bank!.regions.icons)
-
-const tiles = computed(() => icons.value?.tiles ?? [])
-const palette = computed(() => icons.value?.palette)
-
-const menu = computed(() => tiles.value.slice(1, 1 + 90))
-const misc = computed(() => tiles.value.slice(91, 276))
-const items = computed(() => chunk(tiles.value.slice(276), 6))
+Object.assign(window, { icons: icons.value })
 </script>
 
 <template>
   <h2>Icon graphics</h2>
-  <div v-if="tiles[0] && palette">
-    <Tile :tile="tiles[0]" :palette="palette" :scale="3" />
-    <TileBlock :tiles="menu" :palette="palette" :scale="3" :width="3" />
-    <TileBlock :tiles="misc" :palette="palette" :scale="3" :width="16" />
-    <div class="row">
-      <div v-for="(group, i) in items" :key="i" class="grid grid-cols-2">
-        <TileBlock :tiles="group" :palette="palette" :scale="3" :width="2" />
-      </div>
+  <div class="row">
+    <div v-for="(group, i) in chunk(icons.actionMenu, 9)" :key="i">
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
     </div>
   </div>
-  <p v-else class="text-grey">No icon graphics in this bank.</p>
+  <div class="row">
+    <div v-for="(group, i) in chunk(icons.itemMenu, 9)" :key="i">
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+    </div>
+  </div>
+  <div class="row">
+    <div v-for="(group, i) in chunk(icons.battleMenu, 9)" :key="i">
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+    </div>
+  </div>
+  <div class="row">
+    <div v-for="(group, i) in chunk(icons.shopMenu, 9)" :key="i">
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+    </div>
+  </div>
+  <div class="row">
+    <div v-for="(group, i) in chunk(icons.campMenu, 9)" :key="i">
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+    </div>
+  </div>
+  <div class="row">
+    <div v-for="(group, i) in chunk(icons.memberMenu, 9)" :key="i">
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+    </div>
+  </div>
+  <div class="row">
+    <div v-for="(group, i) in chunk(icons.items, 6)" :key="i">
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="2" />
+    </div>
+  </div>
 </template>
 
 <style scoped></style>

@@ -3,7 +3,13 @@ import { ICON_PALETTE, decode } from './decode'
 
 export default class Icons {
   palette: Palette = ICON_PALETTE
-  tiles: Tile[] = []
+  actionMenu: Tile[] = []
+  itemMenu: Tile[] = []
+  battleMenu: Tile[] = []
+  shopMenu: Tile[] = []
+  campMenu: Tile[] = []
+  memberMenu: Tile[] = []
+  items: Tile[] = []
 
   private constructor() {}
 
