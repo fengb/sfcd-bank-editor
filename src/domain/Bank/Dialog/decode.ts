@@ -1,6 +1,7 @@
 import { invert, mapValues } from 'es-toolkit'
 
 import { BitReader, extractSections, readU16be, readU32be } from '../util'
+import type Dialog from './Dialog'
 
 export const OFFSET = 0x22e000
 
@@ -155,7 +156,7 @@ export function decodeDialogPages(
   return result
 }
 
-export function decodeDialog(data: Uint8Array): string[] {
+export function decode(target: Dialog, data: Uint8Array): boolean {
   const sections = extractSections(data, OFFSET, {
     textData: 0x00,
     treeOffsets: 0x40,
@@ -171,5 +172,10 @@ export function decodeDialog(data: Uint8Array): string[] {
     offset === 0xffff ? null : splitTree(sections.treeData, offset),
   )
 
-  return decodeDialogPages(trees, sections.textData, OFFSET + sections.textData.segmentOffset)
+  target.strings = decodeDialogPages(
+    trees,
+    sections.textData,
+    OFFSET + sections.textData.segmentOffset,
+  )
+  return true
 }

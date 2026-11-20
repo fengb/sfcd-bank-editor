@@ -9,20 +9,23 @@ import { useBankFileStore } from '@/stores/bank'
 const store = useBankFileStore()
 const icons = computed(() => store.bank!.regions.icons)
 
-const menu = computed(() => icons.value.tiles.slice(1, 1 + 90))
-const misc = computed(() => icons.value.tiles.slice(91, 276))
-const items = computed(() => chunk(icons.value.tiles.slice(276), 6))
+const tiles = computed(() => icons.value?.tiles ?? [])
+const palette = computed(() => icons.value?.palette)
+
+const menu = computed(() => tiles.value.slice(1, 1 + 90))
+const misc = computed(() => tiles.value.slice(91, 276))
+const items = computed(() => chunk(tiles.value.slice(276), 6))
 </script>
 
 <template>
   <h2>Icon graphics</h2>
-  <div v-if="icons.tiles[0]">
-    <Tile :tile="icons.tiles[0]" :palette="icons.palette" :scale="3" />
-    <TileBlock :tiles="menu" :palette="icons.palette" :scale="3" :width="3" />
-    <TileBlock :tiles="misc" :palette="icons.palette" :scale="3" :width="16" />
+  <div v-if="tiles[0] && palette">
+    <Tile :tile="tiles[0]" :palette="palette" :scale="3" />
+    <TileBlock :tiles="menu" :palette="palette" :scale="3" :width="3" />
+    <TileBlock :tiles="misc" :palette="palette" :scale="3" :width="16" />
     <div class="row">
       <div v-for="(group, i) in items" :key="i" class="grid grid-cols-2">
-        <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="2" />
+        <TileBlock :tiles="group" :palette="palette" :scale="3" :width="2" />
       </div>
     </div>
   </div>

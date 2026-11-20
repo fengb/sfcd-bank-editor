@@ -3,7 +3,7 @@ import { QTable, type QTableProps } from 'quasar'
 
 import { formatHex } from '@/components/BytesViewer/hex'
 import { decodeSpell } from '@/domain/Bank'
-import { type CompendiumMonster, type CompendiumNames } from '@/domain/Bank/Compendium'
+import { type CompendiumMonster, type CompendiumNames } from '@/domain/Bank/Compendium/Compendium'
 import { splitBits } from '@/utils/bits'
 
 const props = defineProps<{ monsters: CompendiumMonster[]; names: CompendiumNames }>()

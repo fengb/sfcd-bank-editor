@@ -3,59 +3,8 @@ import { ByteReader, extractSections, readU16be } from '../util'
 
 const BATTLE_BASE = 0x236800
 
-export interface BattleAlly {
-  index: number
-  x: number
-  y: number
-  unknown: number[]
-}
-
-export interface BattleEnemy {
-  index: number
-  x: number
-  y: number
-  ai: number
-  item: number
-  moveOrder: number
-  triggerRegion: number
-  byte8: number
-  byte9: number
-  byte10: number
-  spawnParams: number
-}
-
-export interface BattleAIRegion {
-  type: number
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  x3: number
-  y3: number
-  x4: number
-  y4: number
-  unknown: number[]
-}
-
-export interface BattleAIPoint {
-  x: number
-  y: number
-}
-
-export interface BattleSpriteSet {
-  allies: BattleAlly[]
-  enemies: BattleEnemy[]
-  aiRegions: BattleAIRegion[]
-  aiPoints: BattleAIPoint[]
-}
-
-export interface BattleDataRegions {
-  terrain: number[]
-  spriteset: BattleSpriteSet
-  spritesetBis: BattleSpriteSet
-
-  bytes: Uint8Array
-}
+import type { BattleSpriteSet } from './BattleData'
+import type BattleData from './BattleData'
 
 export function decodeSpriteSet(data: Uint8Array): BattleSpriteSet {
   const reader = new ByteReader(data)
@@ -119,21 +68,15 @@ export function decodeSpriteSet(data: Uint8Array): BattleSpriteSet {
   return { allies, enemies, aiRegions, aiPoints }
 }
 
-export function decodeBattleData(data: Uint8Array): BattleDataRegions | null {
-  try {
-    const sections = extractSections(data, BATTLE_BASE, {
-      terrain: 0x00,
-      sprintset: 0x04,
-      sprintsetBis: 0x08,
-    })
+export function decode(target: BattleData, data: Uint8Array): boolean {
+  const sections = extractSections(data, BATTLE_BASE, {
+    terrain: 0x00,
+    sprintset: 0x04,
+    sprintsetBis: 0x08,
+  })
 
-    return {
-      terrain: decodeStackData(sections.terrain) ?? [],
-      spriteset: decodeSpriteSet(sections.sprintset),
-      spritesetBis: decodeSpriteSet(sections.sprintsetBis),
-      bytes: data,
-    }
-  } catch {
-    return null
-  }
+  target.terrain = decodeStackData(sections.terrain) ?? []
+  target.spriteset = decodeSpriteSet(sections.sprintset)
+  target.spritesetBis = decodeSpriteSet(sections.sprintsetBis)
+  return true
 }

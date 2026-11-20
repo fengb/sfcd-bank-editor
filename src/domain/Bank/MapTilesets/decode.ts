@@ -1,16 +1,12 @@
-import { decodeStackGraphics, type Tile } from '../BattleSprites/graphics'
+import { decodeStackGraphics } from '../BattleSprites/graphics'
 import { extractEntries } from '../util'
-
-export interface MapTileset {
-  tiles: Tile[]
-}
+import type MapTilesets from './MapTilesets'
 
 const MAX_MAP_TILESETS = 5
 
-export function decodeMapTilesets(bytes: Uint8Array): MapTileset {
-  return {
-    tiles: extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_MAP_TILESETS).flatMap((entry) =>
-      decodeStackGraphics(entry)!,
-    ),
-  }
+export function decode(target: MapTilesets, bytes: Uint8Array): boolean {
+  target.tiles = extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_MAP_TILESETS).flatMap(
+    (entry) => decodeStackGraphics(entry)!,
+  )
+  return true
 }

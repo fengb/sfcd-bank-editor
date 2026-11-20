@@ -3,6 +3,7 @@
   "semi": false,
   "singleQuote": true,
   "sortImports": {
+    "ignoreCase": false,
     "newlinesBetween": true,
     "customGroups": [{ "groupName": "vitest", "elementNamePattern": ["vitest"] }],
     "groups": [

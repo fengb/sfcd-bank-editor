@@ -2,7 +2,7 @@
 import { QOptionGroup } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
-import { type CompendiumNames } from '@/domain/Bank/Compendium'
+import { type CompendiumNames } from '@/domain/Bank/Compendium/Compendium'
 
 const props = defineProps<{
   mask: number

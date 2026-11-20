@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
-import { decodeCharacterData } from './decode'
+import Character from './Character'
 import { encodeCharacterData } from './encode'
 
 const BASE_OFFSET = 0x232c00
@@ -67,16 +67,16 @@ function buildSegment(): Uint8Array {
 describe('decodeCharacterData => encodeCharacterData', () => {
   it('round-trips the extracted region', async () => {
     const bytes = new Uint8Array(await readFile(resolve(import.meta.dirname, 'region.test.bin')))
-    const tables = decodeCharacterData(bytes)
+    const tables = Character.decode(bytes)!
     const encoded = encodeCharacterData(tables, BASE_OFFSET)
     expect(encoded).toEqual(bytes)
   })
 
   it('is idempotent at the byte level (encode => decode => encode)', async () => {
     const bytes = new Uint8Array(await readFile(resolve(import.meta.dirname, 'region.test.bin')))
-    const tables = decodeCharacterData(bytes)
+    const tables = Character.decode(bytes)!
     const encodedOnce = encodeCharacterData(tables, BASE_OFFSET)
-    const roundTripped = decodeCharacterData(encodedOnce)
+    const roundTripped = Character.decode(encodedOnce)!
     const encodedTwice = encodeCharacterData(roundTripped, BASE_OFFSET)
     expect(Array.from(encodedTwice)).toEqual(Array.from(encodedOnce))
   })
@@ -85,7 +85,8 @@ describe('decodeCharacterData => encodeCharacterData', () => {
 describe('encodeCharacterData => decodeCharacterData', () => {
   it('round-trips empty tables', () => {
     const encoded = encodeCharacterData({ records: [], secondary: [], classes: [] })
-    expect(decodeCharacterData(encoded)).toEqual({
+    const decoded = Character.decode(encoded)!
+    expect(decoded).toEqual({
       records: [],
       secondary: [],
       classes: [],
@@ -94,7 +95,7 @@ describe('encodeCharacterData => decodeCharacterData', () => {
 })
 
 describe('encodeCharacterData', () => {
-  const tables = decodeCharacterData(buildSegment())
+  const tables = Character.decode(buildSegment())!
 
   it('encodes decoded tables to a segment of the expected size', () => {
     const encoded = encodeCharacterData(tables, BASE_OFFSET)

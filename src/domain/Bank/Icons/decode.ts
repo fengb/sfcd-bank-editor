@@ -1,9 +1,5 @@
-import { convertTiles, parsePalette, type Tile, type Palette } from '../BattleSprites/graphics'
-
-export interface Icon {
-  palette: Palette
-  tiles: Tile[]
-}
+import { convertTiles, parsePalette, type Palette } from '../BattleSprites/graphics'
+import type Icons from './Icons'
 
 const ICON_PALETTE_BYTES = new Uint8Array([
   0x00, 0x00, 0x0e, 0xee, 0x00, 0x00, 0x04, 0x44, 0x08, 0x88, 0x04, 0xa0, 0x0c, 0x64, 0x04, 0x8e,
@@ -12,11 +8,13 @@ const ICON_PALETTE_BYTES = new Uint8Array([
 
 export const ICON_PALETTE: Palette = parsePalette(ICON_PALETTE_BYTES)
 
-export function decodeIcons(data: Uint8Array): Icon | null {
-  if (data.length < 32) return null
+export function decode(target: Icons, data: Uint8Array): boolean {
+  if (data.length < 32) return false
 
   const tiles = convertTiles([...data])
-  if (!tiles?.length) return null
+  if (!tiles?.length) return false
 
-  return { palette: ICON_PALETTE, tiles }
+  target.palette = ICON_PALETTE
+  target.tiles = tiles
+  return true
 }

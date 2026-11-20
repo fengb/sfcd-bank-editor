@@ -1,109 +1,13 @@
 import { chunk, takeWhile } from 'es-toolkit'
 
-import { parsePalette, type Palette } from '../BattleSprites/graphics'
+import { parsePalette } from '../BattleSprites/graphics'
 import { extractSections, readU16be } from '../util'
-import { decodeBlocks, type DecodedTile } from './decodeBlocks'
-import { decodeLayout, type LayoutEntry } from './decodeLayout'
+import type { MapArea, MapAnimation, MapFlagCopy, MapItem, MapStepCopy, MapWarp } from './MapData'
+import type MapData from './MapData'
+import { decodeBlocks } from './decodeBlocks'
+import { decodeLayout } from './decodeLayout'
 
 const MAINCPU_WORDRAM_LOADING_OFFSET = 0x23de00
-
-export interface MapArea {
-  layer1StartX: number
-  layer1StartY: number
-  layer1EndX: number
-  layer1EndY: number
-  foregroundLayer2StartX: number
-  foregroundLayer2StartY: number
-  backgroundLayer2StartX: number
-  backgroundLayer2StartY: number
-  layer1ParallaxX: number
-  layer1ParallaxY: number
-  layer2ParallaxX: number
-  layer2ParallaxY: number
-  layer1AutoscrollX: number
-  layer1AutoscrollY: number
-  layer2AutoscrollX: number
-  layer2AutoscrollY: number
-  layerType: number
-  defaultMusic: number
-}
-
-export interface MapFlagCopy {
-  flag: number
-  sourceX: number
-  sourceY: number
-  width: number
-  height: number
-  destX: number
-  destY: number
-}
-
-export interface MapStepCopy {
-  triggerX: number
-  triggerY: number
-  sourceX: number
-  sourceY: number
-  width: number
-  height: number
-  destX: number
-  destY: number
-}
-
-export interface MapLayer2Copy {
-  triggerX: number
-  triggerY: number
-  sourceX: number
-  sourceY: number
-  width: number
-  height: number
-  destX: number
-  destY: number
-}
-
-export interface MapWarp {
-  triggerX: number
-  triggerY: number
-  destMap: string
-  destX: number
-  destY: number
-  facing: string
-}
-
-export interface MapItem {
-  x: number
-  y: number
-  flag: number
-  item: string
-}
-
-export interface MapAnimationFrame {
-  start: number
-  length: number
-  dest: number
-  delay: number
-}
-
-export interface MapAnimation {
-  tileset: number
-  length: number
-  frames: MapAnimationFrame[]
-}
-
-export interface MapDataRegions {
-  header: number
-
-  palette: Palette | null
-  decodedBlocks: DecodedTile[]
-  decodedLayout: LayoutEntry[]
-  areas: MapArea[]
-  flagCopies: MapFlagCopy[]
-  stepCopies: MapStepCopy[]
-  layer2Copies: MapLayer2Copy[]
-  warps: MapWarp[]
-  chestItems: MapItem[]
-  otherItems: MapItem[]
-  animation: MapAnimation | null
-}
 
 function parseAreas(data: Uint8Array): MapArea[] {
   return takeWhile(chunk([...data], 30), (entry) => entry[0] !== 0xff || entry[1] !== 0xff).map(
@@ -197,41 +101,36 @@ function parseAnimation(data: Uint8Array): MapAnimation | null {
   return { tileset, length, frames }
 }
 
-export function decodeMapData(data: Uint8Array): MapDataRegions | null {
-  try {
-    if (!data || data.length < 2) return null
+export function decode(target: MapData, data: Uint8Array): boolean {
+  if (!data || data.length < 2) return false
 
-    const header = readU16be(data, 0)
+  const header = readU16be(data, 0)
 
-    const sections = extractSections(data, MAINCPU_WORDRAM_LOADING_OFFSET, {
-      palette: 0x02,
-      blocks: 0x06,
-      layout: 0x0a,
-      areas: 0x0e,
-      flagCopies: 0x12,
-      stepCopies: 0x16,
-      layer2Copies: 0x1a,
-      warps: 0x1e,
-      chestItems: 0x22,
-      otherItems: 0x26,
-      animations: 0x2a,
-    })
+  const sections = extractSections(data, MAINCPU_WORDRAM_LOADING_OFFSET, {
+    palette: 0x02,
+    blocks: 0x06,
+    layout: 0x0a,
+    areas: 0x0e,
+    flagCopies: 0x12,
+    stepCopies: 0x16,
+    layer2Copies: 0x1a,
+    warps: 0x1e,
+    chestItems: 0x22,
+    otherItems: 0x26,
+    animations: 0x2a,
+  })
 
-    return {
-      header,
-      palette: parsePalette(sections.palette),
-      decodedBlocks: decodeBlocks(sections.blocks),
-      decodedLayout: decodeLayout(sections.layout),
-      areas: parseAreas(sections.areas),
-      flagCopies: parseFlagCopies(sections.flagCopies),
-      stepCopies: parseStepCopies(sections.stepCopies),
-      layer2Copies: parseStepCopies(sections.layer2Copies),
-      warps: parseWarps(sections.warps),
-      chestItems: parseItems(sections.chestItems),
-      otherItems: parseItems(sections.otherItems),
-      animation: parseAnimation(sections.animations),
-    }
-  } catch {
-    return null
-  }
+  target.header = header ?? 0
+  target.palette = parsePalette(sections.palette)
+  target.decodedBlocks = decodeBlocks(sections.blocks)
+  target.decodedLayout = decodeLayout(sections.layout)
+  target.areas = parseAreas(sections.areas)
+  target.flagCopies = parseFlagCopies(sections.flagCopies)
+  target.stepCopies = parseStepCopies(sections.stepCopies)
+  target.layer2Copies = parseStepCopies(sections.layer2Copies)
+  target.warps = parseWarps(sections.warps)
+  target.chestItems = parseItems(sections.chestItems)
+  target.otherItems = parseItems(sections.otherItems)
+  target.animation = parseAnimation(sections.animations)
+  return true
 }

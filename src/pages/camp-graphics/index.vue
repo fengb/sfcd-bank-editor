@@ -9,11 +9,14 @@ import { useBankFileStore } from '@/stores/bank'
 const store = useBankFileStore()
 const camp = computed(() => store.bank!.regions.campGraphics)
 
+const palettes = computed(() => camp.value?.palettes ?? [])
+const tilesets = computed(() => camp.value?.tilesets ?? [])
+
 const selected = ref(0)
 const paletteOptions = computed(() =>
-  camp.value.palettes.map((_, i) => ({ label: String(i), value: i })),
+  palettes.value.map((_, i) => ({ label: String(i), value: i })),
 )
-const selectedPalette = computed<Palette>(() => camp.value.palettes[selected.value]!)
+const selectedPalette = computed<Palette>(() => palettes.value[selected.value]!)
 </script>
 
 <template>
@@ -24,7 +27,7 @@ const selectedPalette = computed<Palette>(() => camp.value.palettes[selected.val
   </div>
   <div v-if="selectedPalette">
     <TileBlock
-      v-for="(tileset, i) in camp.tilesets"
+      v-for="(tileset, i) in tilesets"
       :key="i"
       :tiles="tileset"
       :width="16"

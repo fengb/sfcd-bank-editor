@@ -6,7 +6,7 @@ import { computed, ref, watch } from 'vue'
 import { formatHex } from '@/components/BytesViewer/hex'
 import TileBlock from '@/components/TileBlock'
 import BattleSprites from '@/domain/Bank/BattleSprites'
-import type { BattleSprite } from '@/domain/Bank/BattleSprites/decode'
+import type { BattleSprite } from '@/domain/Bank/BattleSprites/BattleSprites'
 
 const props = defineProps<{ battleSprites: BattleSprites }>()
 

@@ -7,9 +7,9 @@ import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
 const chapter = computed(() => store.bank!.regions.chapterGraphics)
-const graphic = computed(() => chapter.value.graphic)
-const palette = computed(() => chapter.value.palette)
-const tiles = computed(() => chapter.value.tiles)
+const graphic = computed(() => chapter.value)
+const palette = computed(() => chapter.value?.palette ?? null)
+const tiles = computed(() => chapter.value?.tiles ?? [])
 </script>
 
 <template>

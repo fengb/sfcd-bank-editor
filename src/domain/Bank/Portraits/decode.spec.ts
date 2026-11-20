@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { decodePortraits } from './decode'
+import Portraits from './Portraits'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const REGION_OFFSET = 0x6028e - 0x10000
@@ -17,9 +17,9 @@ describe('decodePortraits', () => {
     new Uint8Array(buffer, REGION_OFFSET).set(buf)
     const bytes = new Uint8Array(buffer, REGION_OFFSET, buf.byteLength)
 
-    const portraits = decodePortraits(bytes)
-    expect(portraits).toHaveLength(33)
-    for (const portrait of portraits) {
+    const portraits = Portraits.decode(bytes)!
+    expect(portraits.portraits).toHaveLength(33)
+    for (const portrait of portraits.portraits) {
       expect(portrait.baseTiles).toHaveLength(48)
     }
   })

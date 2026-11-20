@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { decodeCharacterData } from './decode'
+import Character from './Character'
 
 const ROM_BASE = 0x232c00
 
@@ -64,7 +64,8 @@ function buildSegment(): Uint8Array {
 }
 
 describe('decodeCharacterData', () => {
-  const { records, secondary, classes } = decodeCharacterData(buildSegment())
+  const character = Character.decode(buildSegment())!
+  const { records, secondary, classes } = character
 
   it('decodes pointered, unpointed, and spell-tailed records in order', () => {
     expect(records).toHaveLength(3)
@@ -135,15 +136,9 @@ describe('decodeCharacterData', () => {
   })
 
   it('returns empty tables for buffers too short to hold a header', () => {
-    expect(decodeCharacterData(new Uint8Array(0))).toEqual({
-      records: [],
-      secondary: [],
-      classes: [],
-    })
-    expect(decodeCharacterData(new Uint8Array(0x5f))).toEqual({
-      records: [],
-      secondary: [],
-      classes: [],
-    })
+    const empty = Character.decode(new Uint8Array(0))!
+    expect(empty).toEqual({ records: [], secondary: [], classes: [] })
+    const short = Character.decode(new Uint8Array(0x5f))!
+    expect(short).toEqual({ records: [], secondary: [], classes: [] })
   })
 })

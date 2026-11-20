@@ -1,5 +1,3 @@
-import { isNotNil } from 'es-toolkit'
-
 import {
   decodeStackGraphics,
   parsePalette,
@@ -7,19 +5,7 @@ import {
   type Palette,
 } from '../BattleSprites/graphics'
 import { ByteReader, extractEntries } from '../util'
-
-interface OverlayTile {
-  tile: Tile
-  target: number
-}
-
-export interface Portrait {
-  index: number
-  palette: Palette
-  baseTiles: Tile[]
-  eyeTiles: OverlayTile[]
-  mouthTiles: OverlayTile[]
-}
+import type Portraits from './Portraits'
 
 const MAX_PORTRAITS = 64
 
@@ -28,8 +14,8 @@ type TileMeta = [number, number, number, number]
 export function decodePortrait(data: Uint8Array): {
   palette: Palette
   baseTiles: Tile[]
-  eyeTiles: OverlayTile[]
-  mouthTiles: OverlayTile[]
+  eyeTiles: { tile: Tile; target: number }[]
+  mouthTiles: { tile: Tile; target: number }[]
 } | null {
   const reader = new ByteReader(data)
 
@@ -54,7 +40,7 @@ export function decodePortrait(data: Uint8Array): {
 
   const baseTiles = allTiles.filter((_, i) => i % 8 < 6)
 
-  function extractOverlayTile(meta: TileMeta): OverlayTile {
+  function extractOverlayTile(meta: TileMeta): { tile: Tile; target: number } {
     const [xTgt, yTgt, xSrc, ySrc] = meta
     const tile = allTiles![ySrc * 8 + xSrc]!
     return { tile, target: yTgt * 6 + xTgt }
@@ -68,20 +54,18 @@ export function decodePortrait(data: Uint8Array): {
   }
 }
 
-export function decodePortraits(bytes: Uint8Array): Portrait[] {
-  return extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_PORTRAITS)
-    .map((entry, i) => {
-      const decoded = decodePortrait(entry)!
-      if (!decoded) {
-        return null
-      }
-      return {
-        index: i,
-        palette: decoded.palette,
-        baseTiles: decoded.baseTiles,
-        eyeTiles: decoded.eyeTiles,
-        mouthTiles: decoded.mouthTiles,
-      }
+export function decode(target: Portraits, bytes: Uint8Array): boolean {
+  target.portraits = []
+  extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_PORTRAITS).forEach((entry, i) => {
+    const decoded = decodePortrait(entry)
+    if (!decoded) return
+    target.portraits.push({
+      index: i,
+      palette: decoded.palette,
+      baseTiles: decoded.baseTiles,
+      eyeTiles: decoded.eyeTiles,
+      mouthTiles: decoded.mouthTiles,
     })
-    .filter(isNotNil)
+  })
+  return true
 }

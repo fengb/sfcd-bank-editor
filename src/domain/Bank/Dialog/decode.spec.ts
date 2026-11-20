@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
+import Dialog from './Dialog'
 import {
   splitTree,
   decodeTokens,
   decodeString,
   decodeDialogPage,
   decodeDialogPages,
-  decodeDialog,
   CHAR_TO_TOKEN,
   TOKEN_TO_CHAR,
 } from './decode'
@@ -18,12 +18,14 @@ const path = resolve(import.meta.dirname, 'decode.test.bin')
 
 describe('decodeDialog', () => {
   it('returns an empty list for empty input', () => {
-    expect(decodeDialog(new Uint8Array())).toEqual([])
+    const dialog = Dialog.decode(new Uint8Array())!
+    expect(dialog.strings).toEqual([])
   })
 
   it('decodes the BANKD0E dialog into 528 strings', async () => {
     const bytes = new Uint8Array(await readFile(path))
-    const strings = decodeDialog(bytes)
+    const dialog = Dialog.decode(bytes)!
+    const strings = dialog.strings
 
     expect(strings).toHaveLength(528)
     expect(strings[0]).toBe('The game will be suspended.↵OK?')

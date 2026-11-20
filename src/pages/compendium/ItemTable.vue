@@ -2,7 +2,7 @@
 import { QMenu, QTable, QTd, type QTableProps } from 'quasar'
 
 import { formatHex } from '@/components/BytesViewer/hex'
-import { type CompendiumItem, type CompendiumNames } from '@/domain/Bank/Compendium'
+import { type CompendiumItem, type CompendiumNames } from '@/domain/Bank/Compendium/Compendium'
 import { splitBits } from '@/utils/bits'
 
 import ClassMask from './ClassMask.vue'

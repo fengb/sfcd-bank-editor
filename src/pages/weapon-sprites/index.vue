@@ -5,7 +5,7 @@ import { computed, ref, watch } from 'vue'
 
 import TileBlock from '@/components/TileBlock'
 import type { Color, Palette } from '@/domain/Bank/BattleSprites/graphics'
-import type { WeaponSprite } from '@/domain/Bank/WeaponSprites/decode'
+import type { WeaponSprite } from '@/domain/Bank/WeaponSprites/WeaponSprites'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()

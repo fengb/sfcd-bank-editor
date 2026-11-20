@@ -15,37 +15,19 @@ import MapData from './MapData'
 import MapSprites from './MapSprites'
 import MapTilesets from './MapTilesets'
 import Portraits from './Portraits'
-import { readU32be } from './util'
 import WeaponSprites from './WeaponSprites'
+import { readU32be } from './util'
 
 type RegionConfig<TRegion> = {
   tocEntry: number
   codec: {
-    decode: (bytes: Uint8Array) => TRegion
+    decode: (bytes: Uint8Array) => TRegion | null
     encode?: (region: TRegion) => Uint8Array
-    load?: (json: string) => TRegion
-    save?: (region: TRegion) => string
   }
 }
 
-export class RawRegion {
-  constructor(readonly data: Uint8Array = new Uint8Array()) {}
-
-  static decode(bytes: Uint8Array): RawRegion {
-    return new RawRegion(new Uint8Array(bytes))
-  }
-
-  encode(): Uint8Array {
-    return this.data
-  }
-
-  static load(json: string): RawRegion {
-    return new RawRegion(Uint8Array.fromBase64(json))
-  }
-
-  save(): { data: string } {
-    return { data: this.data.toBase64() }
-  }
+export const tmpBytesCodec = {
+  decode: (bytes: Uint8Array): Uint8Array => bytes,
 }
 
 export interface BankRegions {
@@ -55,11 +37,11 @@ export interface BankRegions {
   allyBattleSprites: BattleSprites
   weaponSprites: WeaponSprites
   enemyBattleSprites: BattleSprites
-  backgrounds: RawRegion
-  grounds: RawRegion
-  spellGraphics: RawRegion
-  unknown0: RawRegion
-  unknown1: RawRegion
+  backgrounds: Uint8Array
+  grounds: Uint8Array
+  spellGraphics: Uint8Array
+  unknown0: Uint8Array
+  unknown1: Uint8Array
   compendium: Compendium
   characterData: Character
   dialog: Dialog
@@ -67,20 +49,20 @@ export interface BankRegions {
   campGraphics: CampGraphics
   mapData: MapData
   battleData: BattleData
-  unknownA: RawRegion
+  unknownA: Uint8Array
   map2Tilesets: MapTilesets
   map2Data: MapData
   chapterGraphics: ChapterGraphics
-  pad0: RawRegion
-  pad1: RawRegion
-  pad2: RawRegion
-  pad3: RawRegion
-  pad4: RawRegion
-  pad5: RawRegion
-  pad6: RawRegion
-  pad7: RawRegion
-  pad8: RawRegion
-  pad9: RawRegion
+  pad0: Uint8Array
+  pad1: Uint8Array
+  pad2: Uint8Array
+  pad3: Uint8Array
+  pad4: Uint8Array
+  pad5: Uint8Array
+  pad6: Uint8Array
+  pad7: Uint8Array
+  pad8: Uint8Array
+  pad9: Uint8Array
 }
 
 export type BankToc = {
@@ -100,13 +82,13 @@ const CONFIG: { [K in keyof BankRegions]: RegionConfig<BankRegions[K]> } = {
   weaponSprites: { tocEntry: 0x20, codec: WeaponSprites },
   enemyBattleSprites: { tocEntry: 0x28, codec: BattleSprites },
 
-  backgrounds: { tocEntry: 0x30, codec: RawRegion },
-  grounds: { tocEntry: 0x38, codec: RawRegion },
+  backgrounds: { tocEntry: 0x30, codec: tmpBytesCodec },
+  grounds: { tocEntry: 0x38, codec: tmpBytesCodec },
 
-  spellGraphics: { tocEntry: 0x40, codec: RawRegion },
-  unknown0: { tocEntry: 0x48, codec: RawRegion },
+  spellGraphics: { tocEntry: 0x40, codec: tmpBytesCodec },
+  unknown0: { tocEntry: 0x48, codec: tmpBytesCodec },
 
-  unknown1: { tocEntry: 0x50, codec: RawRegion },
+  unknown1: { tocEntry: 0x50, codec: tmpBytesCodec },
   compendium: { tocEntry: 0x58, codec: Compendium },
 
   characterData: { tocEntry: 0x60, codec: Character },
@@ -118,22 +100,22 @@ const CONFIG: { [K in keyof BankRegions]: RegionConfig<BankRegions[K]> } = {
   mapData: { tocEntry: 0x80, codec: MapData },
   battleData: { tocEntry: 0x88, codec: BattleData },
 
-  unknownA: { tocEntry: 0x90, codec: RawRegion },
+  unknownA: { tocEntry: 0x90, codec: tmpBytesCodec },
   map2Tilesets: { tocEntry: 0x98, codec: MapTilesets },
 
   map2Data: { tocEntry: 0xa0, codec: MapData },
   chapterGraphics: { tocEntry: 0xa8, codec: ChapterGraphics },
 
-  pad0: { tocEntry: 0xb0, codec: RawRegion },
-  pad1: { tocEntry: 0xb8, codec: RawRegion },
-  pad2: { tocEntry: 0xc0, codec: RawRegion },
-  pad3: { tocEntry: 0xc8, codec: RawRegion },
-  pad4: { tocEntry: 0xd0, codec: RawRegion },
-  pad5: { tocEntry: 0xd8, codec: RawRegion },
-  pad6: { tocEntry: 0xe0, codec: RawRegion },
-  pad7: { tocEntry: 0xe8, codec: RawRegion },
-  pad8: { tocEntry: 0xf0, codec: RawRegion },
-  pad9: { tocEntry: 0xf8, codec: RawRegion },
+  pad0: { tocEntry: 0xb0, codec: tmpBytesCodec },
+  pad1: { tocEntry: 0xb8, codec: tmpBytesCodec },
+  pad2: { tocEntry: 0xc0, codec: tmpBytesCodec },
+  pad3: { tocEntry: 0xc8, codec: tmpBytesCodec },
+  pad4: { tocEntry: 0xd0, codec: tmpBytesCodec },
+  pad5: { tocEntry: 0xd8, codec: tmpBytesCodec },
+  pad6: { tocEntry: 0xe0, codec: tmpBytesCodec },
+  pad7: { tocEntry: 0xe8, codec: tmpBytesCodec },
+  pad8: { tocEntry: 0xf0, codec: tmpBytesCodec },
+  pad9: { tocEntry: 0xf8, codec: tmpBytesCodec },
 }
 
 export class BankDecoder {

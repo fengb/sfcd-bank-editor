@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue'
 
 import Tile from '@/components/Tile'
 import type { Tile as TileModel } from '@/domain/Bank/BattleSprites'
-import type { Portrait } from '@/domain/Bank/Portraits/decode'
+import type { Portrait } from '@/domain/Bank/Portraits/Portraits'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()

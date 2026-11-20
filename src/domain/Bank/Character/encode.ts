@@ -1,4 +1,4 @@
-import type { CharacterTables } from './decode'
+import type { CharacterTables } from './Character'
 
 const POINTER_SIZE = 4
 const AUX = {

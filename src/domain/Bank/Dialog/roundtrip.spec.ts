@@ -3,26 +3,31 @@ import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
-import { decodeDialog, decodeDialogPage, decodeString, decodeTokens } from './decode'
+import Dialog from './Dialog'
+import { decodeDialogPage, decodeString, decodeTokens } from './decode'
 import { encodeDialog, encodeDialogPage, encodeTokens, stringToTokens } from './encode'
 
 describe('encodeDialog => decodeDialog', () => {
   it('round-trips the full dialog with original bytes', async () => {
     const bytes = new Uint8Array(await readFile(resolve(import.meta.dirname, 'decode.test.bin')))
-    const strings = decodeDialog(bytes)
+    const dialog = Dialog.decode(bytes)!
+    const strings = dialog.strings
     const encoded = encodeDialog(strings)
-    expect(decodeDialog(encoded)).toEqual(strings)
+    const decoded = Dialog.decode(encoded)!
+    expect(decoded.strings).toEqual(strings)
   })
 
   it('round-trips an empty dialog', () => {
     const encoded = encodeDialog([])
-    expect(decodeDialog(encoded)).toEqual([])
+    const dialog = Dialog.decode(encoded)!
+    expect(dialog.strings).toEqual([])
   })
 
   it('round-trips a dialog with two prefixed strings', () => {
     const strings = ['Ⓝ1fⓃ2a']
     const encoded = encodeDialog(strings)
-    expect(decodeDialog(encoded)).toEqual(strings)
+    const dialog = Dialog.decode(encoded)!
+    expect(dialog.strings).toEqual(strings)
   })
 })
 

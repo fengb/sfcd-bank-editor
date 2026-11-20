@@ -4,8 +4,8 @@ import { computed, ref } from 'vue'
 
 import BytesViewer from '@/components/BytesViewer'
 import { formatHex } from '@/components/BytesViewer/hex'
-import BattleData from '@/domain/Bank/BattleData'
-import type { BattleSpriteSet } from '@/domain/Bank/BattleData/decode'
+import type BattleData from '@/domain/Bank/BattleData'
+import type { BattleSpriteSet } from '@/domain/Bank/BattleData/BattleData'
 import type Compendium from '@/domain/Bank/Compendium'
 import { useBankFileStore } from '@/stores/bank'
 

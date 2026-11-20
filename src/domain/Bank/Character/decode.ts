@@ -5,39 +5,8 @@ import { extractSections } from '../util'
 const SECONDARY_ENTRY_SIZE = 6
 const CLASS_ENTRY_SIZE = 5
 
-export type StatPair = { growth: number; value: number }
-
-export type SpellLearn = { level: number; spell: number }
-
-export type CharacterRecord = {
-  heroId: number
-  classId: number
-  stats: { hp: StatPair; mp: StatPair; att: StatPair; def: StatPair; agi: StatPair }
-  /** Spell tail after the five stat pairs: [level, spell] until the terminator. */
-  spells: SpellLearn[]
-  /** FF for normal records; FE for the candidate level-cap stat records. */
-  terminator: number
-}
-
-export type SecondaryEntry = {
-  heroId: number
-  classId: number
-  level: number
-  unknown: [number, number, number, number]
-}
-
-export type ClassEntry = {
-  classId: number
-  mov: number
-  unitClass: number
-  unknown04: number
-}
-
-export type CharacterTables = {
-  records: CharacterRecord[]
-  secondary: SecondaryEntry[]
-  classes: ClassEntry[]
-}
+import type { StatPair, CharacterRecord, SecondaryEntry, ClassEntry } from './Character'
+import type Character from './Character'
 
 function statPair(data: number[], at: number): StatPair {
   return { growth: data[at]!, value: data[at + 1]! }
@@ -89,16 +58,15 @@ function decodeClasses(bytes: Uint8Array): ClassEntry[] {
   }))
 }
 
-export function decodeCharacterData(bytes: Uint8Array): CharacterTables {
+export function decode(target: Character, bytes: Uint8Array): boolean {
   const sections = extractSections(bytes, 0x232c00, {
     secondary: 0x08,
     classes: 0x0c,
     records: 0x10,
   })
 
-  return {
-    records: decodeRecords(sections.records),
-    secondary: decodeSecondary(sections.secondary),
-    classes: decodeClasses(sections.classes),
-  }
+  target.records = decodeRecords(sections.records)
+  target.secondary = decodeSecondary(sections.secondary)
+  target.classes = decodeClasses(sections.classes)
+  return true
 }

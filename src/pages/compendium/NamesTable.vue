@@ -4,7 +4,7 @@ import { QTable, type QTableProps } from 'quasar'
 import { capitalize, computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
-import type { CompendiumNames } from '@/domain/Bank/Compendium'
+import type { CompendiumNames } from '@/domain/Bank/Compendium/Compendium'
 
 const props = defineProps<{ names: CompendiumNames }>()
 

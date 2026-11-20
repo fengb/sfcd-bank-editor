@@ -4,7 +4,7 @@ import { computed } from 'vue'
 
 import { formatHex } from '@/components/BytesViewer/hex'
 import { decodeSpell } from '@/domain/Bank'
-import { type CharacterRecord } from '@/domain/Bank/Character'
+import { type CharacterRecord } from '@/domain/Bank/Character/Character'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()

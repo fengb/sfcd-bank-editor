@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 
 import TileBlock from '@/components/TileBlock'
+import { MAP_SPRITE_PALETTE } from '@/domain/Bank/MapSprites/decode'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
@@ -10,7 +11,7 @@ const mapSprites = computed(() => store.bank!.regions.mapSprites)
 
 <template>
   <h2>Map sprites</h2>
-  <p class="text-grey">{{ mapSprites.count }} sprites</p>
+  <p class="text-grey">{{ mapSprites.sprites.length }} sprites</p>
   <div class="row flex-wrap">
     <div
       v-for="(sprite, i) in mapSprites.sprites"
@@ -19,14 +20,14 @@ const mapSprites = computed(() => store.bank!.regions.mapSprites)
     >
       <TileBlock
         :tiles="sprite.frames[0]"
-        :palette="mapSprites.palette"
+        :palette="MAP_SPRITE_PALETTE"
         :scale="2"
         flow="columns"
         :height="3"
       />
       <TileBlock
         :tiles="sprite.frames[1]"
-        :palette="mapSprites.palette"
+        :palette="MAP_SPRITE_PALETTE"
         :scale="2"
         flow="columns"
         :height="3"

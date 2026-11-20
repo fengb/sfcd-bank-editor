@@ -1,27 +1,21 @@
 import { chunk } from 'es-toolkit'
 
 import { extractEntries, readU16be } from '../util'
-import { decodeStackGraphics, parsePalette, type Tile, type Palette } from './graphics'
-
-export interface BattleSprite {
-  index: number
-  animSpeed: number
-  unknown: number
-  palettes: Palette[]
-  frames: Tile[][]
-}
+import type { DecodedBattleSprite } from './BattleSprites'
+import type BattleSprites from './BattleSprites'
+import { decodeStackGraphics, parsePalette, type Tile } from './graphics'
 
 const MAX_SPRITES = 64
 
-export function decodeBattleSprites(bytes: Uint8Array): BattleSprite[] {
+export function decode(target: BattleSprites, bytes: Uint8Array): boolean {
   const entries = extractEntries(bytes, 0x10000 + bytes.byteOffset, MAX_SPRITES)
 
-  const result: BattleSprite[] = []
+  target.sprites = []
 
   for (const [i, block] of entries.entries()) {
     const decoded = decodeBattleSpriteBlock(block)
     if (!decoded) break
-    result.push({
+    target.sprites.push({
       index: i,
       animSpeed: decoded.animSpeed,
       unknown: decoded.unknown,
@@ -29,15 +23,7 @@ export function decodeBattleSprites(bytes: Uint8Array): BattleSprite[] {
       frames: decoded.frames,
     })
   }
-
-  return result
-}
-
-export type DecodedBattleSprite = {
-  animSpeed: number
-  unknown: number
-  palettes: Palette[]
-  frames: Tile[][]
+  return true
 }
 
 const PALETTE_SIZE = 32

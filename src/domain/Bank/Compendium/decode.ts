@@ -5,13 +5,7 @@ import { ByteReader, extractSections, readU16be, readU32be } from '../util'
 /** RAM base used by the pointer header; subtracting it yields file offsets. */
 export const RAM_BASE = 0x233200
 
-export interface CompendiumNames {
-  items: string[]
-  classes: string[]
-  spells: string[]
-  characters: string[]
-  monsters: string[]
-}
+import type Compendium from './Compendium'
 
 export function decodeString(data: Uint8Array): string[] {
   const names: string[] = []
@@ -36,49 +30,7 @@ export function decodeString(data: Uint8Array): string[] {
   return names
 }
 
-export interface CompendiumStats {
-  items: number
-  spells: number
-  monsters: number
-}
-
-export interface CompendiumItem {
-  itemId: number
-  mask: number
-  range: [number, number]
-  price: number
-  flags: number
-  useSpell: number
-  equip: number[]
-}
-
-export interface CompendiumMonster {
-  monsterId: number
-  index: number
-  level: number
-  hp: number
-  mp: number
-  atk: number
-  def: number
-  agi: number
-  mov: number
-  unknown1a: number
-  spellResist: number
-  unknown1c: number[]
-  inventory: number[]
-  spells: number[]
-  unitClass: number
-  unknown32: number[]
-}
-
-export interface CompendiumData {
-  names: CompendiumNames
-  items: CompendiumItem[]
-  monsters: CompendiumMonster[]
-  spells: Uint8Array
-}
-
-export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
+export function decode(target: Compendium, bytes: Uint8Array): boolean {
   const sections = extractSections(bytes, RAM_BASE, {
     itemNames: 0x00,
     classNames: 0x04,
@@ -91,41 +43,40 @@ export function decodeCompendiumData(bytes: Uint8Array): CompendiumData {
     monsters: 0x1c,
   })
 
-  return {
-    names: {
-      items: decodeString(sections.itemNames),
-      classes: decodeString(sections.classNames),
-      spells: decodeString(sections.spellNames),
-      characters: decodeString(sections.characterNames),
-      monsters: decodeString(sections.monsterNames),
-    },
-    items: chunk([...sections.items], 16).map((entry, i) => ({
-      itemId: i,
-      mask: readU32be(entry, 0x00) ?? 0,
-      range: [entry[0x05]!, entry[0x04]!] as [number, number],
-      price: readU16be(entry, 0x06),
-      flags: entry[0x08]!,
-      useSpell: entry[0x09]!,
-      equip: entry.slice(0x0a),
-    })),
-    monsters: chunk([...sections.monsters], 0x38).map((entry, i) => ({
-      monsterId: i,
-      index: entry[0x00]!,
-      level: entry[0x0b]!,
-      hp: readU16be(entry, 0x0c),
-      mp: entry[0x10]!,
-      atk: entry[0x12]!,
-      def: entry[0x14]!,
-      agi: entry[0x16]!,
-      mov: entry[0x18]!,
-      unknown1a: entry[0x1a]!,
-      spellResist: entry[0x1b]!,
-      unknown1c: entry.slice(0x1c, 0x20),
-      inventory: Array.from({ length: 4 }, (_, s) => readU16be(entry, 0x20 + s * 2)),
-      spells: entry.slice(0x28, 0x28 + 4),
-      unitClass: entry[0x31]!,
-      unknown32: entry.slice(0x32),
-    })),
-    spells: sections.spells,
+  target.names = {
+    items: decodeString(sections.itemNames),
+    classes: decodeString(sections.classNames),
+    spells: decodeString(sections.spellNames),
+    characters: decodeString(sections.characterNames),
+    monsters: decodeString(sections.monsterNames),
   }
+  target.items = chunk([...sections.items], 16).map((entry, i) => ({
+    itemId: i,
+    mask: readU32be(entry, 0x00) ?? 0,
+    range: [entry[0x05]!, entry[0x04]!] as [number, number],
+    price: readU16be(entry, 0x06),
+    flags: entry[0x08]!,
+    useSpell: entry[0x09]!,
+    equip: entry.slice(0x0a),
+  }))
+  target.monsters = chunk([...sections.monsters], 0x38).map((entry, i) => ({
+    monsterId: i,
+    index: entry[0x00]!,
+    level: entry[0x0b]!,
+    hp: readU16be(entry, 0x0c),
+    mp: entry[0x10]!,
+    atk: entry[0x12]!,
+    def: entry[0x14]!,
+    agi: entry[0x16]!,
+    mov: entry[0x18]!,
+    unknown1a: entry[0x1a]!,
+    spellResist: entry[0x1b]!,
+    unknown1c: entry.slice(0x1c, 0x20),
+    inventory: Array.from({ length: 4 }, (_, s) => readU16be(entry, 0x20 + s * 2)),
+    spells: entry.slice(0x28, 0x28 + 4),
+    unitClass: entry[0x31]!,
+    unknown32: entry.slice(0x32),
+  }))
+  target.spells = sections.spells
+  return true
 }
