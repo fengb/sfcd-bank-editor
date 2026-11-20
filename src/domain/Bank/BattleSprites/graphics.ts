@@ -55,6 +55,10 @@ export function parsePalette(data: Uint8Array | number[]): Palette {
   return colors.slice(0, 16) as Palette
 }
 
+export function parsePalettes(data: Uint8Array | number[]): Palette[] {
+  return chunk([...data], 32).map(parsePalette)
+}
+
 export function convertTiles(data: number[]): Tile[] {
   return chunk(data, 32).map((entry) => {
     const pixels = Array.from({ length: 8 }, () => Array(8).fill(0)) as PixelGrid

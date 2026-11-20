@@ -1,10 +1,8 @@
-import { decodeStackGraphics, parsePalette } from '../BattleSprites/graphics'
+import { decodeStackGraphics, parsePalettes } from '../BattleSprites/graphics'
 import { extractSections } from '../util'
 import type CampGraphics from './CampGraphics'
 
 const BASE = 0x236e00
-
-const PALETTE_SIZE = 0x20
 
 export function decode(target: CampGraphics, data: Uint8Array): boolean {
   const sections = extractSections(data, BASE, {
@@ -15,9 +13,7 @@ export function decode(target: CampGraphics, data: Uint8Array): boolean {
     3: 0x10,
   })
 
-  const palettes = Array.from({ length: 4 }, (_, i) =>
-    parsePalette(sections.palettes.subarray(i * PALETTE_SIZE, (i + 1) * PALETTE_SIZE)),
-  )
+  const palettes = parsePalettes(sections.palettes)
 
   const tilesets = [
     decodeStackGraphics(sections[0])!,
