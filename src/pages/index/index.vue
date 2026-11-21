@@ -11,6 +11,7 @@ import { PAGES } from './util'
 
 const store = useBankFileStore()
 const decoder = computed(() => store.bank!.decoder!)
+const unknown50 = computed(() => store.bank!.regions.unknown90!)
 
 const rows = computed(() => Object.values(decoder.value.toc))
 
@@ -49,9 +50,9 @@ const columns: QTableProps['columns'] = [
   <h3>Summary</h3>
   <dl>
     <dt>Book</dt>
-    <dd>{{ decoder.bytes[0x124] }}</dd>
-    <dt>Chapter</dt>
-    <dd>{{ decoder.bytes[0x125] }}</dd>
+    <dd>{{ unknown50.book }}</dd>
+    <dt>Battle</dt>
+    <dd>{{ unknown50.battle }}</dd>
   </dl>
   <QTable
     :rows="rows"

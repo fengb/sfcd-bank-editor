@@ -15,6 +15,9 @@ import MapData from './MapData'
 import MapSprites from './MapSprites'
 import MapTilesets from './MapTilesets'
 import Portraits from './Portraits'
+import Unknown48 from './Unknown48'
+import Unknown50 from './Unknown50'
+import Unknown90 from './Unknown90'
 import WeaponSprites from './WeaponSprites'
 import { readU32be } from './util'
 
@@ -40,8 +43,8 @@ export interface BankRegions {
   backgrounds: Uint8Array
   grounds: Uint8Array
   spellGraphics: Uint8Array
-  unknown0: Uint8Array
-  unknown1: Uint8Array
+  unknown48: Unknown48
+  unknown50: Unknown50
   compendium: Compendium
   characterData: Character
   dialog: Dialog
@@ -49,7 +52,7 @@ export interface BankRegions {
   campGraphics: CampGraphics
   mapData: MapData
   battleData: BattleData
-  unknownA: Uint8Array
+  unknown90: Unknown90
   map2Tilesets: MapTilesets
   map2Data: MapData
   chapterGraphics: ChapterGraphics
@@ -86,9 +89,9 @@ const CONFIG: { [K in keyof BankRegions]: RegionConfig<BankRegions[K]> } = {
   grounds: { tocEntry: 0x38, codec: tmpBytesCodec },
 
   spellGraphics: { tocEntry: 0x40, codec: tmpBytesCodec },
-  unknown0: { tocEntry: 0x48, codec: tmpBytesCodec },
+  unknown48: { tocEntry: 0x48, codec: Unknown48 },
 
-  unknown1: { tocEntry: 0x50, codec: tmpBytesCodec },
+  unknown50: { tocEntry: 0x50, codec: Unknown50 },
   compendium: { tocEntry: 0x58, codec: Compendium },
 
   characterData: { tocEntry: 0x60, codec: Character },
@@ -100,7 +103,7 @@ const CONFIG: { [K in keyof BankRegions]: RegionConfig<BankRegions[K]> } = {
   mapData: { tocEntry: 0x80, codec: MapData },
   battleData: { tocEntry: 0x88, codec: BattleData },
 
-  unknownA: { tocEntry: 0x90, codec: tmpBytesCodec },
+  unknown90: { tocEntry: 0x90, codec: Unknown90 },
   map2Tilesets: { tocEntry: 0x98, codec: MapTilesets },
 
   map2Data: { tocEntry: 0xa0, codec: MapData },

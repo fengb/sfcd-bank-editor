@@ -15,7 +15,6 @@ const tilesets = computed(() => store.bank!.regions.map2Tilesets.tiles ?? [])
 const decodedBlocks = computed<DecodedTile[]>(() => mapData.value.decodedBlocks ?? [])
 
 const decodedLayout = computed(() => mapData.value.decodedLayout ?? [])
-debugger
 
 const blockCount = computed(() => Math.floor(mapData.value.decodedBlocks.length / 9))
 
