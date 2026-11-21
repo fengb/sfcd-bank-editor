@@ -1,14 +1,17 @@
 import type { Palette, Tile } from '../BattleSprites/graphics'
 import { decode } from './decode'
 
-export default class CampGraphics {
+export default class HqGraphics {
   palettes: Palette[] = []
-  tilesets: Tile[][] = []
+  camp: Tile[] = []
+  noShop: Tile[] = []
+  shop: Tile[] = []
+  text: Tile[] = []
 
   private constructor() {}
 
-  static decode(bytes: Uint8Array): CampGraphics | null {
-    const r = new CampGraphics()
+  static decode(bytes: Uint8Array): HqGraphics | null {
+    const r = new HqGraphics()
     try {
       if (!decode(r, bytes)) return null
     } catch {

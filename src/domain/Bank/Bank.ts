@@ -5,11 +5,11 @@ import { splitBits } from '@/utils/bits'
 
 import BattleData from './BattleData'
 import BattleSprites from './BattleSprites'
-import CampGraphics from './CampGraphics'
 import ChapterGraphics from './ChapterGraphics'
 import Character from './Character'
 import Compendium from './Compendium'
 import Dialog from './Dialog'
+import HqGraphics from './HqGraphics'
 import Icons from './Icons'
 import MapData from './MapData'
 import MapSprites from './MapSprites'
@@ -49,7 +49,7 @@ export interface BankRegions {
   characterData: Character
   dialog: Dialog
   icons: Icons
-  campGraphics: CampGraphics
+  hqGraphics: HqGraphics
   mapData: MapData
   battleData: BattleData
   unknown90: Unknown90
@@ -98,7 +98,7 @@ const CONFIG: { [K in keyof BankRegions]: RegionConfig<BankRegions[K]> } = {
   dialog: { tocEntry: 0x68, codec: Dialog },
 
   icons: { tocEntry: 0x70, codec: Icons },
-  campGraphics: { tocEntry: 0x78, codec: CampGraphics },
+  hqGraphics: { tocEntry: 0x78, codec: HqGraphics },
 
   mapData: { tocEntry: 0x80, codec: MapData },
   battleData: { tocEntry: 0x88, codec: BattleData },

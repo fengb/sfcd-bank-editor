@@ -7,7 +7,7 @@ export default class Icons {
   itemMenu: Tile[] = []
   battleMenu: Tile[] = []
   shopMenu: Tile[] = []
-  campMenu: Tile[] = []
+  hqMenu: Tile[] = []
   memberMenu: Tile[] = []
   items: Tile[] = []
 

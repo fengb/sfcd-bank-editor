@@ -7,34 +7,25 @@ import { type Palette } from '@/domain/Bank/BattleSprites'
 import { useBankFileStore } from '@/stores/bank'
 
 const store = useBankFileStore()
-const camp = computed(() => store.bank!.regions.campGraphics)
-
-const palettes = computed(() => camp.value?.palettes ?? [])
-const tilesets = computed(() => camp.value?.tilesets ?? [])
+const hq = computed(() => store.bank!.regions.hqGraphics)
 
 const selected = ref(0)
 const paletteOptions = computed(() =>
-  palettes.value.map((_, i) => ({ label: String(i), value: i })),
+  hq.value.palettes.map((_, i) => ({ label: String(i), value: i })),
 )
-const selectedPalette = computed<Palette>(() => palettes.value[selected.value]!)
+const selectedPalette = computed<Palette>(() => hq.value.palettes[selected.value]!)
 </script>
 
 <template>
-  <h2>Camp graphics</h2>
+  <h2>HQ graphics</h2>
   <div class="row items-center q-gutter-sm">
     <div>Palette</div>
     <QBtnToggle v-model="selected" :options="paletteOptions" dense toggle-color="primary" />
   </div>
-  <div v-if="selectedPalette">
-    <TileBlock
-      v-for="(tileset, i) in tilesets"
-      :key="i"
-      :tiles="tileset"
-      :width="16"
-      :palette="selectedPalette"
-      :scale="3"
-    />
-  </div>
+  <TileBlock :tiles="hq.camp" :width="16" :palette="selectedPalette" :scale="3" />
+  <TileBlock :tiles="hq.noShop" :width="16" :palette="selectedPalette" :scale="3" />
+  <TileBlock :tiles="hq.shop" :width="16" :palette="selectedPalette" :scale="3" />
+  <TileBlock :tiles="hq.text" :width="1" :palette="selectedPalette" :scale="3" />
 </template>
 
 <style scoped></style>

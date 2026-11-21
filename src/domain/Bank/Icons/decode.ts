@@ -29,7 +29,7 @@ export function decode(target: Icons, data: Uint8Array): boolean {
     battleMenu: 0x08,
     empty1: 0x0a,
     shopMenu: 0x10,
-    campMenu: 0x14,
+    hqMenu: 0x14,
     memberMenu: 0x18,
     empty2: 0x1a,
     items: 0x20,
@@ -38,7 +38,7 @@ export function decode(target: Icons, data: Uint8Array): boolean {
   target.itemMenu = decodeStackGraphics(sections.itemMenu)!
   target.battleMenu = decodeStackGraphics(sections.battleMenu)!
   target.shopMenu = decodeStackGraphics(sections.shopMenu)!
-  target.campMenu = decodeStackGraphics(sections.campMenu)!
+  target.hqMenu = decodeStackGraphics(sections.hqMenu)!
   target.memberMenu = decodeStackGraphics(sections.memberMenu)!
   target.items = convertTiles([...sections.items])
   return true

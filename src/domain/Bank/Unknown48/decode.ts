@@ -6,7 +6,7 @@ export function decode(target: Unknown48, data: Uint8Array): boolean {
     a: 0x00,
     b: 0x04,
   })
-  
+
   const entries = extractEntries(sections.b, 0x238600 + sections.b.segmentOffset)
 
   target.bytes = data

@@ -33,7 +33,7 @@ Object.assign(window, { icons: icons.value })
     </div>
   </div>
   <div class="row">
-    <div v-for="(group, i) in chunk(icons.campMenu, 9)" :key="i">
+    <div v-for="(group, i) in chunk(icons.hqMenu, 9)" :key="i">
       <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
     </div>
   </div>
