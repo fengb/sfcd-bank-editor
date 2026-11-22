@@ -3,6 +3,7 @@ import { mapValues } from 'es-toolkit'
 import { formatHex } from '@/components/BytesViewer/hex'
 import { splitBits } from '@/utils/bits'
 
+import Backgrounds from './Backgrounds'
 import BattleData from './BattleData'
 import BattleSprites from './BattleSprites'
 import ChapterGraphics from './ChapterGraphics'
@@ -40,7 +41,7 @@ export interface BankRegions {
   allyBattleSprites: BattleSprites
   weaponSprites: WeaponSprites
   enemyBattleSprites: BattleSprites
-  backgrounds: Uint8Array
+  backgrounds: Backgrounds
   grounds: Uint8Array
   spellGraphics: Uint8Array
   unknown48: Unknown48
@@ -85,7 +86,7 @@ const CONFIG: { [K in keyof BankRegions]: RegionConfig<BankRegions[K]> } = {
   weaponSprites: { tocEntry: 0x20, codec: WeaponSprites },
   enemyBattleSprites: { tocEntry: 0x28, codec: BattleSprites },
 
-  backgrounds: { tocEntry: 0x30, codec: tmpBytesCodec },
+  backgrounds: { tocEntry: 0x30, codec: Backgrounds },
   grounds: { tocEntry: 0x38, codec: tmpBytesCodec },
 
   spellGraphics: { tocEntry: 0x40, codec: tmpBytesCodec },

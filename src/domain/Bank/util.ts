@@ -180,3 +180,7 @@ export function extractEntries(
 
   return offsets.map((offset) => bytes.subarray(offset, nexts[offset]))
 }
+
+export function readRelative(block: Uint8Array, lookup: number): number {
+  return lookup + readU16be(block, lookup)
+}

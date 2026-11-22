@@ -44,7 +44,7 @@ export type Tile = {
 
 export function parsePalette(data: Uint8Array | number[]): Palette {
   const colors: Color[] = []
-  for (let i = 0; i + 1 < data.length; i += 2) {
+  for (let i = 0; i + 1 < data.length && colors.length < 16; i += 2) {
     const cram = readU16be(data, i)
     const [, b, g, r] = splitBits(cram, [4, 4, 4, 4])
     colors.push([(r >> 1) as ColorChannel, (g >> 1) as ColorChannel, (b >> 1) as ColorChannel])
