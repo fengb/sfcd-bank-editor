@@ -10,6 +10,7 @@ import ChapterGraphics from './ChapterGraphics'
 import Character from './Character'
 import Compendium from './Compendium'
 import Dialog from './Dialog'
+import Grounds from './Grounds'
 import HqGraphics from './HqGraphics'
 import Icons from './Icons'
 import MapData from './MapData'
@@ -42,7 +43,7 @@ export interface BankRegions {
   weaponSprites: WeaponSprites
   enemyBattleSprites: BattleSprites
   backgrounds: Backgrounds
-  grounds: Uint8Array
+  grounds: Grounds
   spellGraphics: Uint8Array
   unknown48: Unknown48
   unknown50: Unknown50
@@ -87,7 +88,7 @@ const CONFIG: { [K in keyof BankRegions]: RegionConfig<BankRegions[K]> } = {
   enemyBattleSprites: { tocEntry: 0x28, codec: BattleSprites },
 
   backgrounds: { tocEntry: 0x30, codec: Backgrounds },
-  grounds: { tocEntry: 0x38, codec: tmpBytesCodec },
+  grounds: { tocEntry: 0x38, codec: Grounds },
 
   spellGraphics: { tocEntry: 0x40, codec: tmpBytesCodec },
   unknown48: { tocEntry: 0x48, codec: Unknown48 },
