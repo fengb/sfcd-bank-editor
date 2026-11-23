@@ -1,6 +1,6 @@
 export type Page = {
   offset: number | null
-  icon: string
+  icon: string | null
   path: string
   name: string
 }
@@ -26,8 +26,8 @@ export const PAGES: Page[] = [
   { offset: 0x80, icon: '🗺️', path: '/map-data', name: 'Map data' },
   { offset: 0x88, icon: '⚔️', path: '/battle-data', name: 'Battle data' },
   { offset: 0x90, icon: '❔', path: '/unknown-0x90', name: 'Unknown 0x90' },
-  { offset: 0x98, icon: '❔', path: '/unknown-0x98', name: 'Unknown 0x98' },
-  { offset: 0xa0, icon: '❔', path: '/unknown-0xa0', name: 'Unknown 0xa0' },
+  { offset: 0x98, icon: null, path: '/map-tilesets?mapset=extra', name: 'Map tilesets (extra)' },
+  { offset: 0xa0, icon: null, path: '/map-data?mapset=extra', name: 'Map data (extra)' },
   { offset: 0xa8, icon: '📜', path: '/chapter-graphics', name: 'Chapter screen graphics' },
   { offset: null, icon: '🔢', path: '/bytes', name: 'Bytes' },
 ]

@@ -17,7 +17,7 @@ const dropHandler: DropHandler = async (file: File) => {
   return true
 }
 
-const nav = PAGES.map((page) => ({
+const nav = PAGES.filter((page) => page.icon).map((page) => ({
   to: page.path,
   label: page.name,
   icon: page.icon,

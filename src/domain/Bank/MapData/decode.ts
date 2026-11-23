@@ -122,8 +122,8 @@ export function decode(target: MapData, data: Uint8Array): boolean {
 
   target.header = header ?? 0
   target.palette = parsePalette(sections.palette)
-  target.decodedBlocks = decodeBlocks(sections.blocks)
-  target.decodedLayout = decodeLayout(sections.layout)
+  target.blocks = decodeBlocks(sections.blocks)
+  target.layout = decodeLayout(sections.layout)
   target.areas = parseAreas(sections.areas)
   target.flagCopies = parseFlagCopies(sections.flagCopies)
   target.stepCopies = parseStepCopies(sections.stepCopies)

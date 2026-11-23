@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { QBtnToggle } from 'quasar'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import PaletteDisplay from '@/components/PaletteDisplay'
 import type { Palette } from '@/domain/Bank/BattleSprites'
@@ -8,15 +10,25 @@ import { useBankFileStore } from '@/stores/bank'
 import { paletteRgb } from '@/utils/color'
 
 const store = useBankFileStore()
-const mapData = computed(() => store.bank!.regions.mapData)
+const route = useRoute()
 
-const tilesets = computed(() => store.bank!.regions.mapTilesets.tiles)
+const selected = ref(route.query.mapset === 'extra' ? 'extra' : 'base')
 
-const decodedBlocks = computed<DecodedTile[]>(() => mapData.value.decodedBlocks ?? [])
+const mapData = computed(() =>
+  selected.value === 'extra' ? store.bank!.regions.map2Data : store.bank!.regions.mapData,
+)
 
-const decodedLayout = computed(() => mapData.value.decodedLayout ?? [])
+const tilesets = computed(() =>
+  selected.value === 'extra'
+    ? store.bank!.regions.map2Tilesets.tiles
+    : store.bank!.regions.mapTilesets.tiles,
+)
 
-const blockCount = computed(() => Math.floor(mapData.value.decodedBlocks.length / 9))
+const blocks = computed<DecodedTile[]>(() => mapData.value.blocks ?? [])
+
+const layout = computed(() => mapData.value.layout ?? [])
+
+const blockCount = computed(() => Math.floor(mapData.value.blocks.length / 9))
 
 const sections = computed(() => [
   { name: 'Areas', count: mapData.value.areas.length, data: mapData.value.areas },
@@ -59,9 +71,8 @@ function drawTile(
 function renderBlocks(): void {
   const canvas = blocksCanvas.value
   if (!canvas) return
-  const blocks = decodedBlocks.value
   const palette = mapData.value.palette
-  if (!blocks.length || !palette) return
+  if (!blocks.value.length || !palette) return
 
   const tileSize = 8
   const blockTiles = 3
@@ -81,7 +92,7 @@ function renderBlocks(): void {
     const row = Math.floor(i / columns)
     const ox = col * (blockPx + gap)
     const oy = row * (blockPx + gap)
-    const slice = blocks.slice(i * 9, i * 9 + 9)
+    const slice = blocks.value.slice(i * 9, i * 9 + 9)
     slice.forEach((tileDesc, t) => {
       const tx = t % blockTiles
       const ty = Math.floor(t / blockTiles)
@@ -95,10 +106,8 @@ function renderBlocks(): void {
 function renderLayout(): void {
   const canvas = layoutCanvas.value
   if (!canvas) return
-  const layout = decodedLayout.value
-  const blocks = decodedBlocks.value
   const palette = mapData.value.palette
-  if (!layout.length || !blocks.length || !palette) return
+  if (!layout.value.length || !blocks.value.length || !palette) return
 
   const tileSize = 8
   const blockTiles = 3
@@ -111,10 +120,10 @@ function renderLayout(): void {
   ctx.fillStyle = '#111'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  layout.forEach((entry, bi) => {
+  layout.value.forEach((entry, bi) => {
     const bx = bi % blocksPerRow
     const by = Math.floor(bi / blocksPerRow)
-    const slice = blocks.slice(entry.block * 9, entry.block * 9 + 9)
+    const slice = blocks.value.slice(entry.block * 9, entry.block * 9 + 9)
     if (slice.length < 9) return
     slice.forEach((tileDesc, t) => {
       const tx = t % blockTiles
@@ -131,7 +140,7 @@ onMounted(() => {
   renderLayout()
 })
 watch(
-  [decodedBlocks, decodedLayout, () => mapData.value.palette, tilesets],
+  [blocks, layout, () => mapData.value.palette, tilesets],
   () => {
     renderBlocks()
     renderLayout()
@@ -142,16 +151,25 @@ watch(
 
 <template>
   <h2>Per-map data</h2>
+  <QBtnToggle
+    v-model="selected"
+    :options="[
+      { label: 'Base', value: 'base' },
+      { label: 'Extra', value: 'extra' },
+    ]"
+    toggle-color="primary"
+    dense
+  />
 
   <div v-if="mapData.palette">
     <h3>Palette</h3>
     <PaletteDisplay :palette="mapData.palette" />
   </div>
 
-  <h3>Decoded blocks ({{ blockCount }})</h3>
+  <h3>Blocks ({{ blockCount }})</h3>
   <canvas ref="blocksCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
 
-  <h3>Decoded layout ({{ decodedLayout.length }} blocks)</h3>
+  <h3>Layout ({{ layout.length }} blocks)</h3>
   <canvas ref="layoutCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
 
   <div v-for="section in sections" :key="section.name">

@@ -178,20 +178,6 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    '/unknown-0x98/': RouteRecordInfo<
-      '/unknown-0x98/',
-      '/unknown-0x98',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
-    '/unknown-0xa0/': RouteRecordInfo<
-      '/unknown-0xa0/',
-      '/unknown-0xa0',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     '/weapon-sprites/': RouteRecordInfo<
       '/weapon-sprites/',
       '/weapon-sprites',
@@ -375,22 +361,6 @@ declare module 'vue-router/auto-routes' {
     'src/pages/unknown-0x90/index.vue': {
       routes:
         | '/unknown-0x90/'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/pages/unknown-0x98/index.vue': {
-      routes:
-        | '/unknown-0x98/'
-      views:
-        | never
-      pathParamNames:
-        | never
-    }
-    'src/pages/unknown-0xa0/index.vue': {
-      routes:
-        | '/unknown-0xa0/'
       views:
         | never
       pathParamNames:

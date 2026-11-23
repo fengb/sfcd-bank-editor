@@ -89,8 +89,8 @@ export default class MapData {
   header: number = 0
 
   palette: Palette | null = null
-  decodedBlocks: DecodedTile[] = []
-  decodedLayout: LayoutEntry[] = []
+  blocks: DecodedTile[] = []
+  layout: LayoutEntry[] = []
   areas: MapArea[] = []
   flagCopies: MapFlagCopy[] = []
   stepCopies: MapStepCopy[] = []
