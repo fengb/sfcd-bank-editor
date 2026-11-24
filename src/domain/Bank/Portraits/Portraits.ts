@@ -9,6 +9,7 @@ interface OverlayTile {
 export interface Portrait {
   index: number
   palette: Palette
+  tiles: Tile[]
   baseTiles: Tile[]
   eyeTiles: OverlayTile[]
   mouthTiles: OverlayTile[]

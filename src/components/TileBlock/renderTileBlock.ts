@@ -9,14 +9,14 @@ type CachedImage = {
 const imageCache = new Map<string, CachedImage>()
 
 export type TileBlockLayout = {
+  grid: number[][]
   cols: number
   rows: number
-  pixelWidth: number
-  pixelHeight: number
 }
 
-export function parseTileBlockPattern(pattern: string): number[][] {
-  return pattern.split(',').map((row) =>
+export function parseTileBlockLayout(layout: string | string[]): TileBlockLayout {
+  const rows = Array.isArray(layout) ? layout : layout.split(',')
+  const grid = rows.map((row) =>
     row
       .trim()
       .split(/\s+/)
@@ -27,13 +27,13 @@ export function parseTileBlockPattern(pattern: string): number[][] {
         return Number.isNaN(n) ? -1 : n
       }),
   )
-}
-
-export function computeTileBlockLayout(pattern: string): TileBlockLayout {
-  const grid = parseTileBlockPattern(pattern)
-  const rows = grid.length || 1
-  const cols = grid.reduce((m, r) => Math.max(m, r.length), 0) || 1
-  return { cols, rows, pixelWidth: cols * 8, pixelHeight: rows * 8 }
+  const rowCount = grid.length || 1
+  const colCount = grid.reduce((m, r) => Math.max(m, r.length), 0) || 1
+  return {
+    grid,
+    cols: colCount,
+    rows: rowCount,
+  }
 }
 
 async function sha256(text: string): Promise<string> {
@@ -45,18 +45,17 @@ async function sha256(text: string): Promise<string> {
 export async function renderTileBlockImage(
   tiles: Tile[],
   palette: Palette,
-  pattern: string,
+  layout: TileBlockLayout,
 ): Promise<string> {
-  const { pixelWidth, pixelHeight } = computeTileBlockLayout(pattern)
-  const grid = parseTileBlockPattern(pattern)
+  const { cols, rows, grid } = layout
 
-  const key = await sha256(JSON.stringify({ tiles, palette, pattern }))
+  const key = await sha256(JSON.stringify({ tiles, palette, layout }))
   const cached = imageCache.get(key)
   if (cached) return cached.url
 
   const canvas = document.createElement('canvas')
-  canvas.width = pixelWidth
-  canvas.height = pixelHeight
+  canvas.width = cols * 8
+  canvas.height = rows * 8
   const ctx = canvas.getContext('2d')
   if (!ctx) return ''
 

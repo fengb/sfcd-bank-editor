@@ -13,6 +13,7 @@ type TileMeta = [number, number, number, number]
 
 export function decodePortrait(data: Uint8Array): {
   palette: Palette
+  tiles: Tile[]
   baseTiles: Tile[]
   eyeTiles: { tile: Tile; target: number }[]
   mouthTiles: { tile: Tile; target: number }[]
@@ -33,21 +34,22 @@ export function decodePortrait(data: Uint8Array): {
 
   const palette = parsePalette(Uint8Array.from(reader.nextBytes(32)))
 
-  const allTiles = decodeStackGraphics(reader.rest())
-  if (allTiles?.length !== 64) {
+  const tiles = decodeStackGraphics(reader.rest())
+  if (tiles?.length !== 64) {
     return null
   }
 
-  const baseTiles = allTiles.filter((_, i) => i % 8 < 6)
+  const baseTiles = tiles.filter((_, i) => i % 8 < 6)
 
   function extractOverlayTile(meta: TileMeta): { tile: Tile; target: number } {
     const [xTgt, yTgt, xSrc, ySrc] = meta
-    const tile = allTiles![ySrc * 8 + xSrc]!
+    const tile = tiles![ySrc * 8 + xSrc]!
     return { tile, target: yTgt * 6 + xTgt }
   }
 
   return {
     palette,
+    tiles,
     baseTiles,
     eyeTiles: eyeMeta.map(extractOverlayTile),
     mouthTiles: mouthMeta.map(extractOverlayTile),
@@ -62,6 +64,7 @@ export function decode(target: Portraits, bytes: Uint8Array): boolean {
     target.portraits.push({
       index: i,
       palette: decoded.palette,
+      tiles: decoded.tiles,
       baseTiles: decoded.baseTiles,
       eyeTiles: decoded.eyeTiles,
       mouthTiles: decoded.mouthTiles,

@@ -3,6 +3,7 @@ import { QBtnToggle, QTable, type QTableProps } from 'quasar'
 import { computed, ref, watch } from 'vue'
 
 import Tile from '@/components/Tile'
+import TileBlock from '@/components/TileBlock/TileBlock.vue'
 import type { Tile as TileModel } from '@/domain/Bank/BattleSprites'
 import type { Portrait } from '@/domain/Bank/Portraits/Portraits'
 import { useBankFileStore } from '@/stores/bank'
@@ -80,15 +81,22 @@ watch(columns, () => {
         />
       </div>
       <div v-if="active" class="grid">
-        <div v-show="showBase" class="grid grid-cols-6" style="grid-area: 1 / 1">
-          <Tile
-            v-for="(tile, i) in active.baseTiles"
-            :key="`base-${i}`"
-            :tile="tile"
-            :palette="active.palette"
-            :scale="3"
-          />
-        </div>
+        <TileBlock
+          v-show="showBase"
+          :tiles="active.tiles"
+          :palette="active.palette"
+          :scale="3"
+          :layout="[
+            '00 01 02 03 04 05',
+            '08 09 0A 0B 0C 0D',
+            '10 11 12 13 14 15',
+            '18 19 1A 1B 1C 1D',
+            '20 21 22 23 24 25',
+            '28 29 2A 2B 2C 2D',
+            '30 31 32 33 34 35',
+          ]"
+          style="grid-area: 1 / 1"
+        />
         <div v-show="showAnim" class="grid grid-cols-6" style="grid-area: 1 / 1">
           <template v-for="(tile, i) in animTiles" :key="`anim-${i}`">
             <Tile v-if="tile" :tile="tile" :palette="active.palette" :scale="3" />
