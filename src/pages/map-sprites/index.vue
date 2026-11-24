@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { chunk } from 'es-toolkit'
 import { computed } from 'vue'
 
 import TileBlock from '@/components/TileBlock'
@@ -12,12 +13,12 @@ const mapSprites = computed(() => store.bank!.regions.mapSprites)
 <template>
   <h2>Map sprites</h2>
   <p class="text-grey">{{ mapSprites.sprites.length }} sprites</p>
-  <div class="row flex-wrap">
-    <div
-      v-for="(sprite, i) in mapSprites.sprites"
-      :key="i"
-      style="border: 1px solid #444; padding: 2px"
-    >
+  <div
+    v-for="(group, i) in chunk(mapSprites.sprites, 3)"
+    :key="i"
+    class="row flex-wrap q-gutter-md"
+  >
+    <div v-for="(sprite, j) in group" :key="j">
       <TileBlock
         :tiles="sprite.frames[0]"
         :palette="MAP_SPRITE_PALETTE"
