@@ -14,37 +14,37 @@ Object.assign(window, { icons: icons.value })
   <h2>Icon graphics</h2>
   <div class="row">
     <div v-for="(group, i) in chunk(icons.actionMenu, 9)" :key="i">
-      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" layout="0 1 2,3 4 5,6 7 8" />
     </div>
   </div>
   <div class="row">
     <div v-for="(group, i) in chunk(icons.itemMenu, 9)" :key="i">
-      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" layout="0 1 2,3 4 5,6 7 8" />
     </div>
   </div>
   <div class="row">
     <div v-for="(group, i) in chunk(icons.battleMenu, 9)" :key="i">
-      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" layout="0 1 2,3 4 5,6 7 8" />
     </div>
   </div>
   <div class="row">
     <div v-for="(group, i) in chunk(icons.shopMenu, 9)" :key="i">
-      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" layout="0 1 2,3 4 5,6 7 8" />
     </div>
   </div>
   <div class="row">
     <div v-for="(group, i) in chunk(icons.hqMenu, 9)" :key="i">
-      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" layout="0 1 2,3 4 5,6 7 8" />
     </div>
   </div>
   <div class="row">
     <div v-for="(group, i) in chunk(icons.memberMenu, 9)" :key="i">
-      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="3" />
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" layout="0 1 2,3 4 5,6 7 8" />
     </div>
   </div>
   <div class="row">
     <div v-for="(group, i) in chunk(icons.items, 6)" :key="i">
-      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" :width="2" />
+      <TileBlock :tiles="group" :palette="icons.palette" :scale="3" layout="0 1,2 3,4 5" />
     </div>
   </div>
 </template>

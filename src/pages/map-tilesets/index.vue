@@ -15,6 +15,22 @@ const selected = ref(route.query.mapset === 'extra' ? 'extra' : 'base')
 const mapTilesets = computed(() =>
   selected.value === 'extra' ? store.bank!.regions.map2Tilesets : store.bank!.regions.mapTilesets,
 )
+
+const layout = computed(() => {
+  const n = mapTilesets.value.tiles.length
+  const cols = 32
+  const rows = Math.ceil(n / cols) || 1
+  const out: string[] = []
+  for (let r = 0; r < rows; r++) {
+    const cells: string[] = []
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c
+      if (idx < n) cells.push(idx.toString(16).toUpperCase())
+    }
+    out.push(cells.join(' '))
+  }
+  return out.join(',')
+})
 </script>
 
 <template>
@@ -29,7 +45,7 @@ const mapTilesets = computed(() =>
     dense
   />
   <p class="text-grey">{{ mapTilesets.tiles.length }} Tiles</p>
-  <TileBlock :tiles="mapTilesets.tiles" :width="32" :palette="MAP_SPRITE_PALETTE" :scale="3" />
+  <TileBlock :tiles="mapTilesets.tiles" :layout="layout" :palette="MAP_SPRITE_PALETTE" :scale="3" />
 </template>
 
 <style scoped>

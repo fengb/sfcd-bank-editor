@@ -44,8 +44,7 @@ watch(backgrounds, () => {
           v-for="(grouped, i) in chunk(active.tiles, 16)"
           :key="i"
           :tiles="grouped"
-          flow="columns"
-          :height="4"
+          layout="0 4 8 C,1 5 9 D,2 6 A E,3 7 B F"
           :palette="active.palette"
           :scale="2"
         />

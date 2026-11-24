@@ -17,8 +17,7 @@ const grounds = computed(() => store.bank!.regions.grounds)
       :key="i"
       :tiles="ground.tiles"
       :palette="store.bank!.regions.backgrounds.backgrounds[0]!.palette"
-      flow="columns"
-      :height="4"
+      layout="00 04 08 0C 10 14 18 1C 20 24 28 2C,01 05 09 0D 11 15 19 1D 21 25 29 2D,02 06 0A 0E 12 16 1A 1E 22 26 2A 2E,03 07 0B 0F 13 17 1B 1F 23 27 2B 2F"
     />
   </div>
 </template>

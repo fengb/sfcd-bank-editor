@@ -22,15 +22,13 @@ const mapSprites = computed(() => store.bank!.regions.mapSprites)
         :tiles="sprite.frames[0]"
         :palette="MAP_SPRITE_PALETTE"
         :scale="2"
-        flow="columns"
-        :height="3"
+        layout="0 3 6,1 4 7,2 5 8"
       />
       <TileBlock
         :tiles="sprite.frames[1]"
         :palette="MAP_SPRITE_PALETTE"
         :scale="2"
-        flow="columns"
-        :height="3"
+        layout="0 3 6,1 4 7,2 5 8"
       />
     </div>
   </div>

@@ -93,8 +93,7 @@ watch(selected, () => {
           :tiles="tiles"
           :palette="activeSprite?.palettes?.[selectedPalette]!"
           :scale="3"
-          flow="columns"
-          :height="4"
+          layout="0 4 8 C,1 5 9 D,2 6 A E,3 7 B F"
         />
       </div>
     </div>

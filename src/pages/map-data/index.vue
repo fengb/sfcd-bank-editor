@@ -35,10 +35,10 @@ const tileBlocks = computed<Tile[][]>(() => {
 
     let { pixels } = tile
     if (desc.vFlip) {
-      pixels = pixels.toReversed() as PixelGrid
+      pixels = pixels.map((row) => row.toReversed()) as PixelGrid
     }
     if (desc.hFlip) {
-      pixels = pixels.map((row) => row.toReversed()) as PixelGrid
+      pixels = pixels.toReversed() as PixelGrid
     }
     return { pixels }
   })
@@ -151,7 +151,7 @@ watch([blocks, layout, () => mapData.value.palette, tilesets], () => renderLayou
       :tiles="tiles"
       :palette="mapData.palette"
       :scale="1"
-      :width="3"
+      layout="0 1 2,3 4 5,6 7 8"
     />
   </div>
 
