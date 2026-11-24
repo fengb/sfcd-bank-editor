@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 
 import type { Palette, Tile } from '@/domain/Bank/BattleSprites/graphics'
 
@@ -13,21 +13,13 @@ const props = defineProps<{
 }>()
 
 const scale = computed(() => props.scale ?? 4)
-
 const tileLayout = computed(() => parseTileBlockLayout(props.layout))
-
-const imgSrc = ref<string>('')
-
-async function render(): Promise<void> {
-  imgSrc.value = await renderTileBlockImage(props.tiles, props.palette, tileLayout.value)
-}
-
-watch(() => props, render, { deep: true, flush: 'post', immediate: true })
+const img = computed(() => renderTileBlockImage(props.tiles, props.palette, tileLayout.value))
 </script>
 
 <template>
   <img
-    :src="imgSrc"
+    :src="img.url"
     :width="tileLayout.cols * 8 * scale"
     :height="tileLayout.rows * 8 * scale"
     style="image-rendering: pixelated"

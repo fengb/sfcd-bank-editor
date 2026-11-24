@@ -1,7 +1,7 @@
 import type { Palette, Tile } from '@/domain/Bank/BattleSprites/graphics'
-import { paletteRgb } from '@/utils/color'
+import { CHANNEL_LEVELS } from '@/utils/color'
 
-type CachedImage = {
+export type CachedImage = {
   blob: Blob
   url: string
 }
@@ -36,54 +36,68 @@ export function parseTileBlockLayout(layout: string | string[]): TileBlockLayout
   }
 }
 
-async function sha256(text: string): Promise<string> {
-  const data = new TextEncoder().encode(text)
-  const hash = await crypto.subtle.digest('SHA-256', data)
-  return new Uint8Array(hash).toHex()
-}
-
-export async function renderTileBlockImage(
+export function renderTileBlockImage(
   tiles: Tile[],
   palette: Palette,
   layout: TileBlockLayout,
-): Promise<string> {
+): CachedImage {
   const { cols, rows, grid } = layout
 
-  const key = await sha256(JSON.stringify({ tiles, palette, layout }))
+  const key = JSON.stringify({ tiles, palette, layout })
   const cached = imageCache.get(key)
-  if (cached) return cached.url
+  if (cached) {
+    return cached
+  }
 
   const canvas = document.createElement('canvas')
   canvas.width = cols * 8
   canvas.height = rows * 8
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return ''
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })
+  if (!ctx) {
+    const blob = new Blob()
+    const result = { blob, url: '' }
+    imageCache.set(key, result)
+    return result
+  }
 
-  grid.forEach((row, r) => {
-    row.forEach((idx, c) => {
-      if (idx < 0) return
+  const pal = palette.map((color) => {
+    const r = CHANNEL_LEVELS[color[0]]
+    const g = CHANNEL_LEVELS[color[1]]
+    const b = CHANNEL_LEVELS[color[2]]
+    return (255 << 24) | (b << 16) | (g << 8) | r
+  })
+  // Keep base color fully transparent
+  pal[0] = 0
+
+  const imageData = ctx.createImageData(canvas.width, canvas.height)
+  const buf = new Uint32Array(imageData.data.buffer)
+
+  for (let r = 0; r < grid.length; r++) {
+    const row = grid[r]!
+    for (let c = 0; c < row.length; c++) {
+      const idx = row[c]!
       const tile = tiles[idx]
-      if (!tile) return
+      if (!tile) continue
       const ox = c * 8
       const oy = r * 8
+      const pixels = tile.pixels
       for (let py = 0; py < 8; py++) {
         for (let px = 0; px < 8; px++) {
-          const colorIndex = tile.pixels[px]?.[py] ?? 0
-          if (colorIndex === 0) continue
-          ctx.fillStyle = paletteRgb(palette[colorIndex])
-          ctx.fillRect(ox + px, oy + py, 1, 1)
+          const colorIndex = pixels[px]![py]!
+          buf[(oy + py) * canvas.width + (ox + px)] = pal[colorIndex]!
         }
       }
-    })
-  })
+    }
+  }
 
-  const blob = await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((result) => {
-      if (result) resolve(result)
-      else reject(new Error('canvas.toBlob returned null'))
-    })
-  })
+  ctx.putImageData(imageData, 0, 0)
+
+  const dataUrl = canvas.toDataURL('image/png')
+  const [, base64] = dataUrl.split(',')
+  const bytes = Uint8Array.fromBase64(base64!)
+  const blob = new Blob([bytes], { type: 'image/png' })
   const url = URL.createObjectURL(blob)
-  imageCache.set(key, { blob, url })
-  return url
+  const result = { blob, url }
+  imageCache.set(key, result)
+  return result
 }
