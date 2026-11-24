@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { chunk } from 'es-toolkit'
 import { QBtnToggle } from 'quasar'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import PaletteDisplay from '@/components/PaletteDisplay'
-import type { Palette } from '@/domain/Bank/BattleSprites'
+import TileBlock from '@/components/TileBlock'
+import type { Palette, PixelGrid, Tile } from '@/domain/Bank/BattleSprites/graphics'
 import type { DecodedTile } from '@/domain/Bank/MapData/decodeBlocks'
 import { useBankFileStore } from '@/stores/bank'
 import { paletteRgb } from '@/utils/color'
@@ -26,6 +28,23 @@ const tilesets = computed(() =>
 
 const blocks = computed<DecodedTile[]>(() => mapData.value.blocks ?? [])
 
+const tileBlocks = computed<Tile[][]>(() => {
+  const tiles = blocks.value.map((desc) => {
+    const tile = tilesets.value[desc.tileId]
+    if (!tile) return { pixels: Array.from({ length: 8 }, () => Array(8).fill(0)) as PixelGrid }
+
+    let { pixels } = tile
+    if (desc.vFlip) {
+      pixels = pixels.toReversed() as PixelGrid
+    }
+    if (desc.hFlip) {
+      pixels = pixels.map((row) => row.toReversed()) as PixelGrid
+    }
+    return { pixels }
+  })
+  return chunk(tiles, 9)
+})
+
 const layout = computed(() => mapData.value.layout ?? [])
 
 const blockCount = computed(() => Math.floor(mapData.value.blocks.length / 9))
@@ -45,7 +64,6 @@ const sections = computed(() => [
 ])
 
 const layoutCanvas = ref<HTMLCanvasElement | null>(null)
-const blocksCanvas = ref<HTMLCanvasElement | null>(null)
 
 function drawTile(
   ctx: CanvasRenderingContext2D,
@@ -65,41 +83,6 @@ function drawTile(
       ctx.fillStyle = paletteRgb(palette[idx])
       ctx.fillRect(x0 + px, y0 + py, 1, 1)
     }
-  }
-}
-
-function renderBlocks(): void {
-  const canvas = blocksCanvas.value
-  if (!canvas) return
-  const palette = mapData.value.palette
-  if (!blocks.value.length || !palette) return
-
-  const tileSize = 8
-  const blockTiles = 3
-  const blockPx = tileSize * blockTiles
-  const columns = 8
-  const rows = Math.ceil(blockCount.value / columns)
-  const gap = 4
-  canvas.width = columns * (blockPx + gap) - gap
-  canvas.height = Math.max(1, rows) * (blockPx + gap) - gap
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-  ctx.fillStyle = '#111'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-  for (let i = 0; i < blockCount.value; i++) {
-    const col = i % columns
-    const row = Math.floor(i / columns)
-    const ox = col * (blockPx + gap)
-    const oy = row * (blockPx + gap)
-    const slice = blocks.value.slice(i * 9, i * 9 + 9)
-    slice.forEach((tileDesc, t) => {
-      const tx = t % blockTiles
-      const ty = Math.floor(t / blockTiles)
-      const x0 = ox + tx * tileSize
-      const y0 = oy + ty * tileSize
-      drawTile(ctx, tileDesc, x0, y0, palette)
-    })
   }
 }
 
@@ -136,17 +119,11 @@ function renderLayout(): void {
 }
 
 onMounted(() => {
-  renderBlocks()
   renderLayout()
 })
-watch(
-  [blocks, layout, () => mapData.value.palette, tilesets],
-  () => {
-    renderBlocks()
-    renderLayout()
-  },
-  { flush: 'post' },
-)
+watch([blocks, layout, () => mapData.value.palette, tilesets], () => renderLayout(), {
+  flush: 'post',
+})
 </script>
 
 <template>
@@ -167,7 +144,16 @@ watch(
   </div>
 
   <h3>Blocks ({{ blockCount }})</h3>
-  <canvas ref="blocksCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
+  <div class="row q-gutter-xs">
+    <TileBlock
+      v-for="(tiles, i) in tileBlocks"
+      :key="i"
+      :tiles="tiles"
+      :palette="mapData.palette"
+      :scale="1"
+      :width="3"
+    />
+  </div>
 
   <h3>Layout ({{ layout.length }} blocks)</h3>
   <canvas ref="layoutCanvas" style="image-rendering: pixelated; border: 1px solid #555" />

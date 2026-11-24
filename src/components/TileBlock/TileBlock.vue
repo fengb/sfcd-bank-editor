@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import Tile from '@/components/Tile'
-import type { Palette, Tile as TileModel } from '@/domain/Bank/BattleSprites/graphics'
+import { computed, ref, watch } from 'vue'
+
+import type { Palette, Tile } from '@/domain/Bank/BattleSprites/graphics'
+
+import { computeTileBlockLayout, renderTileBlockImage } from './renderTileBlock'
 
 const props = defineProps<{
-  tiles: TileModel[]
+  tiles: Tile[]
   palette: Palette
   scale?: number
   flow?: 'columns' | 'rows'
@@ -11,18 +14,34 @@ const props = defineProps<{
   height?: number
 }>()
 
-const containerClass = () => {
-  if (props.flow === 'columns') {
-    return `grid grid-flow-col grid-rows-${props.height}`
-  }
-  return `grid grid-flow-row grid-cols-${props.width}`
+const scale = computed(() => props.scale ?? 4)
+
+const layout = computed(() =>
+  computeTileBlockLayout(props.tiles, props.flow ?? 'rows', props.width, props.height),
+)
+
+const imgSrc = ref<string>('')
+
+async function render(): Promise<void> {
+  imgSrc.value = await renderTileBlockImage(
+    props.tiles,
+    props.palette,
+    props.flow ?? 'rows',
+    props.width,
+    props.height,
+  )
 }
+
+watch(() => props, render, { deep: true, flush: 'post', immediate: true })
 </script>
 
 <template>
-  <div :class="containerClass()" style="width: max-content">
-    <Tile v-for="(tile, j) in tiles" :key="j" :tile="tile" :palette="palette" :scale="scale" />
-  </div>
+  <img
+    :src="imgSrc"
+    :width="layout.pixelWidth * scale"
+    :height="layout.pixelHeight * scale"
+    style="image-rendering: pixelated"
+  />
 </template>
 
 <style scoped></style>

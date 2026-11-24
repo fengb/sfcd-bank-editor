@@ -88,7 +88,7 @@ export interface MapAnimation {
 export default class MapData {
   header: number = 0
 
-  palette: Palette | null = null
+  palette!: Palette
   blocks: DecodedTile[] = []
   layout: LayoutEntry[] = []
   areas: MapArea[] = []
