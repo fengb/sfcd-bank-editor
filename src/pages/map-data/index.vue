@@ -4,6 +4,7 @@ import { QBtnToggle } from 'quasar'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { formatHex } from '@/components/BytesViewer/hex'
 import PaletteDisplay from '@/components/PaletteDisplay'
 import TileBlock from '@/components/TileBlock'
 import type { PixelGrid, Tile } from '@/domain/Bank/BattleSprites/graphics'
@@ -14,6 +15,8 @@ const store = useBankFileStore()
 const route = useRoute()
 
 const selected = ref(route.query.mapset === 'extra' ? 'extra' : 'base')
+
+const overlay = ref<'none' | 'interaction' | 'terrain'>('none')
 
 const mapData = computed(() =>
   selected.value === 'extra' ? store.bank!.regions.map2Data : store.bank!.regions.mapData,
@@ -92,16 +95,47 @@ const sections = computed(() => [
     />
   </div>
 
-  <h3>Layout ({{ layoutBlocks.length }} blocks)</h3>
-  <div class="grid" style="grid-template-columns: repeat(64, 1fr); overflow: scroll">
-    <TileBlock
-      v-for="(tiles, i) in layoutBlocks"
-      :key="i"
-      :tiles="tiles"
-      :palette="mapData.palette"
-      :scale="1"
-      layout="0 1 2,3 4 5,6 7 8"
-    />
+  <h3>Layout</h3>
+  Overlay
+  <QBtnToggle
+    v-model="overlay"
+    :options="[
+      { label: 'None', value: 'none' },
+      { label: 'Interaction', value: 'interaction' },
+      { label: 'Terrain', value: 'terrain' },
+    ]"
+    toggle-color="primary"
+    dense
+  />
+  <div class="grid" style="overflow: scroll">
+    <div class="grid" style="grid-area: 1/1; grid-template-columns: repeat(64, 24px)">
+      <TileBlock
+        v-for="(tiles, i) in layoutBlocks"
+        :key="i"
+        :tiles="tiles"
+        :palette="mapData.palette"
+        :scale="1"
+        layout="0 1 2,3 4 5,6 7 8"
+      />
+    </div>
+    <div
+      v-if="overlay === 'interaction'"
+      class="grid text-center"
+      style="grid-area: 1/1; grid-template-columns: repeat(64, 24px)"
+    >
+      <div v-for="(entry, i) in mapData.layout" :key="`meta-${i}`" style="overflow: hidden">
+        {{ entry.interaction !== 'none' ? entry.interaction : '' }}
+      </div>
+    </div>
+    <div
+      v-if="overlay === 'terrain'"
+      class="grid text-center"
+      style="grid-area: 1/1; grid-template-columns: repeat(32, 24px)"
+    >
+      <div v-for="(raw, i) in store.bank!.regions.battleData.terrain" :key="i">
+        {{ formatHex(raw, 2) }}
+      </div>
+    </div>
   </div>
 
   <div v-for="section in sections" :key="section.name">

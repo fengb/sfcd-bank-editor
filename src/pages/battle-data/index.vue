@@ -2,7 +2,6 @@
 import { QBtnToggle, QTable, type QTableProps } from 'quasar'
 import { computed, ref } from 'vue'
 
-import BytesViewer from '@/components/BytesViewer'
 import { formatHex } from '@/components/BytesViewer/hex'
 import type BattleData from '@/domain/Bank/BattleData'
 import type { BattleSpriteSet } from '@/domain/Bank/BattleData/BattleData'
@@ -83,7 +82,10 @@ const aiPointColumns: QTableProps['columns'] = [
 <template>
   <h2>Battle data</h2>
 
-  <BytesViewer :bytes="battleData.terrain" title="Terrain (raw)" />
+  <h3>Terrain</h3>
+  <div class="grid grid-cols-32 q-gutter-sm">
+    <div v-for="(val, i) in battleData.terrain" :key="i">{{ formatHex(val, 2) }}</div>
+  </div>
 
   <div class="row items-center q-gutter-md q-mb-md">
     <strong>Spriteset view:</strong>
