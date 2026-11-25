@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { chunk } from 'es-toolkit'
 import { QBtnToggle } from 'quasar'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import PaletteDisplay from '@/components/PaletteDisplay'
 import TileBlock from '@/components/TileBlock'
-import type { Palette, PixelGrid, Tile } from '@/domain/Bank/BattleSprites/graphics'
+import type { PixelGrid, Tile } from '@/domain/Bank/BattleSprites/graphics'
 import type { DecodedTile } from '@/domain/Bank/MapData/decodeBlocks'
 import { useBankFileStore } from '@/stores/bank'
-import { paletteRgb } from '@/utils/color'
 
 const store = useBankFileStore()
 const route = useRoute()
@@ -45,9 +44,9 @@ const tileBlocks = computed<Tile[][]>(() => {
   return chunk(tiles, 9)
 })
 
-const layout = computed(() => mapData.value.layout ?? [])
-
-const blockCount = computed(() => Math.floor(mapData.value.blocks.length / 9))
+const layoutBlocks = computed<Tile[][]>(() =>
+  mapData.value.layout.map((entry) => tileBlocks.value[entry.block]!),
+)
 
 const sections = computed(() => [
   { name: 'Areas', count: mapData.value.areas.length, data: mapData.value.areas },
@@ -62,68 +61,6 @@ const sections = computed(() => [
   { name: 'Chest items', count: mapData.value.chestItems.length, data: mapData.value.chestItems },
   { name: 'Other items', count: mapData.value.otherItems.length, data: mapData.value.otherItems },
 ])
-
-const layoutCanvas = ref<HTMLCanvasElement | null>(null)
-
-function drawTile(
-  ctx: CanvasRenderingContext2D,
-  desc: DecodedTile,
-  x0: number,
-  y0: number,
-  palette: Palette,
-): void {
-  const tile = tilesets.value[desc.tileId]
-  if (!tile || !palette) return
-  for (let py = 0; py < 8; py++) {
-    for (let px = 0; px < 8; px++) {
-      const srcX = desc.hFlip ? 7 - px : px
-      const srcY = desc.vFlip ? 7 - py : py
-      const idx = tile.pixels[srcX]?.[srcY] ?? 0
-      if (idx === 0) continue
-      ctx.fillStyle = paletteRgb(palette[idx])
-      ctx.fillRect(x0 + px, y0 + py, 1, 1)
-    }
-  }
-}
-
-function renderLayout(): void {
-  const canvas = layoutCanvas.value
-  if (!canvas) return
-  const palette = mapData.value.palette
-  if (!layout.value.length || !blocks.value.length || !palette) return
-
-  const tileSize = 8
-  const blockTiles = 3
-  const blockPx = tileSize * blockTiles
-  const blocksPerRow = 64
-  canvas.width = 64 * blockPx
-  canvas.height = 32 * blockPx
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-  ctx.fillStyle = '#111'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-  layout.value.forEach((entry, bi) => {
-    const bx = bi % blocksPerRow
-    const by = Math.floor(bi / blocksPerRow)
-    const slice = blocks.value.slice(entry.block * 9, entry.block * 9 + 9)
-    if (slice.length < 9) return
-    slice.forEach((tileDesc, t) => {
-      const tx = t % blockTiles
-      const ty = Math.floor(t / blockTiles)
-      const x0 = (bx * blockTiles + tx) * tileSize
-      const y0 = (by * blockTiles + ty) * tileSize
-      drawTile(ctx, tileDesc, x0, y0, palette)
-    })
-  })
-}
-
-onMounted(() => {
-  renderLayout()
-})
-watch([blocks, layout, () => mapData.value.palette, tilesets], () => renderLayout(), {
-  flush: 'post',
-})
 </script>
 
 <template>
@@ -143,7 +80,7 @@ watch([blocks, layout, () => mapData.value.palette, tilesets], () => renderLayou
     <PaletteDisplay :palette="mapData.palette" />
   </div>
 
-  <h3>Blocks ({{ blockCount }})</h3>
+  <h3>Blocks ({{ tileBlocks.length }})</h3>
   <div class="row q-gutter-xs">
     <TileBlock
       v-for="(tiles, i) in tileBlocks"
@@ -155,8 +92,17 @@ watch([blocks, layout, () => mapData.value.palette, tilesets], () => renderLayou
     />
   </div>
 
-  <h3>Layout ({{ layout.length }} blocks)</h3>
-  <canvas ref="layoutCanvas" style="image-rendering: pixelated; border: 1px solid #555" />
+  <h3>Layout ({{ layoutBlocks.length }} blocks)</h3>
+  <div class="grid" style="grid-template-columns: repeat(64, 1fr); overflow: scroll">
+    <TileBlock
+      v-for="(tiles, i) in layoutBlocks"
+      :key="i"
+      :tiles="tiles"
+      :palette="mapData.palette"
+      :scale="1"
+      layout="0 1 2,3 4 5,6 7 8"
+    />
+  </div>
 
   <div v-for="section in sections" :key="section.name">
     <h3>{{ section.name }} ({{ section.count }})</h3>
