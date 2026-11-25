@@ -75,12 +75,12 @@ function parseWarps(data: Uint8Array): MapWarp[] {
 }
 
 function parseItems(data: Uint8Array): MapItem[] {
-  return takeWhile(chunk([...data], 4), (entry) => entry[0] !== 0xff && entry[1] !== 0xff).map(
+  return takeWhile(chunk([...data], 4), (entry) => entry[0] !== 0xff || entry[1] !== 0xff).map(
     (entry) => ({
       x: entry[0]!,
       y: entry[1]!,
       flag: entry[2]!,
-      item: String(data[3]),
+      item: String(entry[3]),
     }),
   )
 }
